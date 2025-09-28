@@ -8,7 +8,7 @@ check_packages(action = "warn", ignore = NULL)
 }
 \arguments{
 \item{action}{Behaviour to take if environment is not clean. Possible values
-are "error", "warn", and "message".}
+are "error", "warn", "message", and "none".}
 
 \item{ignore}{Character vector containing names of non-base packages that
 will not trigger an action. If NULL, only the base packages and sessioncheck

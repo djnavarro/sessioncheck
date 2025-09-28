@@ -1,9 +1,9 @@
 
 .validate_action <- function(action) {
   stopifnot(
-    "`action` must be one of 'error', 'warn', or 'message'" = length(action) == 1L,
-    "`action` must be one of 'error', 'warn', or 'message'" = is.character(action),
-    "`action` must be one of 'error', 'warn', or 'message'" = action %in% c("error", "warn", "message")
+    "`action` must be one of 'error', 'warn', 'message', or 'none'" = length(action) == 1L,
+    "`action` must be one of 'error', 'warn', 'message', or 'none'" = is.character(action),
+    "`action` must be one of 'error', 'warn', 'message', or 'none'" = action %in% c("error", "warn", "message", "none")
   )
 }
 
@@ -44,6 +44,7 @@
 }
 
 .action <- function(action, status, message = NULL) {
+  if (action == "none") return(invisible(status)) 
   if (!any(!status)) return(invisible(status))
   if (action == "message") {
     message(message)

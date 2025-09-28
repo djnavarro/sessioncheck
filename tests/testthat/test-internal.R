@@ -9,6 +9,7 @@ test_that("valid `action` arguments are permitted", {
   expect_no_error(.validate_action(action = "warn"))
   expect_no_error(.validate_action(action = "error"))
   expect_no_error(.validate_action(action = "message"))
+  expect_no_error(.validate_action(action = "none"))
 })
 
 test_that("invalid `ignore` arguments are detected", {
@@ -32,4 +33,8 @@ test_that(".action() produces the requested action", {
   expect_no_error(.action(action = "error", status = TRUE))
   expect_no_warning(.action(action = "warn", status = TRUE))
   expect_no_message(.action(action = "message", status = TRUE))
+  # no action occurs if action is "none"
+  expect_no_error(.action(action = "none", status = FALSE))
+  expect_no_warning(.action(action = "none", status = FALSE))
+  expect_no_message(.action(action = "none", status = FALSE))
 })

@@ -8,7 +8,7 @@ check_environment(action = "warn", ignore = NULL, envir = .GlobalEnv)
 }
 \arguments{
 \item{action}{Behaviour to take if environment is not clean. Possible values
-are "error", "warn", and "message".}
+are "error", "warn", "message", and "none".}
 
 \item{ignore}{Character vector containing names of variables that will not
 trigger an action. If NULL, variables that start with a dot are ignored.}

@@ -2,7 +2,7 @@
 #' Check if an environment is clean
 #'
 #' @param action Behaviour to take if environment is not clean. Possible values 
-#' are "error", "warn", and "message".
+#' are "error", "warn", "message", and "none".
 #' @param ignore Character vector containing names of variables that will not 
 #' trigger an action. If NULL, variables that start with a dot are ignored.
 #' @param envir Environment to be checked.
@@ -25,7 +25,7 @@ check_environment <- function(action = "warn", ignore = NULL, envir = .GlobalEnv
 #' Check if list of loaded packages is clean
 #'
 #' @param action Behaviour to take if environment is not clean. Possible values
-#' are "error", "warn", and "message".
+#' are "error", "warn", "message", and "none".
 #' @param ignore Character vector containing names of non-base packages that 
 #' will not trigger an action. If NULL, only the base packages and sessioncheck 
 #' itself are permitted.
