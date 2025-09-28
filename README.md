@@ -33,7 +33,36 @@ pak::pak("djnavarro/sessioncheck")
 ## Example
 
 ``` r
+# Basic use
 sessioncheck::check_environment()
 sessioncheck::check_packages()
-#> Warning: Found loaded packages: crayon, vctrs, knitr, cli, and 39 more
+#> Warning: Found loaded packages: digest, R6, fastmap, xfun, and 19 more
+
+# To inspect the detected packages, assign the results
+# to a variable. The pkg variable is a logical vector,
+# with names corresponding to the detected packages. 
+# Values are set to TRUE for base packages as well as 
+# any packages included in the ignore list
+pkg <- sessioncheck::check_packages()
+#> Warning: Found loaded packages: digest, R6, fastmap, xfun, and 19 more
+pkg
+#>       digest      methods           R6      fastmap         xfun     magrittr         glue sessioncheck        knitr 
+#>        FALSE         TRUE        FALSE        FALSE        FALSE        FALSE        FALSE         TRUE        FALSE 
+#>    htmltools    rmarkdown    lifecycle        utils          cli          pak        vctrs      pkgdown     graphics 
+#>        FALSE        FALSE        FALSE         TRUE        FALSE        FALSE        FALSE        FALSE         TRUE 
+#>     testthat    grDevices        stats     compiler        purrr         base        tools         etal         brio 
+#>        FALSE         TRUE         TRUE         TRUE        FALSE         TRUE         TRUE        FALSE        FALSE 
+#>     evaluate         yaml        rlang           fs      usethis     datasets 
+#>        FALSE        FALSE        FALSE        FALSE        FALSE         TRUE
+
+
+# The same applies to objects detected in the global
+# environment. Default behaviour is to permit hidden
+# variables (i.e., those with names that start with 
+# a dot)
+obj <- sessioncheck::check_environment()
+#> Warning: Found variables: pkg
+obj
+#> .Random.seed          pkg 
+#>         TRUE        FALSE
 ```
