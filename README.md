@@ -48,14 +48,18 @@ sessioncheck::check_packages()
 # included in the ignore list
 pkg <- sessioncheck::check_packages(action = "none")
 pkg
-#>       digest      methods           R6      fastmap         xfun     magrittr         glue sessioncheck        knitr 
-#>        FALSE         TRUE        FALSE        FALSE        FALSE        FALSE        FALSE         TRUE        FALSE 
-#>    htmltools    rmarkdown    lifecycle        utils          cli          pak        vctrs      pkgdown     graphics 
-#>        FALSE        FALSE        FALSE         TRUE        FALSE        FALSE        FALSE        FALSE         TRUE 
-#>     testthat    grDevices        stats     compiler        purrr         base        tools         etal         brio 
-#>        FALSE         TRUE         TRUE         TRUE        FALSE         TRUE         TRUE        FALSE        FALSE 
-#>     evaluate         yaml        rlang           fs      usethis     datasets 
-#>        FALSE        FALSE        FALSE        FALSE        FALSE         TRUE
+#>       digest      methods           R6      fastmap         xfun     magrittr 
+#>        FALSE         TRUE        FALSE        FALSE        FALSE        FALSE 
+#>         glue sessioncheck        knitr    htmltools    rmarkdown    lifecycle 
+#>        FALSE         TRUE        FALSE        FALSE        FALSE        FALSE 
+#>        utils          cli          pak        vctrs      pkgdown     graphics 
+#>         TRUE        FALSE        FALSE        FALSE        FALSE         TRUE 
+#>     testthat    grDevices        stats     compiler        purrr         base 
+#>        FALSE         TRUE         TRUE         TRUE        FALSE         TRUE 
+#>        tools         etal         brio     evaluate         yaml        rlang 
+#>         TRUE        FALSE        FALSE        FALSE        FALSE        FALSE 
+#>           fs      usethis     datasets 
+#>        FALSE        FALSE         TRUE
 
 
 # The same applies to objects detected in the global environment. The default 
