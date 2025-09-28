@@ -1,0 +1,14 @@
+Package: sessioncheck
+Title: Checks Session Status
+Version: 0.0.0.9000
+Authors@R: 
+    person("Danielle", "Navarro", , "djnavarro@protonmail.com", role = c("aut", "cre", "cph"))
+Description:
+    Provides tools to check variables contained in the user environment, and
+    inspect the currently loaded package namespaces. The intended use is to
+    allow user scripts to throw errors or warnings if unwanted variables exist
+    or if unwanted packages are loaded.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
