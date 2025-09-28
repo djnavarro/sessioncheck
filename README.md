@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/djnavarro/sessioncheck/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/djnavarro/sessioncheck/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of **sessioncheck** is to provide simple tools that can be
@@ -34,5 +35,5 @@ pak::pak("djnavarro/sessioncheck")
 ``` r
 sessioncheck::check_environment()
 sessioncheck::check_packages()
-#> Warning: Found loaded packages: jsonlite, brio, gitcreds, credentials, and 38 more
+#> Warning: Found loaded packages: crayon, vctrs, knitr, cli, and 39 more
 ```
