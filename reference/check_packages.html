@@ -46,22 +46,26 @@
 
 
 <dl><dt id="arg-action">action<a class="anchor" aria-label="anchor" href="#arg-action"></a></dt>
-<dd><p>Behaviour to take if environment is not clean. Possible values are "error", "warn", and "message"</p></dd>
+<dd><p>Behaviour to take if environment is not clean. Possible values
+are "error", "warn", and "message".</p></dd>
 
 
 <dt id="arg-ignore">ignore<a class="anchor" aria-label="anchor" href="#arg-ignore"></a></dt>
-<dd><p>Character vector containing names of non-base packages that will not trigger an action. If NULL, only the base packages are permitted</p></dd>
+<dd><p>Character vector containing names of non-base packages that
+will not trigger an action. If NULL, only the base packages and sessioncheck
+itself are permitted.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Invisibly returns a logical vector with names corresponding to loaded namespaces. Values are TRUE if the package is ignored, FALSE if not</p>
+    <p>Invisibly returns a logical vector with names corresponding to
+loaded namespaces. Values are TRUE if the package is ignored, FALSE if not.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">check_packages</span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Found loaded packages: jsonlite, xml2, jquerylib, textshaping, and 40 more</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Found loaded packages: jsonlite, xml2, jquerylib, textshaping, and 39 more</span>
 <span class="r-in"><span> </span></span>
 </code></pre></div>
     </div>
