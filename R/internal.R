@@ -20,7 +20,7 @@
 }
 
 .get_package_status <- function(ignore) {
-  if (is.null(ignore)) ignore <- character(0L)
+  if (is.null(ignore)) ignore <- "sessioncheck"
   status <- vapply(
     loadedNamespaces(), 
     function(x) identical(utils::packageDescription(x)$Priority, "base") | x %in% ignore, 

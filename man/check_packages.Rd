@@ -7,12 +7,16 @@
 check_packages(action = "warn", ignore = NULL)
 }
 \arguments{
-\item{action}{Behaviour to take if environment is not clean. Possible values are "error", "warn", and "message"}
+\item{action}{Behaviour to take if environment is not clean. Possible values
+are "error", "warn", and "message".}
 
-\item{ignore}{Character vector containing names of non-base packages that will not trigger an action. If NULL, only the base packages are permitted}
+\item{ignore}{Character vector containing names of non-base packages that
+will not trigger an action. If NULL, only the base packages and sessioncheck
+itself are permitted.}
 }
 \value{
-Invisibly returns a logical vector with names corresponding to loaded namespaces. Values are TRUE if the package is ignored, FALSE if not
+Invisibly returns a logical vector with names corresponding to
+loaded namespaces. Values are TRUE if the package is ignored, FALSE if not.
 }
 \description{
 Check if list of loaded packages is clean
