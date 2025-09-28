@@ -49,7 +49,7 @@
 <div class="page-header"><h1 id="sessioncheck">sessioncheck<a class="anchor" aria-label="anchor" href="#sessioncheck"></a>
 </h1></div>
 <!-- badges: start -->
-<!-- badges: end -->
+
 <p>The goal of <strong>sessioncheck</strong> is to provide simple tools that can be called at the top of a script, and produce warnings or errors if it detects hints that it is not being executed in a clean R session. It is not intended as a replacement for sophisticated tools such as <strong>targets</strong>, <strong>renv</strong>, <strong>callr</strong>, and the like. These are tools that expert R users can use to impose tight controls over how a script is executed, and for expert-level users these are strongly recommended over <strong>sessioncheck</strong>. The purpose of <strong>sessioncheck</strong> is to provide a collection of simple tools that novice or intermediate level R users can use, as a drop-in replacement for the common (but unsafe) approach of placing <code>rm(list = ls())</code> at the top of the script.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -65,7 +65,7 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="reference/check_environment.html">check_environment</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="reference/check_packages.html">check_packages</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Found loaded packages: jsonlite, brio, gitcreds, credentials, and 38 more</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: Found loaded packages: crayon, vctrs, knitr, cli, and 39 more</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -99,7 +99,12 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/djnavarro/sessioncheck/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/djnavarro/sessioncheck/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>
