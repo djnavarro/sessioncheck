@@ -15,8 +15,8 @@
 
 # status checkers ------
 
-.get_environment_status <- function(envir, ignore) {
-  obj <- ls(envir = envir, all.names = TRUE)
+.get_globalenv_status <- function(ignore) {
+  obj <- ls(envir = .GlobalEnv, all.names = TRUE)
   if (is.null(ignore)) ignore <- obj[grepl(pattern = "^\\.", x = obj)]
   status <- obj %in% ignore
   names(status) <- obj
@@ -24,7 +24,8 @@
 }
 
 .get_namespace_status <- function(ignore) {
-  if (is.null(ignore)) ignore <- "sessioncheck"
+  if (is.null(ignore)) ignore <- character(0L)
+  ignore <- union(ignore, "sessioncheck")
   status <- vapply(
     loadedNamespaces(), 
     function(x) identical(utils::packageDescription(x)$Priority, "base") | x %in% ignore, 
@@ -34,7 +35,7 @@
 }
 
 .get_package_status <- function(ignore) {
-  if (is.null(ignore)) ignore <- "sessioncheck"
+  if (is.null(ignore)) ignore <- character(0L)
   status <- vapply(
     .packages(), 
     function(x) identical(utils::packageDescription(x)$Priority, "base") | x %in% ignore, 

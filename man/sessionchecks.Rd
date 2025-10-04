@@ -42,14 +42,15 @@ and takes action based on the objects found there. When \code{ignore = NULL}, va
 in the global environment will be ignored if the name starts with a dot. For
 example, \code{.Random.seed} and \code{.Last.value} no not trigger actions by default.
 \item \code{check_packages()}: This checker inspects the list of packages that have been
-attached to the search path (e.g., via \code{library()}). When  \code{ignore = NULL}, R
-packages that have "base" priority (e.g., \strong{base}, \strong{utils}, and \strong{grDevices})
-do not trigger an action. Note that the \strong{base} package itself never triggers an
-action.
+attached to the search path (e.g., via \code{library()}). Regardless of the value of
+ignore, R packages that have "base" priority (e.g., \strong{base}, \strong{utils}, and
+\strong{grDevices}) do not trigger an action. When \code{ignore = NULL} these are the only
+packages that are ignored.
 \item \code{check_namespaces()}: This checker inspects the list of loaded namespaces (e.g.
 packages that have been loaded but not attached). The \code{ignore} argument for this
 checker is almost identical to \code{check_packages()}: the only difference is that
-the \strong{sessioncheck} package itself will never trigger an action.
+the \strong{sessioncheck} package is never flagged, since the namespace must be loaded
+in order to call the function.
 \item \code{check_attachments()}: This checker inspects all environments on the search
 path. This includes attached packages, anything added using \code{attach()}, and the
 global environment. When \code{ignore = NULL}, package environents do not trigger an

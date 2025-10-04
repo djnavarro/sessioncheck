@@ -32,15 +32,16 @@
 #' example, `.Random.seed` and `.Last.value` no not trigger actions by default.
 #' 
 #' - `check_packages()`: This checker inspects the list of packages that have been
-#' attached to the search path (e.g., via `library()`). When  `ignore = NULL`, R 
-#' packages that have "base" priority (e.g., **base**, **utils**, and **grDevices**)
-#' do not trigger an action. Note that the **base** package itself never triggers an
-#' action. 
+#' attached to the search path (e.g., via `library()`). Regardless of the value of 
+#' ignore, R packages that have "base" priority (e.g., **base**, **utils**, and 
+#' **grDevices**) do not trigger an action. When `ignore = NULL` these are the only
+#' packages that are ignored.
 #' 
 #' - `check_namespaces()`: This checker inspects the list of loaded namespaces (e.g.
 #' packages that have been loaded but not attached). The `ignore` argument for this
 #' checker is almost identical to `check_packages()`: the only difference is that 
-#' the **sessioncheck** package itself will never trigger an action.
+#' the **sessioncheck** package is never flagged, since the namespace must be loaded
+#' in order to call the function.
 #' 
 #' - `check_attachments()`: This checker inspects all environments on the search
 #' path. This includes attached packages, anything added using `attach()`, and the
@@ -57,7 +58,7 @@ NULL
 check_globalenv <- function(action = "warn", ignore = NULL) {
   .validate_action(action)
   .validate_ignore(ignore)
-  status <- .get_environment_status(envir = .GlobalEnv, ignore)
+  status <- .get_globalenv_status(ignore)
   msg  <- .message_text("Found objects:", status)
   .action(action, status, msg)
 }
