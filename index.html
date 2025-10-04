@@ -64,15 +64,15 @@
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Basic use: the default action is to warn the user</span></span>
-<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="reference/check_environment.html">check_environment</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="reference/check_packages.html">check_packages</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu">check_environment</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="reference/sessionchecks.html">check_packages</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Found loaded packages: digest, R6, fastmap, xfun, and 19 more</span></span>
 <span></span>
 <span><span class="co"># To inspect the detected packages, assign the results to a variable. The pkg </span></span>
 <span><span class="co"># variable is a logical vector, with names corresponding to the detected </span></span>
 <span><span class="co"># packages. Values are set to TRUE for base packages as well as  any packages </span></span>
 <span><span class="co"># included in the ignore list</span></span>
-<span><span class="va">pkg</span> <span class="op">&lt;-</span> <span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="reference/check_packages.html">check_packages</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
+<span><span class="va">pkg</span> <span class="op">&lt;-</span> <span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="reference/sessionchecks.html">check_packages</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
 <span><span class="va">pkg</span></span>
 <span><span class="co">#&gt;       digest      methods           R6      fastmap         xfun     magrittr </span></span>
 <span><span class="co">#&gt;        FALSE         TRUE        FALSE        FALSE        FALSE        FALSE </span></span>
@@ -91,7 +91,7 @@
 <span><span class="co"># The same applies to objects detected in the global environment. The default </span></span>
 <span><span class="co"># behaviour is to permit hidden variables (i.e., those with names that start </span></span>
 <span><span class="co"># with a dot)</span></span>
-<span><span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="reference/check_environment.html">check_environment</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
+<span><span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu">check_environment</span><span class="op">(</span>action <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
 <span><span class="va">obj</span></span>
 <span><span class="co">#&gt; .Random.seed          pkg </span></span>
 <span><span class="co">#&gt;         TRUE        FALSE</span></span></code></pre></div>
