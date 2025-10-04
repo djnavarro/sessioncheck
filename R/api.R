@@ -10,7 +10,7 @@
 #' @param action Behaviour to take if the status is not clean. Possible values are 
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param checks Character vector listing the checks to run. The
-#' default is to run `checks = c("globalenv", "packages", "attachments", "namespaces")`
+#' default is to run `checks = c("globalenv", "packages", "attachments")`
 #' @param settings A list specifying the rules applied for individual checks
 #'
 #' @returns Invisibly returns a status object, a list of a named logical vectors. Each vector
@@ -27,7 +27,7 @@
 #' 
 check_session <- function(
   action = "warn", 
-  checks = c("globalenv", "packages", "namespaces", "attachments"),
+  checks = c("globalenv", "packages", "attachments"),
   settings = getOption("sessioncheck.settings")
 ) {
   .validate_action(action)
@@ -48,11 +48,11 @@ check_session <- function(
   if (check_globalenv)   msg$globalenv   <- .message_text("- Objects in global environment:", status$globalenv)
   if (check_packages)    msg$packages    <- .message_text("- Attached packages:", status$packages)
   if (check_namespaces)  msg$namespaces  <- .message_text("- Loaded namespaces:", status$namespaces)
-  if (check_attachments) msg$attachments <- .message_text("- Other attached environments:", status$attachments)
+  if (check_attachments) msg$attachments <- .message_text("- Attached non-package environments:", status$attachments)
   
   if (length(msg) > 0L) {
     msg <- paste(unlist(msg), collapse = "\n")
-    msg <- paste("Session checks found the following issues:", msg, sep = "\n")
+    msg <- paste("Session check detected the following issues:", msg, sep = "\n")
     if (action == "error") {
       msg <- paste(msg, "It may be necessary to restart R", sep = "\n")
     }

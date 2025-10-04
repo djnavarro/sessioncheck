@@ -6,7 +6,7 @@
 \usage{
 check_session(
   action = "warn",
-  checks = c("globalenv", "packages", "namespaces", "attachments"),
+  checks = c("globalenv", "packages", "attachments"),
   settings = getOption("sessioncheck.settings")
 )
 }
@@ -15,7 +15,7 @@ check_session(
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
 \item{checks}{Character vector listing the checks to run. The
-default is to run \code{checks = c("globalenv", "packages", "attachments", "namespaces")}}
+default is to run \code{checks = c("globalenv", "packages", "attachments")}}
 
 \item{settings}{A list specifying the rules applied for individual checks}
 }
