@@ -36,22 +36,6 @@ pak::pak("djnavarro/sessioncheck")
 ## Example
 
 ```{r example}
-# Basic use: the default action is to warn the user
-sessioncheck::check_environment()
-sessioncheck::check_packages()
-
-# To inspect the detected packages, assign the results to a variable. The pkg 
-# variable is a logical vector, with names corresponding to the detected 
-# packages. Values are set to TRUE for base packages as well as  any packages 
-# included in the ignore list
-pkg <- sessioncheck::check_packages(action = "none")
-pkg
-
-
-# The same applies to objects detected in the global environment. The default 
-# behaviour is to permit hidden variables (i.e., those with names that start 
-# with a dot)
-obj <- sessioncheck::check_environment(action = "none")
-obj
+sessioncheck::check_session()
 ```
 

@@ -6,7 +6,7 @@
 \alias{check_packages}
 \alias{check_namespaces}
 \alias{check_attachments}
-\title{Check aspects to the R session}
+\title{Check specific aspects to the R session}
 \usage{
 check_globalenv(action = "warn", ignore = NULL)
 

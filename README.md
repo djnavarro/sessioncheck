@@ -37,36 +37,9 @@ pak::pak("djnavarro/sessioncheck")
 ## Example
 
 ``` r
-# Basic use: the default action is to warn the user
-sessioncheck::check_environment()
-sessioncheck::check_packages()
-#> Warning: Found loaded packages: digest, R6, fastmap, xfun, and 19 more
-
-# To inspect the detected packages, assign the results to a variable. The pkg 
-# variable is a logical vector, with names corresponding to the detected 
-# packages. Values are set to TRUE for base packages as well as  any packages 
-# included in the ignore list
-pkg <- sessioncheck::check_packages(action = "none")
-pkg
-#>       digest      methods           R6      fastmap         xfun     magrittr 
-#>        FALSE         TRUE        FALSE        FALSE        FALSE        FALSE 
-#>         glue sessioncheck        knitr    htmltools    rmarkdown    lifecycle 
-#>        FALSE         TRUE        FALSE        FALSE        FALSE        FALSE 
-#>        utils          cli          pak        vctrs      pkgdown     graphics 
-#>         TRUE        FALSE        FALSE        FALSE        FALSE         TRUE 
-#>     testthat    grDevices        stats     compiler        purrr         base 
-#>        FALSE         TRUE         TRUE         TRUE        FALSE         TRUE 
-#>        tools         etal         brio     evaluate         yaml        rlang 
-#>         TRUE        FALSE        FALSE        FALSE        FALSE        FALSE 
-#>           fs      usethis     datasets 
-#>        FALSE        FALSE         TRUE
-
-
-# The same applies to objects detected in the global environment. The default 
-# behaviour is to permit hidden variables (i.e., those with names that start 
-# with a dot)
-obj <- sessioncheck::check_environment(action = "none")
-obj
-#> .Random.seed          pkg 
-#>         TRUE        FALSE
+sessioncheck::check_session()
+#> Warning: Found objects in global environment: s
+#> Found attached packages: sessioncheck, pak, pkgdown, testthat, and 1 more
+#> Found other attached environments: iris
+#> Found loaded namespaces: digest, R6, fastmap, xfun, and 19 more
 ```

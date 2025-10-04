@@ -13,6 +13,10 @@
   stopifnot("`ignore` must be a character vector or NULL" = is.character(ignore) | is.null(ignore))
 }
 
+.validate_settings <- function(settings) {
+  stopifnot("`settings` must be a list or NULL" = is.list(settings) | is.null(settings))
+}
+
 # status checkers ------
 
 .get_globalenv_status <- function(ignore) {
@@ -76,7 +80,11 @@
 
 .action <- function(action, status, message = NULL) {
   if (action == "none") return(invisible(status)) 
-  if (!any(!status)) return(invisible(status))
+  if (is.atomic(status) && !any(!status)) return(invisible(status))
+  if (!is.atomic(status)) {
+    is_ok <- vapply(status, function(s) !any(!s), logical(1L))
+    if (all(is_ok)) return(invisible(status))
+  }
   if (action == "message") {
     message(message)
     return(invisible(status))
