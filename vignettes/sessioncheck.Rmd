@@ -40,7 +40,7 @@ sessioncheck::check_session("error")
 
 When executed in a clean environment this function does nothing, and the script will continue to run as it normally would. However, if the session is "dirty" -- for some specific interpretation of what that means -- it will produce an error, prevent the script from running, and prompt the user to consider restarting the R session. 
 
-This behaviour is very easy to illustrate in this vignette, because the environment inside the R markdown document has been altered in many ways that make it different from a "typical" clean R session. This is what happens:
+This intended behaviour is very easy to illustrate in this vignette, because the environment inside the R markdown document has been altered in many ways that make it different from a "typical" clean R session. Here is an example showing the error that a user might see if they run a "session checked" script in a dirty R session:
 
 ```{r}
 #| label: error-example
@@ -48,3 +48,20 @@ This behaviour is very easy to illustrate in this vignette, because the environm
 sessioncheck::check_session("error")
 ```
 
+The error message lists two specific problems:
+
+- several "unapproved" packages have been loaded via namespace
+- one "unapproved" environment has been appended to the search path
+
+This is then followed by a prompt for the user to restart R.
+
+## How does sessioncheck work?
+
+```{r}
+#| label: individual-checks
+library(sessioncheck)
+check_globalenv()
+check_packages()
+check_attachments()
+check_namespaces()
+```
