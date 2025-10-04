@@ -38,6 +38,7 @@ pak::pak("djnavarro/sessioncheck")
 
 ``` r
 sessioncheck::check_session()
-#> Warning: Found attached packages: pak, pkgdown, testthat, usethis
-#> Found loaded namespaces: digest, R6, fastmap, xfun, and 19 more
+#> Warning: Session checks found the following issues:
+#> - Attached packages: pak, pkgdown, testthat, usethis
+#> - Loaded namespaces: digest, R6, fastmap, xfun, and 19 more
 ```

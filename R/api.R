@@ -47,11 +47,17 @@ check_session <- function(
   if (check_namespaces)  status$namespaces  <- .get_namespace_status(settings$namespaces)
 
   msg <- list()
-  msg$globalenv   <- .message_text("Found objects in global environment:", status$globalenv)
-  msg$packages    <- .message_text("Found attached packages:", status$packages)
-  msg$attachments <- .message_text("Found other attached environments:", status$attachments)
-  msg$namespaces  <- .message_text("Found loaded namespaces:", status$namespaces)
-  msg <- paste(unlist(msg), collapse = "\n")
+  if (check_globalenv)   msg$globalenv   <- .message_text("- Objects in global environment:", status$globalenv)
+  if (check_packages)    msg$packages    <- .message_text("- Attached packages:", status$packages)
+  if (check_attachments) msg$attachments <- .message_text("- Other attached environments:", status$attachments)
+  if (check_namespaces)  msg$namespaces  <- .message_text("- Loaded namespaces:", status$namespaces)
+  
+  if (length(msg) > 0L) {
+    msg <- paste(unlist(msg), collapse = "\n")
+    msg <- paste("Session checks found the following issues:", msg, sep = "\n")
+  } else {
+    msg <- paste("Session checks found no issues")
+  }
 
   .action(action, status, msg)
 }
