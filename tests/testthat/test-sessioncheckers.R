@@ -125,10 +125,7 @@ test_that("check_session() returns list of status vectors", {
 
   ss <- check_session(
     action = "none", 
-    check_globalenv = TRUE,
-    check_packages = TRUE,
-    check_namespaces = TRUE,
-    check_attachments = TRUE,
+    checks = c("globalenv", "packages", "namespaces", "attachments"),
     settings = NULL
   )
   ii <- list(

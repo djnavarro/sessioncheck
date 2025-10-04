@@ -6,11 +6,7 @@
 \usage{
 check_session(
   action = "warn",
-  check_globalenv = TRUE,
-  check_packages = TRUE,
-  check_namespaces = TRUE,
-  check_attachments = TRUE,
-  ...,
+  checks = c("globalenv", "packages", "namespaces", "attachments"),
   settings = getOption("sessioncheck.settings")
 )
 }
@@ -18,17 +14,10 @@ check_session(
 \item{action}{Behaviour to take if the status is not clean. Possible values are
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
-\item{check_globalenv}{Should the \code{check_globalenv()} check be run? (default is \code{TRUE})}
+\item{checks}{Character vector listing the checks to run. The
+default is to run \code{checks = c("globalenv", "packages", "attachments", "namespaces")}}
 
-\item{check_packages}{Should the \code{check_packages()} check be run? (default is \code{TRUE})}
-
-\item{check_namespaces}{Should the \code{check_namespaces()} check be run? (default is \code{TRUE})}
-
-\item{check_attachments}{Should the \code{check_attachments()} check be run? (default is \code{TRUE})}
-
-\item{...}{Reserved to allow additional checks to be added in future (ignored)}
-
-\item{settings}{A list that specifies the rules applied for individual checks}
+\item{settings}{A list specifying the rules applied for individual checks}
 }
 \value{
 Invisibly returns a status object, a list of a named logical vectors. Each vector

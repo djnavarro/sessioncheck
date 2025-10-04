@@ -9,12 +9,9 @@
 #' 
 #' @param action Behaviour to take if the status is not clean. Possible values are 
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
-#' @param check_globalenv Should the `check_globalenv()` check be run? (default is `TRUE`)
-#' @param check_packages Should the `check_packages()` check be run? (default is `TRUE`)
-#' @param check_namespaces Should the `check_namespaces()` check be run? (default is `TRUE`)
-#' @param check_attachments Should the `check_attachments()` check be run? (default is `TRUE`)
-#' @param ... Reserved to allow additional checks to be added in future (ignored)
-#' @param settings A list that specifies the rules applied for individual checks
+#' @param checks Character vector listing the checks to run. The
+#' default is to run `checks = c("globalenv", "packages", "attachments", "namespaces")`
+#' @param settings A list specifying the rules applied for individual checks
 #'
 #' @returns Invisibly returns a status object, a list of a named logical vectors. Each vector
 #' has names that refer to detected entities for each specific check. Values are `TRUE` if 
@@ -30,15 +27,16 @@
 #' 
 check_session <- function(
   action = "warn", 
-  check_globalenv = TRUE,
-  check_packages = TRUE,
-  check_namespaces = TRUE,
-  check_attachments = TRUE,
-  ...,
+  checks = c("globalenv", "packages", "namespaces", "attachments"),
   settings = getOption("sessioncheck.settings")
 ) {
   .validate_action(action)
   .validate_settings(settings)
+
+  check_globalenv   <- "globalenv" %in% checks
+  check_packages    <- "packages" %in% checks
+  check_namespaces  <- "namespaces" %in% checks
+  check_attachments <- "attachments" %in% checks
 
   status <- list()
   if (check_globalenv)   status$globalenv   <- .get_globalenv_status(settings$globalenv)
