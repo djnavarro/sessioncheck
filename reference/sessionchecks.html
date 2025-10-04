@@ -81,14 +81,15 @@ and takes action based on the objects found there. When <code>ignore = NULL</cod
 in the global environment will be ignored if the name starts with a dot. For
 example, <code>.Random.seed</code> and <code>.Last.value</code> no not trigger actions by default.</p></li>
 <li><p><code>check_packages()</code>: This checker inspects the list of packages that have been
-attached to the search path (e.g., via <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code>). When  <code>ignore = NULL</code>, R
-packages that have "base" priority (e.g., <strong>base</strong>, <strong>utils</strong>, and <strong>grDevices</strong>)
-do not trigger an action. Note that the <strong>base</strong> package itself never triggers an
-action.</p></li>
+attached to the search path (e.g., via <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code>). Regardless of the value of
+ignore, R packages that have "base" priority (e.g., <strong>base</strong>, <strong>utils</strong>, and
+<strong>grDevices</strong>) do not trigger an action. When <code>ignore = NULL</code> these are the only
+packages that are ignored.</p></li>
 <li><p><code>check_namespaces()</code>: This checker inspects the list of loaded namespaces (e.g.
 packages that have been loaded but not attached). The <code>ignore</code> argument for this
 checker is almost identical to <code>check_packages()</code>: the only difference is that
-the <strong>sessioncheck</strong> package itself will never trigger an action.</p></li>
+the <strong>sessioncheck</strong> package is never flagged, since the namespace must be loaded
+in order to call the function.</p></li>
 <li><p><code>check_attachments()</code>: This checker inspects all environments on the search
 path. This includes attached packages, anything added using <code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code>, and the
 global environment. When <code>ignore = NULL</code>, package environents do not trigger an
@@ -100,6 +101,7 @@ actions.</p></li>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">check_packages</span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Found packages: sessioncheck</span>
 <span class="r-in"><span><span class="fu">check_namespaces</span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Found namespaces: jsonlite, xml2, jquerylib, textshaping, and 39 more</span>
 <span class="r-in"><span><span class="fu">check_globalenv</span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span><span class="op">)</span></span></span>
