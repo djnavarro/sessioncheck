@@ -6,3 +6,4 @@
 .quarto
 docs
 README.html
+inst/doc

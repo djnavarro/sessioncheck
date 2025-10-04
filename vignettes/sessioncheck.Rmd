@@ -1,0 +1,22 @@
+---
+title: "sessioncheck"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{sessioncheck}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+Blah blah blah
+
+```{r setup}
+sessioncheck::check_session()
+```
