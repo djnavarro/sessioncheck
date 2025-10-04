@@ -113,16 +113,37 @@ the script will continue to run as it normally would. However, if the
 session is “dirty” – for some specific interpretation of what that means
 – it will produce an error, prevent the script from running, and prompt
 the user to consider restarting the R session.</p>
-<p>This behaviour is very easy to illustrate in this vignette, because
-the environment inside the R markdown document has been altered in many
-ways that make it different from a “typical” clean R session. This is
-what happens:</p>
+<p>This intended behaviour is very easy to illustrate in this vignette,
+because the environment inside the R markdown document has been altered
+in many ways that make it different from a “typical” clean R session.
+Here is an example showing the error that a user might see if they run a
+“session checked” script in a dirty R session:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_session.html">check_session</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error: Session checks found the following issues:</span></span>
 <span><span class="co">#&gt; - Loaded namespaces: digest, desc, R6, fastmap, and 19 more</span></span>
 <span><span class="co">#&gt; - Other attached environments: tools:callr</span></span>
 <span><span class="co">#&gt; It may be necessary to restart R</span></span></code></pre></div>
+<p>The error message lists two specific problems:</p>
+<ul>
+<li>several “unapproved” packages have been loaded via namespace</li>
+<li>one “unapproved” environment has been appended to the search
+path</li>
+</ul>
+<p>This is then followed by a prompt for the user to restart R.</p>
+</div>
+<div class="section level2">
+<h2 id="how-does-sessioncheck-work">How does sessioncheck work?<a class="anchor" aria-label="anchor" href="#how-does-sessioncheck-work"></a>
+</h2>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/sessioncheck" class="external-link">sessioncheck</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/sessionchecks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/sessionchecks.html">check_packages</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Found packages: sessioncheck</span></span>
+<span><span class="fu"><a href="../reference/sessionchecks.html">check_attachments</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Found attachments: tools:callr</span></span>
+<span><span class="fu"><a href="../reference/sessionchecks.html">check_namespaces</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Found namespaces: digest, desc, R6, fastmap, and 19 more</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
