@@ -42,14 +42,6 @@ The intention when using **sessioncheck** is that you would rarely if ever load 
 sessioncheck::check_session()
 ```
 
-The default behaviour is to produce a warning when potential issues are detected, but more often you'd want it to produce an error:
-
-```{r}
-#| label: error-behaviour
-#| error: true
-sessioncheck::check_session("error")
-```
-
-Explanations of how the checks work -- and how they can be customised -- are provided in the package documentation and vignettes. 
+The default behaviour is to produce a warning when potential issues are detected, but more often you'd want it to produce an error, which can be accomplished with `sessioncheck::check_session("error")`. Explanations of how the checks work -- and how they can be customised -- are provided in the package documentation and vignettes. 
 
 

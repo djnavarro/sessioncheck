@@ -14,9 +14,37 @@ knitr::opts_chunk$set(
 )
 ```
 
+The goal of **sessioncheck** is to provide simple tools that can be called at the top of a script, and produce warnings or errors if it detects signs that the script is not being executed in a clean R session. 
 
-Blah blah blah
+## Why is this important?
 
-```{r setup}
-sessioncheck::check_session()
+A common practice when writing R scripts is to include a snippet of code like `rm(list = ls())` at the top of the script. The reason people do this is for reproducibility purposes, to ensure that the script is run in the context of a "clean" R session. The goal is a good one, but the method used to attain it is not very effective. The only thing that `rm(list = ls())` does is remove any variables currently stored in the global environment, but this is only one of many different ways in which previously-executed code can alter the state of the R session. This approach doesn't provide any degree of safety from any of the following:
+
+- packages may have been loaded with `library()`
+- data sets may have been added to the search path with `attach()`
+- options may have been set with `options()`
+- "hidden" variables in the global environment like `.Random.seed`
+- (...and a long list of other more subtle things)
+
+Any of these can affect how your script executes, and `rm(list = ls())` does not protect you against any of them. Because of this, a better practice is to **restart the R session** immediately before running the script. By running the script in a fresh R session, you're much less likely to encounter these issues.
+
+## How does sessioncheck help?
+
+The principle that underpins **sessioncheck** is that scripts should not attempt a "clean up" of the environment. A better approach is to include a snippet of code that inspects the state of the R session, and produces a warning (or even an error) if it detects signs that the script is not being run in a clean session. The simplest way to do this is with the `check_session()` function. The user could put this as the very line of their R script:
+
+```{r}
+#| label: basic-use
+#| eval: false
+sessioncheck::check_session("error")
 ```
+
+When executed in a clean environment this function does nothing, and the script will continue to run as it normally would. However, if the session is "dirty" -- for some specific interpretation of what that means -- it will produce an error, prevent the script from running, and prompt the user to consider restarting the R session. 
+
+This behaviour is very easy to illustrate in this vignette, because the environment inside the R markdown document has been altered in many ways that make it different from a "typical" clean R session. This is what happens:
+
+```{r}
+#| label: error-example
+#| error: true
+sessioncheck::check_session("error")
+```
+

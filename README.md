@@ -47,14 +47,7 @@ sessioncheck::check_session()
 ```
 
 The default behaviour is to produce a warning when potential issues are
-detected, but more often you’d want it to produce an error:
-
-``` r
-sessioncheck::check_session("error")
-#> Error: Session checks found the following issues:
-#> - Attached packages: pak, pkgdown, testthat, usethis
-#> - Loaded namespaces: digest, R6, fastmap, xfun, and 19 more
-```
-
-Explanations of how the checks work – and how they can be customised –
-are provided in the package documentation and vignettes.
+detected, but more often you’d want it to produce an error, which can be
+accomplished with `sessioncheck::check_session("error")`. Explanations
+of how the checks work – and how they can be customised – are provided
+in the package documentation and vignettes.
