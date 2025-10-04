@@ -19,13 +19,37 @@
   status
 }
 
-.get_package_status <- function(ignore) {
+.get_namespace_status <- function(ignore) {
   if (is.null(ignore)) ignore <- "sessioncheck"
   status <- vapply(
     loadedNamespaces(), 
     function(x) identical(utils::packageDescription(x)$Priority, "base") | x %in% ignore, 
     logical(1L)
   )
+  status
+}
+
+.get_package_status <- function(ignore) {
+  if (is.null(ignore)) ignore <- "sessioncheck"
+  status <- vapply(
+    .packages(), 
+    function(x) identical(utils::packageDescription(x)$Priority, "base") | x %in% ignore, 
+    logical(1L)
+  )
+  status
+}
+
+.get_attachment_status <- function(ignore) {
+  if (is.null(ignore)) ignore <- c("tools:rstudio", "tools:positron", "Autoloads")
+  ignore <- union(".GlobalEnv", ignore)
+  attached <- search()
+  is_pkg <- vapply(
+    seq_along(attached),
+    function(ind) !is.null(attr(as.environment(ind), "path")) | ind == length(attached),
+    logical(1L)
+  )
+  status <- is_pkg | attached %in% ignore
+  names(status) <- attached
   status
 }
 
