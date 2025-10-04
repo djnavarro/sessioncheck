@@ -79,7 +79,7 @@ check_namespaces <- function(action = "warn", ignore = NULL) {
 #' @export
 #' 
 #' @examples
-#' check_attachment(action = "message")
+#' check_attachments(action = "message")
 check_attachments <- function(action = "warn", ignore = NULL) {
   .validate_action(action)
   .validate_ignore(ignore)

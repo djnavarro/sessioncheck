@@ -25,5 +25,5 @@ are \code{FALSE} unless the environment belongs to the \code{ignore} list.
 Check the search path for non-standard attachments
 }
 \examples{
-check_attachment(action = "message")
+check_attachments(action = "message")
 }
