@@ -55,8 +55,9 @@ check_session <- function(
   if (length(msg) > 0L) {
     msg <- paste(unlist(msg), collapse = "\n")
     msg <- paste("Session checks found the following issues:", msg, sep = "\n")
-  } else {
-    msg <- paste("Session checks found no issues")
+    if (action == "error") {
+      msg <- paste(msg, "It may be necessary to restart R", sep = "\n")
+    }
   }
 
   .action(action, status, msg)
