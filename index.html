@@ -69,13 +69,7 @@
 <span><span class="co">#&gt; Warning: Session checks found the following issues:</span></span>
 <span><span class="co">#&gt; - Attached packages: pak, pkgdown, testthat, usethis</span></span>
 <span><span class="co">#&gt; - Loaded namespaces: digest, R6, fastmap, xfun, and 19 more</span></span></code></pre></div>
-<p>The default behaviour is to produce a warning when potential issues are detected, but more often you’d want it to produce an error:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="reference/check_session.html">check_session</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: Session checks found the following issues:</span></span>
-<span><span class="co">#&gt; - Attached packages: pak, pkgdown, testthat, usethis</span></span>
-<span><span class="co">#&gt; - Loaded namespaces: digest, R6, fastmap, xfun, and 19 more</span></span></code></pre></div>
-<p>Explanations of how the checks work – and how they can be customised – are provided in the package documentation and vignettes.</p>
+<p>The default behaviour is to produce a warning when potential issues are detected, but more often you’d want it to produce an error, which can be accomplished with <code>sessioncheck::check_session("error")</code>. Explanations of how the checks work – and how they can be customised – are provided in the package documentation and vignettes.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

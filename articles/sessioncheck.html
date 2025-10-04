@@ -59,13 +59,73 @@
 
     
     
-<p>Blah blah blah</p>
+<p>The goal of <strong>sessioncheck</strong> is to provide simple tools
+that can be called at the top of a script, and produce warnings or
+errors if it detects signs that the script is not being executed in a
+clean R session.</p>
+<div class="section level2">
+<h2 id="why-is-this-important">Why is this important?<a class="anchor" aria-label="anchor" href="#why-is-this-important"></a>
+</h2>
+<p>A common practice when writing R scripts is to include a snippet of
+code like <code>rm(list = ls())</code> at the top of the script. The
+reason people do this is for reproducibility purposes, to ensure that
+the script is run in the context of a “clean” R session. The goal is a
+good one, but the method used to attain it is not very effective. The
+only thing that <code>rm(list = ls())</code> does is remove any
+variables currently stored in the global environment, but this is only
+one of many different ways in which previously-executed code can alter
+the state of the R session. This approach doesn’t provide any degree of
+safety from any of the following:</p>
+<ul>
+<li>packages may have been loaded with <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code>
+</li>
+<li>data sets may have been added to the search path with
+<code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code>
+</li>
+<li>options may have been set with <code><a href="https://rdrr.io/r/base/options.html" class="external-link">options()</a></code>
+</li>
+<li>“hidden” variables in the global environment like
+<code>.Random.seed</code>
+</li>
+<li>(…and a long list of other more subtle things)</li>
+</ul>
+<p>Any of these can affect how your script executes, and
+<code>rm(list = ls())</code> does not protect you against any of them.
+Because of this, a better practice is to <strong>restart the R
+session</strong> immediately before running the script. By running the
+script in a fresh R session, you’re much less likely to encounter these
+issues.</p>
+</div>
+<div class="section level2">
+<h2 id="how-does-sessioncheck-help">How does sessioncheck help?<a class="anchor" aria-label="anchor" href="#how-does-sessioncheck-help"></a>
+</h2>
+<p>The principle that underpins <strong>sessioncheck</strong> is that
+scripts should not attempt a “clean up” of the environment. A better
+approach is to include a snippet of code that inspects the state of the
+R session, and produces a warning (or even an error) if it detects signs
+that the script is not being run in a clean session. The simplest way to
+do this is with the <code><a href="../reference/check_session.html">check_session()</a></code> function. The user
+could put this as the very line of their R script:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_session.html">check_session</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Session checks found the following issues:</span></span>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_session.html">check_session</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span></code></pre></div>
+<p>When executed in a clean environment this function does nothing, and
+the script will continue to run as it normally would. However, if the
+session is “dirty” – for some specific interpretation of what that means
+– it will produce an error, prevent the script from running, and prompt
+the user to consider restarting the R session.</p>
+<p>This behaviour is very easy to illustrate in this vignette, because
+the environment inside the R markdown document has been altered in many
+ways that make it different from a “typical” clean R session. This is
+what happens:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_session.html">check_session</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error: Session checks found the following issues:</span></span>
 <span><span class="co">#&gt; - Loaded namespaces: digest, desc, R6, fastmap, and 19 more</span></span>
-<span><span class="co">#&gt; - Other attached environments: tools:callr</span></span></code></pre></div>
-  </main>
+<span><span class="co">#&gt; - Other attached environments: tools:callr</span></span>
+<span><span class="co">#&gt; It may be necessary to restart R</span></span></code></pre></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
