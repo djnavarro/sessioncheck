@@ -13,3 +13,11 @@ test_that(".action() produces the requested action", {
   expect_no_warning(.action(action = "none", status = FALSE))
   expect_no_message(.action(action = "none", status = FALSE))
 })
+
+
+test_that(".message_text() produces the expected text", {
+  ss <- c(a = TRUE, b = FALSE, c = FALSE, d = FALSE)  
+  expect_equal(.message_text("hi", ss, 5L), "hi b, c, d")
+  expect_equal(.message_text("no", ss, 5L), "no b, c, d")
+  expect_equal(.message_text("hi", ss, 1L), "hi b, and 2 more")
+})
