@@ -14,15 +14,14 @@ coverage](https://codecov.io/gh/djnavarro/sessioncheck/graph/badge.svg)](https:/
 
 The goal of **sessioncheck** is to provide simple tools that can be
 called at the top of a script, and produce warnings or errors if it
-detects hints that it is not being executed in a clean R session. It is
-not intended as a replacement for sophisticated tools such as
-**targets**, **renv**, **callr**, and the like. These are tools that
-expert R users can use to impose tight controls over how a script is
-executed, and for expert-level users these are strongly recommended over
-**sessioncheck**. The purpose of **sessioncheck** is to provide a
-collection of simple tools that novice or intermediate level R users can
-use, as a drop-in replacement for the common (but unsafe) approach of
-placing `rm(list = ls())` at the top of the script.
+detects hints that it is not being executed in a clean R session. It not
+intended as a replacement for sophisticated tools available to expert R
+users. Instead, it is intended as drop-in replacement for the common
+(but unsafe) approach of placing `rm(list = ls())` at the top of the
+script. Rather than attempt to clean a dirty session using `rm()`, which
+rarely works as well as one might hope, you can put `check_session()` at
+the top of the script to produce a warning or an error if the R session
+looks dirty
 
 ## Installation
 
@@ -34,7 +33,11 @@ You can install the development version of sessioncheck from
 pak::pak("djnavarro/sessioncheck")
 ```
 
-## Example
+## Basic use
+
+The intention when using **sessioncheck** is that you would rarely if
+ever load it with `library()`. Instead, a single line of code like this
+would be added at the top of the script:
 
 ``` r
 sessioncheck::check_session()
@@ -42,3 +45,16 @@ sessioncheck::check_session()
 #> - Attached packages: pak, pkgdown, testthat, usethis
 #> - Loaded namespaces: digest, R6, fastmap, xfun, and 19 more
 ```
+
+The default behaviour is to produce a warning when potential issues are
+detected, but more often you’d want it to produce an error:
+
+``` r
+sessioncheck::check_session("error")
+#> Error: Session checks found the following issues:
+#> - Attached packages: pak, pkgdown, testthat, usethis
+#> - Loaded namespaces: digest, R6, fastmap, xfun, and 19 more
+```
+
+Explanations of how the checks work – and how they can be customised –
+are provided in the package documentation and vignettes.
