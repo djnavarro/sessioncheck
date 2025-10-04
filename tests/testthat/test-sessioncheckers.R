@@ -118,3 +118,25 @@ test_that("dot-prefixed variables are flaggable but ignored by default in the gl
  
   rm(.sessioncheck_test, envir = .GlobalEnv)  
 })
+
+# omnibus session check ------
+
+test_that("check_session() returns list of status vectors", {
+
+  ss <- check_session(
+    action = "none", 
+    check_globalenv = TRUE,
+    check_packages = TRUE,
+    check_namespaces = TRUE,
+    check_attachments = TRUE,
+    settings = NULL
+  )
+  ii <- list(
+    globalenv = check_globalenv(action = "none", ignore = NULL),
+    packages = check_packages(action = "none", ignore = NULL),
+    namespaces = check_namespaces(action = "none", ignore = NULL),
+    attachments = check_attachments(action = "none", ignore = NULL)
+  )
+
+  expect_equal(ss, ii)
+})

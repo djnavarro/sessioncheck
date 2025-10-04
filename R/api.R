@@ -43,14 +43,14 @@ check_session <- function(
   status <- list()
   if (check_globalenv)   status$globalenv   <- .get_globalenv_status(settings$globalenv)
   if (check_packages)    status$packages    <- .get_package_status(settings$packages)
-  if (check_attachments) status$attachments <- .get_attachment_status(settings$attachment)
   if (check_namespaces)  status$namespaces  <- .get_namespace_status(settings$namespaces)
+  if (check_attachments) status$attachments <- .get_attachment_status(settings$attachment)
 
   msg <- list()
   if (check_globalenv)   msg$globalenv   <- .message_text("- Objects in global environment:", status$globalenv)
   if (check_packages)    msg$packages    <- .message_text("- Attached packages:", status$packages)
-  if (check_attachments) msg$attachments <- .message_text("- Other attached environments:", status$attachments)
   if (check_namespaces)  msg$namespaces  <- .message_text("- Loaded namespaces:", status$namespaces)
+  if (check_attachments) msg$attachments <- .message_text("- Other attached environments:", status$attachments)
   
   if (length(msg) > 0L) {
     msg <- paste(unlist(msg), collapse = "\n")
