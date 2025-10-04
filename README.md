@@ -14,14 +14,16 @@ coverage](https://codecov.io/gh/djnavarro/sessioncheck/graph/badge.svg)](https:/
 
 The goal of **sessioncheck** is to provide simple tools that can be
 called at the top of a script, and produce warnings or errors if it
-detects hints that it is not being executed in a clean R session. It not
-intended as a replacement for sophisticated tools available to expert R
-users. Instead, it is intended as drop-in replacement for the common
-(but unsafe) approach of placing `rm(list = ls())` at the top of the
-script. Rather than attempt to clean a dirty session using `rm()`, which
-rarely works as well as one might hope, you can put `check_session()` at
-the top of the script to produce a warning or an error if the R session
-looks dirty
+detects signs that the script is not being executed in a clean R
+session. The intended user for **sessioncheck** is a beginner or
+intermediate level R user who has learned enough about R to understand
+the limitations of using `rm(list = ls())` as a method to clean the R
+session, but is perhaps not at the point that they can take advantage of
+sophisticated tools like [targets](https://books.ropensci.org/targets/),
+[callr](https://callr.r-lib.org/), and so on.
+
+In short, the goal is to provide a simple drop-in replacement for
+`rm(list = ls())`.
 
 ## Installation
 
@@ -33,7 +35,7 @@ You can install the development version of sessioncheck from
 pak::pak("djnavarro/sessioncheck")
 ```
 
-## Basic use
+## Example
 
 The intention when using **sessioncheck** is that you would rarely if
 ever load it with `library()`. Instead, a single line of code like this
@@ -41,13 +43,15 @@ would be added at the top of the script:
 
 ``` r
 sessioncheck::check_session()
-#> Warning: Session checks found the following issues:
+#> Warning: Session check detected the following issues:
 #> - Attached packages: pak, pkgdown, testthat, usethis
-#> - Loaded namespaces: digest, R6, fastmap, xfun, and 19 more
 ```
 
-The default behaviour is to produce a warning when potential issues are
-detected, but more often you’d want it to produce an error, which can be
-accomplished with `sessioncheck::check_session("error")`. Explanations
-of how the checks work – and how they can be customised – are provided
-in the package documentation and vignettes.
+The default behaviour is to warn the user when issues are detected, but
+this can be converted to an error by using
+`sessioncheck::check_session("error")` if a stricter check is required.
+
+Explanations of how the checks work and how they can be customised are
+provided in the package documentation and on the [get
+started](https://sessioncheck.djnavarro.net/articles/sessioncheck.html)
+page.
