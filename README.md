@@ -38,8 +38,6 @@ pak::pak("djnavarro/sessioncheck")
 
 ``` r
 sessioncheck::check_session()
-#> Warning: Found objects in global environment: s
-#> Found attached packages: sessioncheck, pak, pkgdown, testthat, and 1 more
-#> Found other attached environments: iris
+#> Warning: Found attached packages: pak, pkgdown, testthat, usethis
 #> Found loaded namespaces: digest, R6, fastmap, xfun, and 19 more
 ```
