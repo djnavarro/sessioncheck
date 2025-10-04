@@ -1,4 +1,6 @@
 
+# argument validators ------
+
 .validate_action <- function(action) {
   stopifnot(
     "`action` must be one of 'error', 'warn', 'message', or 'none'" = length(action) == 1L,
@@ -10,6 +12,8 @@
 .validate_ignore <- function(ignore) {
   stopifnot("`ignore` must be a character vector or NULL" = is.character(ignore) | is.null(ignore))
 }
+
+# status checkers ------
 
 .get_environment_status <- function(envir, ignore) {
   obj <- ls(envir = envir, all.names = TRUE)
@@ -52,6 +56,8 @@
   names(status) <- attached
   status
 }
+
+# actions and messages ------
 
 .message_text <- function(prefix, status, max_len = 4L) {
   lst <- names(status[!status])
