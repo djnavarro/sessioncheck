@@ -9,8 +9,8 @@
   )
 }
 
-.validate_ignore <- function(ignore) {
-  stopifnot("`ignore` must be a character vector or NULL" = is.character(ignore) | is.null(ignore))
+.validate_allow <- function(allow) {
+  stopifnot("`allow` must be a character vector or NULL" = is.character(allow) | is.null(allow))
 }
 
 .validate_settings <- function(settings) {
@@ -19,45 +19,45 @@
 
 # status checkers ------
 
-.get_globalenv_status <- function(ignore) {
+.get_globalenv_status <- function(allow) {
   obj <- ls(envir = .GlobalEnv, all.names = TRUE)
-  if (is.null(ignore)) ignore <- obj[grepl(pattern = "^\\.", x = obj)]
-  status <- obj %in% ignore
+  if (is.null(allow)) allow <- obj[grepl(pattern = "^\\.", x = obj)]
+  status <- obj %in% allow
   names(status) <- obj
   status
 }
 
-.get_namespace_status <- function(ignore) {
-  if (is.null(ignore)) ignore <- character(0L)
-  ignore <- union(ignore, "sessioncheck")
+.get_namespace_status <- function(allow) {
+  if (is.null(allow)) allow <- character(0L)
+  allow <- union(allow, "sessioncheck")
   status <- vapply(
     loadedNamespaces(), 
-    function(x) identical(utils::packageDescription(x)$Priority, "base") | x %in% ignore, 
+    function(x) identical(utils::packageDescription(x)$Priority, "base") | x %in% allow, 
     logical(1L)
   )
   status
 }
 
-.get_package_status <- function(ignore) {
-  if (is.null(ignore)) ignore <- character(0L)
+.get_package_status <- function(allow) {
+  if (is.null(allow)) allow <- character(0L)
   status <- vapply(
     .packages(), 
-    function(x) identical(utils::packageDescription(x)$Priority, "base") | x %in% ignore, 
+    function(x) identical(utils::packageDescription(x)$Priority, "base") | x %in% allow, 
     logical(1L)
   )
   status
 }
 
-.get_attachment_status <- function(ignore) {
-  if (is.null(ignore)) ignore <- c("tools:rstudio", "tools:positron", "Autoloads")
-  ignore <- union(".GlobalEnv", ignore)
+.get_attachment_status <- function(allow) {
+  if (is.null(allow)) allow <- c("tools:rstudio", "tools:positron", "Autoloads")
+  allow <- union(".GlobalEnv", allow)
   attached <- search()
   is_pkg <- vapply(
     seq_along(attached),
     function(ind) !is.null(attr(as.environment(ind), "path")) | ind == length(attached),
     logical(1L)
   )
-  status <- is_pkg | attached %in% ignore
+  status <- is_pkg | attached %in% allow
   names(status) <- attached
   status
 }

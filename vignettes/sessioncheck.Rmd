@@ -12,6 +12,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+options(width = 74)
 ```
 
 The goal of **sessioncheck** is to provide simple tools that can be called at the top of a script, and produce warnings or errors if it detects signs that the script is not being executed in a clean R session. The intended user for **sessioncheck** is a beginner or intermediate level R user who has learned enough about R to understand the limitations of using `rm(list = ls())` as a method to clean the R session, but is perhaps not at the point that they can take advantage of sophisticated tools like [targets](https://books.ropensci.org/targets/), [callr](https://callr.r-lib.org/), and so on. 
@@ -48,23 +49,20 @@ This intended behaviour is very easy to illustrate in this vignette, because the
 sessioncheck::check_session("error")
 ```
 
-The error message lists two specific problems:
-
-- several "unapproved" packages have been loaded via namespace
-- one "unapproved" environment has been appended to the search path
-
-This is then followed by a prompt for the user to restart R.
+The error lists specific issues that were detected and prompts the user to restart R.
 
 ## How does sessioncheck work?
 
-The **sessioncheck** package is built on several functions that each check one specific aspect to the R session: the `check_session()` function itself merely aggregates the results of the individual checks. When calling `check_session()` you can customise exactly which checks are performed and what rules should apply to each check, but for now let's look at what the individual check functions do. Let's load the package first, so that we can explore the behaviour of the check functions one at a time:
+The **sessioncheck** package is built on several functions that each check one specific aspect to the R session: the `check_session()` function itself merely aggregates the results of the individual checks. 
+
+When calling `check_session()` you can customise exactly which checks are performed and what rules should apply to each check, but for now let's look at what the individual check functions do. For the purposes of this vignette we'll only look at the three checks that are performed by default: checks of the global environment, checks of the attached packages, and checks of the attached non-package environments. Let's load the package, so that we can explore the behaviour of these three check functions one at a time
 
 ```{r}
 #| label: load-package
 library(sessioncheck)
 ```
 
-### Check the global environment
+### Check 1: global environment
 
 The first and simplest of the checks is `check_globalenv()`, and it focuses on the same aspect of the R session that the traditional `rm(list=ls())` method does: the contents of the global environment. At the moment there is nothing in the global environment, so it is considered "clean". As a consequence, nothing happens when we run this check:
 
@@ -84,27 +82,52 @@ check_globalenv()
 ```
 
 
-### Check the attached packages
+### Check 2: attached packages
 
 ```{r}
 #| label: check-packages
 check_packages()
 ```
 
+The warning notes that the **sessioncheck** package has been attached. This might be considered acceptable, so we can ask the check to `allow` this package:
 
-### Check for other attached environments
+```{r}
+check_packages(action = "warn", allow = "sessioncheck")
+```
+
+The check invisibly returns a status object that looks like this:
+
+```{r}
+status <- check_packages(action = "none")
+status
+```
+
+
+### Check 3: other attachments
 
 ```{r}
 #| label: check-attachments
 check_attachments()
 ```
 
-
-### Check loaded namespaces
+The check invisibly returns a status object that looks like this:
 
 ```{r}
-#| label: check-namespaces
-check_namespaces()
+status <- check_attachments(action = "none")
+status
 ```
+
+
+### Other checks
+
+There are other checks that are not called by default:
+
+- `check_namespaces()` looks for packages that have been loaded but not attached
+- TODO: `check_options()` looks for specific options that might be of concern
+- TODO: `check_locale()` looks for locale settings that might be of concern
+- TODO: `check_sysenv()` looks for system environment variables
+
+
+
 
 

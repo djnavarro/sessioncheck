@@ -12,14 +12,14 @@ test_that("valid `action` arguments are permitted", {
   expect_no_error(.validate_action(action = "none"))
 })
 
-test_that("invalid `ignore` arguments are detected", {
-  expect_error(.validate_ignore(ignore = 1L))
-  expect_error(.validate_ignore(ignore = TRUE))
-  expect_error(.validate_ignore(ignore = list()))
+test_that("invalid `allow` arguments are detected", {
+  expect_error(.validate_allow(allow = 1L))
+  expect_error(.validate_allow(allow = TRUE))
+  expect_error(.validate_allow(allow = list()))
 })
 
-test_that("valid `ignore` arguments are permitted", {
-  expect_no_error(.validate_ignore(ignore = NULL))
-  expect_no_error(.validate_ignore(ignore = ""))
-  expect_no_error(.validate_ignore(ignore = "sessioncheck"))
+test_that("valid `allow` arguments are permitted", {
+  expect_no_error(.validate_allow(allow = NULL))
+  expect_no_error(.validate_allow(allow = ""))
+  expect_no_error(.validate_allow(allow = "sessioncheck"))
 })

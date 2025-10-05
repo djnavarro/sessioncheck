@@ -7,8 +7,8 @@ test_that("session checkers call the validators", {
     check_namespaces
   )
   for (chk in checkers) {
-    expect_error(chk(action = "none", ignore = 1L))
-    expect_error(chk(action = "asdf", ignore = NULL))
+    expect_error(chk(action = "none", allow = 1L))
+    expect_error(chk(action = "asdf", allow = NULL))
   }
 })
 
