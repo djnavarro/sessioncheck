@@ -49,7 +49,7 @@
 }
 
 .get_attachment_status <- function(allow) {
-  if (is.null(allow)) allow <- c("tools:rstudio", "tools:positron", "Autoloads")
+  if (is.null(allow)) allow <- c("tools:rstudio", "tools:positron", "tools:callr", "Autoloads")
   allow <- union(".GlobalEnv", allow)
   attached <- search()
   is_pkg <- vapply(

@@ -21,46 +21,108 @@ The goal of **sessioncheck** is to provide simple tools that can be called at th
 
 A common practice when writing R scripts is to include a snippet of code like `rm(list = ls())` at the top of the script. The reason people do this is for reproducibility purposes, to ensure that the script is run in the context of a "clean" R session. The goal is a good one, but the method used to attain it is not very effective. The only thing that `rm(list = ls())` does is remove any variables currently stored in the global environment, but this is only one of many different ways in which previously-executed code can alter the state of the R session. This approach doesn't provide any degree of safety from any of the following:
 
-- packages may have been loaded with `library()`
-- data sets may have been added to the search path with `attach()`
-- options may have been set with `options()`
-- "hidden" variables in the global environment like `.Random.seed`
-- (...and a long list of other more subtle things)
+- packages that may have been loaded with `library()` and change which functions get executed by your code
+- data sets or other environments that may have been added to the search path with `attach()` and alter the variables and functions that are visible to your code
+- options that may have been set with `options()` and can alter how your code is interpreted 
+- "hidden" variables in the global environment like `.Random.seed` that affect R code execution and are ignored by `rm(list = ls())`
+- ...and many more; there's a long list of subtler ways in which the R session state matters
 
 Any of these can affect how your script executes, and `rm(list = ls())` does not protect you against any of them. Because of this, a better practice is to **restart the R session** immediately before running the script. By running the script in a fresh R session, you're much less likely to encounter these issues.
 
 ## How does sessioncheck help?
 
-The principle that underpins **sessioncheck** is that scripts should not attempt a "clean up" of the environment. A better approach is to include a snippet of code that inspects the state of the R session, and produces a warning (or even an error) if it detects signs that the script is not being run in a clean session. The simplest way to do this is with the `sessioncheck()` function. In the typical case, you wouldn't load the package with `library()`. Instead, you would put this as the very line of their R script:
+The principle that underpins **sessioncheck** is that scripts should not attempt a "clean up" of the environment. The "state" of an R session is complicated, and so if your script detects evidence that the pre-existing R state isn't "clean", the thing it should do is produce an error -- it is the users responsibility to ensure a clean session. The script itself doesn't have the power to make that happen, and it shouldn't try.
+
+If you accept this as the core principle, then the thing you want to do -- within that little snippet of code you insert at the top of the script -- is to have your script look at the state of the R session, and look for signs that it isn't being run in a clean environment. If it detects any such signs, it should warn the user, or (in cases where strict controls are required) produce an error that prevents the rest of the script from running. The purpose of **sessioncheck** is to provide tools that can do this. They are -- necessarily! -- based on heuristic rules that scan the session for signs that there might be an issue, so it will not be perfect. But at a bare minimum it can be guaranteed that this approach is strictly superior to using `rm(list = ls())`.
+
+The core idea is very simple. In the typical case, you wouldn't load the package with `library()`. Instead, you would put this as the very line of their R script:
 
 ```{r}
 #| label: basic-use
-#| eval: false
 sessioncheck::sessioncheck("error")
 ```
 
-When executed in a clean R session this function does nothing, and the script will continue to run as it normally would. However, if the session is "dirty" -- for some specific interpretation of what that means -- it will produce an error, prevent the script from running, and prompt the user to consider restarting the R session. 
+When executed in a clean R session this function does nothing, and the script continues to run as it normally would. However, if the session is "contaminated" -- for some specific interpretation of what that means to call the session "contaminated" -- it will produce an error, prevent the script from running, and prompt the user to consider restarting the R session. 
 
-This intended behaviour is very easy to illustrate in this vignette, because the environment inside the R markdown document has been altered in many ways that make it different from a "typical" clean R session. Here is an example showing the error that a user might see if they run a "session checked" script in a dirty R session:
+To illustrate what happens in a contaminated R session, I'll do two things that most R users would agree fit the definition of a contaminated R environment: creating objects in the global environment and attaching packages or environments:
 
 ```{r}
-#| label: error-example
+library(sessioncheck)                     # trigger check_packages
+my_data = data.frame(T = FALSE, F = TRUE) # trigger check_globalenv
+attach(my_data)                           # trigger check_attachments
+```
+
+These prior actions vary considerably in their riskiness. For the example above, here's a quick risk assessment
+
+- **Attaching packages**. Yes, it's possible that attaching the **sessioncheck** package with `library()` might cause problems, but I've tried to design it safely so it likely won't be a problem. Nevertheless, it is still something where the script should notify the user. By design, the typical use case for this package is to call `sessioncheck::sessioncheck()`. In the normal course of events you wouldn't be writing `library(sessioncheck)` in your script, so yes, the user should probably be informed, as an act of politeness.
+
+- **Adding to the global environment**. Adding the `my_data` data frame as a variable in the global environment is not in itself a bad thing, but in practice when you're running the same script over and over in an interactive context -- which is a thing that data analysts have to do a lot, much more so than software engineers -- you can quickly build up a lot of "detritus", bits and pieces and objects left behind from code you tried out previously, and over time it becomes a big problem. The user should definitely be informed, because there are serious risk shere.
+
+- **Attaching a (malicious!) environment to the search path**. Attaching data sets using `attach()` has been considered an extremely high-risk behaviour in R for a long time. It creates chaos in the R session and the potential for horrific outcomes is very high. The example I construced above is deliberately malicious, just to highlight how bad it can be. If your script executes in an environment when `attach(my_data)` has previously been executed, you can no longer rely on R to make sensible judgements about arithmetic:
+
+  ```{r}
+  (2 + 2 == 5) == T
+  ```
+
+  On the face of it, R now believes that `2 + 2 = 5`. It doesn't actually believe this. The result happens because the prior call to `attach()` ensures that you can no longer rely on the shorthand that assumes `T == TRUE`. Indeed:
+
+  ```{r}
+  T == TRUE
+  ```
+
+  and in fact:
+
+  ```{r}
+  T
+  ```
+
+  In an ideal world an R script should never be using `T` as a shorthand for `TRUE` because it exposes the code to exactly this problem, but unfortunately there is a *massive* amount of old R code in current use that relies on the shortcut. The risk is real.
+
+Noting that the R session is now contaminated in three ways, we can see what happens when `sessioncheck()` is called in a contaminated environment:
+
+```{r}
 #| error: true
 sessioncheck::sessioncheck("error")
 ```
 
-The error lists specific issues that were detected and prompts the user to restart R.
+If this code were placed at the top of the user script, that script would simply refuse to run in this contaminated environment. It would produce an error that indicates which checks were performed, and lists specific issues that were detected in each test. Not only that, because this is an error (rather than a warning) it supplies a prompt to the user that it may be necessary to restart R.
+
+By way of comparison, consider what would happen if the traditional `rm(list=ls())` approach were employed. Executing this code will fix only one of the three problems:
+
+```{r}
+rm(list = ls())
+```
+
+The global environment is now clean, but any code that relies on `T` to mean `TRUE` will now break, because the `rm()` command has *not* detached the malicious environment:
+
+```{r}
+T
+```
+
+Even though `rm(list = ls())` has been invoked, the R session is not safe, and it will corrupt the behaviour of any script that executes in this session. Importantly, notice that because `sessioncheck()` is stricter than the `rm()` approach, it still produces an error:
+
+```{r}
+#| error: true
+sessioncheck::sessioncheck("error")
+```
+
+Under normal circumstances the thing that the user -- a human being -- would likely do next is restart the R session, and all of these problems would go away. That is the intended way to use **sessioncheck**. It is designed primarily for analysts who design their code in a human-in-the-loop fashion. It is explicitly *not* recommended for production code or any other situation where R code is executed without direct human oversight. 
+
+Nevertheless, because the author of this vignette is also the person who created the contaminated R session, she also knows how to reverse it:
+
+```{r}
+detach("my_data")
+detach("package:sessioncheck")
+sessioncheck::sessioncheck("error")
+```
+
+In general though, the job of cleaning the session or restarting it should be reserved for the human analyst. Tools such as **sessioncheck** should not attempt to do so.
 
 ## How does sessioncheck work?
 
 The **sessioncheck** package is built on several functions that each check one specific aspect to the R session: the `sessioncheck()` function itself merely aggregates the results of the individual checks. 
 
-When calling `sessioncheck()` you can customise exactly which checks are performed and what rules should apply to each check, but for now let's look at what the individual check functions do. For the purposes of this vignette we'll only look at the three checks that are performed by default: checks of the global environment, checks of the attached packages, and checks of the attached non-package environments. Let's load the package, so that we can explore the behaviour of these three check functions one at a time
-
-```{r}
-#| label: load-package
-library(sessioncheck)
-```
+When calling `sessioncheck()` you can customise exactly which checks are performed and what rules should apply to each check, but for now let's look at the three specific checks that are performed by default: checks of the global environment, checks of the attached packages, and checks of the attached non-package environments. These can be run as standalone checks using `check_globalenv()`, `check_packages()` and `check_attachments()`, so the natural place to start is examining the behaviour of the standalone checks. 
 
 ### Check 1: global environment
 
@@ -68,7 +130,7 @@ The first and simplest of the checks is `check_globalenv()`, and it focuses on t
 
 ```{r}
 #| label: check-globalenv
-check_globalenv()
+sessioncheck::check_globalenv()
 ```
 
 To get the check to produce a warning, we'll need to add some variables:
@@ -78,53 +140,56 @@ visible_1 <- "this will get detected"
 visible_2 <- "so will this"
 .hidden_1 <- "but this will not"
 
-check_globalenv()
+sessioncheck::check_globalenv()
 ```
 
+The output indicates that the script has detected `visible_1` and `visible_2` in the global environment, and issues a warning to suggest that the R session may be contaminated.
+
+There are two arguments to `check_globalenv()`:
+
+- `action` specifies what the function should do if an issue is detected. There are four allowed values: `error`, `warn` (the default), `message`, and `none`.
+- `allow` is a character vector used to specify the rules that are used to decide *which* objects should trigger an action. A variable name that is included in the `allow` list will not trigger an action. There is a special case: `allow = NULL` will apply the same rule that `ls()` uses when listing the contents of the global environment: variables that start with a `.` will be ignored, and will not trigger an action. 
+
+The example below illustrates how both of these actions are used. Here, the action taken will be to print a message rather than a warning; and by setting the `allow` argument to an empty string, *any* variable in the global environment will trigger the message, even the "hidden" ones:
+
+```{r}
+sessioncheck::check_globalenv(action = "message", allow = "")
+```
+
+This time we notice that the check detects the `visible_1` and `visible_2` like last time, but it now detects two hidden variables: the `.hidden_1` variable that I created earlier, and also the `.Random.seed` variable that R uses to store the state of the random number generator.
 
 ### Check 2: attached packages
 
+
+
 ```{r}
 #| label: check-packages
-check_packages()
+sessioncheck::check_packages()
 ```
 
 The warning notes that the **sessioncheck** package has been attached. This might be considered acceptable, so we can ask the check to `allow` this package:
 
 ```{r}
-check_packages(action = "warn", allow = "sessioncheck")
+sessioncheck::check_packages(action = "warn", allow = "sessioncheck")
 ```
-
-The check invisibly returns a status object that looks like this:
-
-```{r}
-status <- check_packages(action = "none")
-status
-```
-
 
 ### Check 3: other attachments
 
 ```{r}
 #| label: check-attachments
-check_attachments()
-```
-
-The check invisibly returns a status object that looks like this:
-
-```{r}
-status <- check_attachments(action = "none")
-status
+sessioncheck::check_attachments()
 ```
 
 
 ### Other checks
 
-There are other checks that are not called by default:
+There are other checks that are not called by default. One is an "allow list" check, where the user must specify exactly which entities are permitted (i.e. the list of things that *don't* trigger an action):
 
-- `check_namespaces()` looks for packages that have been loaded but not attached
+- `check_namespaces()` looks for packages that have been loaded but not attached 
+
+The others are "block list" checks, where the user specifies which cases are to be blocked (i.e., the list of things that *do* trigger an action) 
+
 - TODO: `check_options()` looks for specific options that might be of concern
-- TODO: `check_locale()` looks for locale settings that might be of concern
 - TODO: `check_sysenv()` looks for system environment variables
 
 

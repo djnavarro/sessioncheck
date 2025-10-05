@@ -54,9 +54,9 @@ package namespace must be loaded in order to call the function itself.
 \item \code{check_attachments()}: This checker inspects all environments on the search
 path. This includes attached packages, anything added using \code{attach()}, and the
 global environment. When \code{allow = NULL}, package environents do not trigger an
-action, nor do "tools:rstudio", "tools:positron", or "Autoloads". The global
-environment and the package environment for the \strong{base} package never trigger
-actions.
+action, nor do "tools:rstudio", "tools:positron", "tools:callr", or "Autoloads".
+The global environment and the package environment for the \strong{base} package
+never trigger actions.
 }
 }
 \examples{
