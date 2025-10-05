@@ -108,10 +108,11 @@ scripts should not attempt a “clean up” of the environment. A better
 approach is to include a snippet of code that inspects the state of the
 R session, and produces a warning (or even an error) if it detects signs
 that the script is not being run in a clean session. The simplest way to
-do this is with the <code><a href="../reference/check_session.html">check_session()</a></code> function. The user
-could put this as the very line of their R script:</p>
+do this is with the <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> function. In the typical
+case, you wouldn’t load the package with <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code>.
+Instead, you would put this as the very line of their R script:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_session.html">check_session</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span></code></pre></div>
 <p>When executed in a clean R session this function does nothing, and
 the script will continue to run as it normally would. However, if the
 session is “dirty” – for some specific interpretation of what that means
@@ -123,8 +124,8 @@ in many ways that make it different from a “typical” clean R session.
 Here is an example showing the error that a user might see if they run a
 “session checked” script in a dirty R session:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_session.html">check_session</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: Session check detected the following issues:</span></span>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error: sessioncheck() detected the following issues:</span></span>
 <span><span class="co">#&gt; - Attached non-package environments: tools:callr</span></span>
 <span><span class="co">#&gt; It may be necessary to restart R</span></span></code></pre></div>
 <p>The error lists specific issues that were detected and prompts the
@@ -135,9 +136,9 @@ user to restart R.</p>
 </h2>
 <p>The <strong>sessioncheck</strong> package is built on several
 functions that each check one specific aspect to the R session: the
-<code><a href="../reference/check_session.html">check_session()</a></code> function itself merely aggregates the
+<code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> function itself merely aggregates the
 results of the individual checks.</p>
-<p>When calling <code><a href="../reference/check_session.html">check_session()</a></code> you can customise exactly
+<p>When calling <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> you can customise exactly
 which checks are performed and what rules should apply to each check,
 but for now let’s look at what the individual check functions do. For
 the purposes of this vignette we’ll only look at the three checks that
