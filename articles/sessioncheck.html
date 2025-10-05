@@ -127,13 +127,8 @@ Here is an example showing the error that a user might see if they run a
 <span><span class="co">#&gt; Error: Session check detected the following issues:</span></span>
 <span><span class="co">#&gt; - Attached non-package environments: tools:callr</span></span>
 <span><span class="co">#&gt; It may be necessary to restart R</span></span></code></pre></div>
-<p>The error message lists two specific problems:</p>
-<ul>
-<li>several “unapproved” packages have been loaded via namespace</li>
-<li>one “unapproved” environment has been appended to the search
-path</li>
-</ul>
-<p>This is then followed by a prompt for the user to restart R.</p>
+<p>The error lists specific issues that were detected and prompts the
+user to restart R.</p>
 </div>
 <div class="section level2">
 <h2 id="how-does-sessioncheck-work">How does sessioncheck work?<a class="anchor" aria-label="anchor" href="#how-does-sessioncheck-work"></a>
@@ -141,25 +136,28 @@ path</li>
 <p>The <strong>sessioncheck</strong> package is built on several
 functions that each check one specific aspect to the R session: the
 <code><a href="../reference/check_session.html">check_session()</a></code> function itself merely aggregates the
-results of the individual checks. When calling
-<code><a href="../reference/check_session.html">check_session()</a></code> you can customise exactly which checks are
-performed and what rules should apply to each check, but for now let’s
-look at what the individual check functions do. Let’s load the package
-first, so that we can explore the behaviour of the check functions one
-at a time:</p>
+results of the individual checks.</p>
+<p>When calling <code><a href="../reference/check_session.html">check_session()</a></code> you can customise exactly
+which checks are performed and what rules should apply to each check,
+but for now let’s look at what the individual check functions do. For
+the purposes of this vignette we’ll only look at the three checks that
+are performed by default: checks of the global environment, checks of
+the attached packages, and checks of the attached non-package
+environments. Let’s load the package, so that we can explore the
+behaviour of these three check functions one at a time</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/sessioncheck" class="external-link">sessioncheck</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
-<h3 id="check-the-global-environment">Check the global environment<a class="anchor" aria-label="anchor" href="#check-the-global-environment"></a>
+<h3 id="check-1-global-environment">Check 1: global environment<a class="anchor" aria-label="anchor" href="#check-1-global-environment"></a>
 </h3>
 <p>The first and simplest of the checks is
-<code><a href="../reference/sessionchecks.html">check_globalenv()</a></code>, and it focuses on the same aspect of the
+<code><a href="../reference/allowlist_checks.html">check_globalenv()</a></code>, and it focuses on the same aspect of the
 R session that the traditional <code>rm(list=ls())</code> method does:
 the contents of the global environment. At the moment there is nothing
 in the global environment, so it is considered “clean”. As a
 consequence, nothing happens when we run this check:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/sessionchecks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/allowlist_checks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>To get the check to produce a warning, we’ll need to add some
 variables:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -167,29 +165,63 @@ variables:</p>
 <span><span class="va">visible_2</span> <span class="op">&lt;-</span> <span class="st">"so will this"</span></span>
 <span><span class="va">.hidden_1</span> <span class="op">&lt;-</span> <span class="st">"but this will not"</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/sessionchecks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/allowlist_checks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Detected objects: visible_1, visible_2</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="check-the-attached-packages">Check the attached packages<a class="anchor" aria-label="anchor" href="#check-the-attached-packages"></a>
+<h3 id="check-2-attached-packages">Check 2: attached packages<a class="anchor" aria-label="anchor" href="#check-2-attached-packages"></a>
 </h3>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/sessionchecks.html">check_packages</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/allowlist_checks.html">check_packages</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Detected attached packages: sessioncheck</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="check-for-other-attached-environments">Check for other attached environments<a class="anchor" aria-label="anchor" href="#check-for-other-attached-environments"></a>
-</h3>
+<p>The warning notes that the <strong>sessioncheck</strong> package has
+been attached. This might be considered acceptable, so we can ask the
+check to <code>allow</code> this package:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/sessionchecks.html">check_attachments</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Detected attached environments: tools:callr</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/allowlist_checks.html">check_packages</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"warn"</span>, allow <span class="op">=</span> <span class="st">"sessioncheck"</span><span class="op">)</span></span></code></pre></div>
+<p>The check invisibly returns a status object that looks like this:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">status</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/allowlist_checks.html">check_packages</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
+<span><span class="va">status</span></span>
+<span><span class="co">#&gt; sessioncheck        stats     graphics    grDevices        utils </span></span>
+<span><span class="co">#&gt;        FALSE         TRUE         TRUE         TRUE         TRUE </span></span>
+<span><span class="co">#&gt;     datasets      methods         base </span></span>
+<span><span class="co">#&gt;         TRUE         TRUE         TRUE</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="check-loaded-namespaces">Check loaded namespaces<a class="anchor" aria-label="anchor" href="#check-loaded-namespaces"></a>
+<h3 id="check-3-other-attachments">Check 3: other attachments<a class="anchor" aria-label="anchor" href="#check-3-other-attachments"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/sessionchecks.html">check_namespaces</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Dectected loaded namespaces: digest, desc, R6, fastmap, and 19 more</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/allowlist_checks.html">check_attachments</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Detected attached environments: tools:callr</span></span></code></pre></div>
+<p>The check invisibly returns a status object that looks like this:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">status</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/allowlist_checks.html">check_attachments</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
+<span><span class="va">status</span></span>
+<span><span class="co">#&gt;           .GlobalEnv package:sessioncheck        package:stats </span></span>
+<span><span class="co">#&gt;                 TRUE                 TRUE                 TRUE </span></span>
+<span><span class="co">#&gt;     package:graphics    package:grDevices        package:utils </span></span>
+<span><span class="co">#&gt;                 TRUE                 TRUE                 TRUE </span></span>
+<span><span class="co">#&gt;     package:datasets      package:methods            Autoloads </span></span>
+<span><span class="co">#&gt;                 TRUE                 TRUE                 TRUE </span></span>
+<span><span class="co">#&gt;          tools:callr         package:base </span></span>
+<span><span class="co">#&gt;                FALSE                 TRUE</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="other-checks">Other checks<a class="anchor" aria-label="anchor" href="#other-checks"></a>
+</h3>
+<p>There are other checks that are not called by default:</p>
+<ul>
+<li>
+<code><a href="../reference/allowlist_checks.html">check_namespaces()</a></code> looks for packages that have been
+loaded but not attached</li>
+<li>TODO: <code>check_options()</code> looks for specific options that
+might be of concern</li>
+<li>TODO: <code>check_locale()</code> looks for locale settings that
+might be of concern</li>
+<li>TODO: <code>check_sysenv()</code> looks for system environment
+variables</li>
+</ul>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
