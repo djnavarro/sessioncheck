@@ -81,17 +81,19 @@ one of many different ways in which previously-executed code can alter
 the state of the R session. This approach doesn’t provide any degree of
 safety from any of the following:</p>
 <ul>
-<li>packages may have been loaded with <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code>
-</li>
-<li>data sets may have been added to the search path with
-<code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code>
-</li>
-<li>options may have been set with <code><a href="https://rdrr.io/r/base/options.html" class="external-link">options()</a></code>
-</li>
+<li>packages that may have been loaded with <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> and
+change which functions get executed by your code</li>
+<li>data sets or other environments that may have been added to the
+search path with <code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code> and alter the variables and
+functions that are visible to your code</li>
+<li>options that may have been set with <code><a href="https://rdrr.io/r/base/options.html" class="external-link">options()</a></code> and can
+alter how your code is interpreted</li>
 <li>“hidden” variables in the global environment like
-<code>.Random.seed</code>
+<code>.Random.seed</code> that affect R code execution and are ignored
+by <code>rm(list = ls())</code>
 </li>
-<li>(…and a long list of other more subtle things)</li>
+<li>…and many more; there’s a long list of subtler ways in which the R
+session state matters</li>
 </ul>
 <p>Any of these can affect how your script executes, and
 <code>rm(list = ls())</code> does not protect you against any of them.
@@ -104,34 +106,156 @@ issues.</p>
 <h2 id="how-does-sessioncheck-help">How does sessioncheck help?<a class="anchor" aria-label="anchor" href="#how-does-sessioncheck-help"></a>
 </h2>
 <p>The principle that underpins <strong>sessioncheck</strong> is that
-scripts should not attempt a “clean up” of the environment. A better
-approach is to include a snippet of code that inspects the state of the
-R session, and produces a warning (or even an error) if it detects signs
-that the script is not being run in a clean session. The simplest way to
-do this is with the <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> function. In the typical
-case, you wouldn’t load the package with <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code>.
-Instead, you would put this as the very line of their R script:</p>
+scripts should not attempt a “clean up” of the environment. The “state”
+of an R session is complicated, and so if your script detects evidence
+that the pre-existing R state isn’t “clean”, the thing it should do is
+produce an error – it is the users responsibility to ensure a clean
+session. The script itself doesn’t have the power to make that happen,
+and it shouldn’t try.</p>
+<p>If you accept this as the core principle, then the thing you want to
+do – within that little snippet of code you insert at the top of the
+script – is to have your script look at the state of the R session, and
+look for signs that it isn’t being run in a clean environment. If it
+detects any such signs, it should warn the user, or (in cases where
+strict controls are required) produce an error that prevents the rest of
+the script from running. The purpose of <strong>sessioncheck</strong> is
+to provide tools that can do this. They are – necessarily! – based on
+heuristic rules that scan the session for signs that there might be an
+issue, so it will not be perfect. But at a bare minimum it can be
+guaranteed that this approach is strictly superior to using
+<code>rm(list = ls())</code>.</p>
+<p>The core idea is very simple. In the typical case, you wouldn’t load
+the package with <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code>. Instead, you would put this as
+the very line of their R script:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span></code></pre></div>
 <p>When executed in a clean R session this function does nothing, and
-the script will continue to run as it normally would. However, if the
-session is “dirty” – for some specific interpretation of what that means
-– it will produce an error, prevent the script from running, and prompt
-the user to consider restarting the R session.</p>
-<p>This intended behaviour is very easy to illustrate in this vignette,
-because the environment inside the R markdown document has been altered
-in many ways that make it different from a “typical” clean R session.
-Here is an example showing the error that a user might see if they run a
-“session checked” script in a dirty R session:</p>
+the script continues to run as it normally would. However, if the
+session is “contaminated” – for some specific interpretation of what
+that means to call the session “contaminated” – it will produce an
+error, prevent the script from running, and prompt the user to consider
+restarting the R session.</p>
+<p>To illustrate what happens in a contaminated R session, I’ll do two
+things that most R users would agree fit the definition of a
+contaminated R environment: creating objects in the global environment
+and attaching packages or environments:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/sessioncheck" class="external-link">sessioncheck</a></span><span class="op">)</span>                     <span class="co"># trigger check_packages</span></span>
+<span><span class="va">my_data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>T <span class="op">=</span> <span class="cn">FALSE</span>, F <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co"># trigger check_globalenv</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach</a></span><span class="op">(</span><span class="va">my_data</span><span class="op">)</span>                           <span class="co"># trigger check_attachments</span></span>
+<span><span class="co">#&gt; The following objects are masked from package:base:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     F, T</span></span></code></pre></div>
+<p>These prior actions vary considerably in their riskiness. For the
+example above, here’s a quick risk assessment</p>
+<ul>
+<li><p><strong>Attaching packages</strong>. Yes, it’s possible that
+attaching the <strong>sessioncheck</strong> package with
+<code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> might cause problems, but I’ve tried to design it
+safely so it likely won’t be a problem. Nevertheless, it is still
+something where the script should notify the user. By design, the
+typical use case for this package is to call
+<code><a href="../reference/sessioncheck.html">sessioncheck::sessioncheck()</a></code>. In the normal course of
+events you wouldn’t be writing <code><a href="https://github.com/djnavarro/sessioncheck" class="external-link">library(sessioncheck)</a></code> in
+your script, so yes, the user should probably be informed, as an act of
+politeness.</p></li>
+<li><p><strong>Adding to the global environment</strong>. Adding the
+<code>my_data</code> data frame as a variable in the global environment
+is not in itself a bad thing, but in practice when you’re running the
+same script over and over in an interactive context – which is a thing
+that data analysts have to do a lot, much more so than software
+engineers – you can quickly build up a lot of “detritus”, bits and
+pieces and objects left behind from code you tried out previously, and
+over time it becomes a big problem. The user should definitely be
+informed, because there are serious risk shere.</p></li>
+<li>
+<p><strong>Attaching a (malicious!) environment to the search
+path</strong>. Attaching data sets using <code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code> has been
+considered an extremely high-risk behaviour in R for a long time. It
+creates chaos in the R session and the potential for horrific outcomes
+is very high. The example I construced above is deliberately malicious,
+just to highlight how bad it can be. If your script executes in an
+environment when <code>attach(my_data)</code> has previously been
+executed, you can no longer rely on R to make sensible judgements about
+arithmetic:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="op">(</span><span class="fl">2</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">5</span><span class="op">)</span> <span class="op">==</span> <span class="cn">T</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+<p>On the face of it, R now believes that <code>2 + 2 = 5</code>. It
+doesn’t actually believe this. The result happens because the prior call
+to <code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code> ensures that you can no longer rely on the
+shorthand that assumes <code>T == TRUE</code>. Indeed:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="cn">T</span> <span class="op">==</span> <span class="cn">TRUE</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
+<p>and in fact:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="cn">T</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
+<p>In an ideal world an R script should never be using <code>T</code> as
+a shorthand for <code>TRUE</code> because it exposes the code to exactly
+this problem, but unfortunately there is a <em>massive</em> amount of
+old R code in current use that relies on the shortcut. The risk is
+real.</p>
+</li>
+</ul>
+<p>Noting that the R session is now contaminated in three ways, we can
+see what happens when <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> is called in a
+contaminated environment:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error: sessioncheck() detected the following issues:</span></span>
+<span><span class="co">#&gt; - Objects in global environment: my_data</span></span>
+<span><span class="co">#&gt; - Attached packages: sessioncheck</span></span>
+<span><span class="co">#&gt; - Attached non-package environments: my_data</span></span>
+<span><span class="co">#&gt; It may be necessary to restart R</span></span></code></pre></div>
+<p>If this code were placed at the top of the user script, that script
+would simply refuse to run in this contaminated environment. It would
+produce an error that indicates which checks were performed, and lists
+specific issues that were detected in each test. Not only that, because
+this is an error (rather than a warning) it supplies a prompt to the
+user that it may be necessary to restart R.</p>
+<p>By way of comparison, consider what would happen if the traditional
+<code>rm(list=ls())</code> approach were employed. Executing this code
+will fix only one of the three problems:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span>list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ls.html" class="external-link">ls</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The global environment is now clean, but any code that relies on
+<code>T</code> to mean <code>TRUE</code> will now break, because the
+<code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code> command has <em>not</em> detached the malicious
+environment:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="cn">T</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
+<p>Even though <code>rm(list = ls())</code> has been invoked, the R
+session is not safe, and it will corrupt the behaviour of any script
+that executes in this session. Importantly, notice that because
+<code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> is stricter than the <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code>
+approach, it still produces an error:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error: sessioncheck() detected the following issues:</span></span>
 <span><span class="co">#&gt; - Objects in global environment: [no issues]</span></span>
-<span><span class="co">#&gt; - Attached packages: [no issues]</span></span>
-<span><span class="co">#&gt; - Attached non-package environments: tools:callr</span></span>
+<span><span class="co">#&gt; - Attached packages: sessioncheck</span></span>
+<span><span class="co">#&gt; - Attached non-package environments: my_data</span></span>
 <span><span class="co">#&gt; It may be necessary to restart R</span></span></code></pre></div>
-<p>The error lists specific issues that were detected and prompts the
-user to restart R.</p>
+<p>Under normal circumstances the thing that the user – a human being –
+would likely do next is restart the R session, and all of these problems
+would go away. That is the intended way to use
+<strong>sessioncheck</strong>. It is designed primarily for analysts who
+design their code in a human-in-the-loop fashion. It is explicitly
+<em>not</em> recommended for production code or any other situation
+where R code is executed without direct human oversight.</p>
+<p>Nevertheless, because the author of this vignette is also the person
+who created the contaminated R session, she also knows how to reverse
+it:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/detach.html" class="external-link">detach</a></span><span class="op">(</span><span class="st">"my_data"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/detach.html" class="external-link">detach</a></span><span class="op">(</span><span class="st">"package:sessioncheck"</span><span class="op">)</span></span>
+<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span></code></pre></div>
+<p>In general though, the job of cleaning the session or restarting it
+should be reserved for the human analyst. Tools such as
+<strong>sessioncheck</strong> should not attempt to do so.</p>
 </div>
 <div class="section level2">
 <h2 id="how-does-sessioncheck-work">How does sessioncheck work?<a class="anchor" aria-label="anchor" href="#how-does-sessioncheck-work"></a>
@@ -142,14 +266,13 @@ functions that each check one specific aspect to the R session: the
 results of the individual checks.</p>
 <p>When calling <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> you can customise exactly
 which checks are performed and what rules should apply to each check,
-but for now let’s look at what the individual check functions do. For
-the purposes of this vignette we’ll only look at the three checks that
-are performed by default: checks of the global environment, checks of
-the attached packages, and checks of the attached non-package
-environments. Let’s load the package, so that we can explore the
-behaviour of these three check functions one at a time</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/sessioncheck" class="external-link">sessioncheck</a></span><span class="op">)</span></span></code></pre></div>
+but for now let’s look at the three specific checks that are performed
+by default: checks of the global environment, checks of the attached
+packages, and checks of the attached non-package environments. These can
+be run as standalone checks using <code><a href="../reference/allowlist_checks.html">check_globalenv()</a></code>,
+<code><a href="../reference/allowlist_checks.html">check_packages()</a></code> and <code><a href="../reference/allowlist_checks.html">check_attachments()</a></code>, so
+the natural place to start is examining the behaviour of the standalone
+checks.</p>
 <div class="section level3">
 <h3 id="check-1-global-environment">Check 1: global environment<a class="anchor" aria-label="anchor" href="#check-1-global-environment"></a>
 </h3>
@@ -159,68 +282,85 @@ R session that the traditional <code>rm(list=ls())</code> method does:
 the contents of the global environment. At the moment there is nothing
 in the global environment, so it is considered “clean”. As a
 consequence, nothing happens when we run this check:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/allowlist_checks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/allowlist_checks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>To get the check to produce a warning, we’ll need to add some
 variables:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">visible_1</span> <span class="op">&lt;-</span> <span class="st">"this will get detected"</span></span>
 <span><span class="va">visible_2</span> <span class="op">&lt;-</span> <span class="st">"so will this"</span></span>
 <span><span class="va">.hidden_1</span> <span class="op">&lt;-</span> <span class="st">"but this will not"</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/allowlist_checks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/allowlist_checks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Detected objects: visible_1, visible_2</span></span></code></pre></div>
+<p>The output indicates that the script has detected
+<code>visible_1</code> and <code>visible_2</code> in the global
+environment, and issues a warning to suggest that the R session may be
+contaminated.</p>
+<p>There are two arguments to <code><a href="../reference/allowlist_checks.html">check_globalenv()</a></code>:</p>
+<ul>
+<li>
+<code>action</code> specifies what the function should do if an
+issue is detected. There are four allowed values: <code>error</code>,
+<code>warn</code> (the default), <code>message</code>, and
+<code>none</code>.</li>
+<li>
+<code>allow</code> is a character vector used to specify the rules
+that are used to decide <em>which</em> objects should trigger an action.
+A variable name that is included in the <code>allow</code> list will not
+trigger an action. There is a special case: <code>allow = NULL</code>
+will apply the same rule that <code><a href="https://rdrr.io/r/base/ls.html" class="external-link">ls()</a></code> uses when listing the
+contents of the global environment: variables that start with a
+<code>.</code> will be ignored, and will not trigger an action.</li>
+</ul>
+<p>The example below illustrates how both of these actions are used.
+Here, the action taken will be to print a message rather than a warning;
+and by setting the <code>allow</code> argument to an empty string,
+<em>any</em> variable in the global environment will trigger the
+message, even the “hidden” ones:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/allowlist_checks.html">check_globalenv</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, allow <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Detected objects: .hidden_1, .Random.seed, visible_1, visible_2</span></span></code></pre></div>
+<p>This time we notice that the check detects the <code>visible_1</code>
+and <code>visible_2</code> like last time, but it now detects two hidden
+variables: the <code>.hidden_1</code> variable that I created earlier,
+and also the <code>.Random.seed</code> variable that R uses to store the
+state of the random number generator.</p>
 </div>
 <div class="section level3">
 <h3 id="check-2-attached-packages">Check 2: attached packages<a class="anchor" aria-label="anchor" href="#check-2-attached-packages"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/allowlist_checks.html">check_packages</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Detected attached packages: sessioncheck</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/allowlist_checks.html">check_packages</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The warning notes that the <strong>sessioncheck</strong> package has
 been attached. This might be considered acceptable, so we can ask the
 check to <code>allow</code> this package:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/allowlist_checks.html">check_packages</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"warn"</span>, allow <span class="op">=</span> <span class="st">"sessioncheck"</span><span class="op">)</span></span></code></pre></div>
-<p>The check invisibly returns a status object that looks like this:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">status</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/allowlist_checks.html">check_packages</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
-<span><span class="va">status</span></span>
-<span><span class="co">#&gt; sessioncheck        stats     graphics    grDevices        utils </span></span>
-<span><span class="co">#&gt;        FALSE         TRUE         TRUE         TRUE         TRUE </span></span>
-<span><span class="co">#&gt;     datasets      methods         base </span></span>
-<span><span class="co">#&gt;         TRUE         TRUE         TRUE</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/allowlist_checks.html">check_packages</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"warn"</span>, allow <span class="op">=</span> <span class="st">"sessioncheck"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="check-3-other-attachments">Check 3: other attachments<a class="anchor" aria-label="anchor" href="#check-3-other-attachments"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/allowlist_checks.html">check_attachments</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Detected attached environments: tools:callr</span></span></code></pre></div>
-<p>The check invisibly returns a status object that looks like this:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">status</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/allowlist_checks.html">check_attachments</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
-<span><span class="va">status</span></span>
-<span><span class="co">#&gt;           .GlobalEnv package:sessioncheck        package:stats </span></span>
-<span><span class="co">#&gt;                 TRUE                 TRUE                 TRUE </span></span>
-<span><span class="co">#&gt;     package:graphics    package:grDevices        package:utils </span></span>
-<span><span class="co">#&gt;                 TRUE                 TRUE                 TRUE </span></span>
-<span><span class="co">#&gt;     package:datasets      package:methods            Autoloads </span></span>
-<span><span class="co">#&gt;                 TRUE                 TRUE                 TRUE </span></span>
-<span><span class="co">#&gt;          tools:callr         package:base </span></span>
-<span><span class="co">#&gt;                FALSE                 TRUE</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/allowlist_checks.html">check_attachments</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="other-checks">Other checks<a class="anchor" aria-label="anchor" href="#other-checks"></a>
 </h3>
-<p>There are other checks that are not called by default:</p>
+<p>There are other checks that are not called by default. One is an
+“allow list” check, where the user must specify exactly which entities
+are permitted (i.e. the list of things that <em>don’t</em> trigger an
+action):</p>
 <ul>
 <li>
 <code><a href="../reference/allowlist_checks.html">check_namespaces()</a></code> looks for packages that have been
 loaded but not attached</li>
+</ul>
+<p>The others are “block list” checks, where the user specifies which
+cases are to be blocked (i.e., the list of things that <em>do</em>
+trigger an action)</p>
+<ul>
 <li>TODO: <code>check_options()</code> looks for specific options that
-might be of concern</li>
-<li>TODO: <code>check_locale()</code> looks for locale settings that
 might be of concern</li>
 <li>TODO: <code>check_sysenv()</code> looks for system environment
 variables</li>
