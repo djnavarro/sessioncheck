@@ -62,7 +62,11 @@
 <p>The goal of <strong>sessioncheck</strong> is to provide simple tools
 that can be called at the top of a script, and produce warnings or
 errors if it detects signs that the script is not being executed in a
-clean R session.</p>
+clean R session. The intended user for <strong>sessioncheck</strong> is
+a beginner or intermediate level R user who has learned enough about R
+to understand the limitations of using <code>rm(list = ls())</code> as a
+method to clean the R session, but is perhaps not at the point that they
+can take advantage of sophisticated tools like <a href="https://books.ropensci.org/targets/" class="external-link">targets</a>, <a href="https://callr.r-lib.org/" class="external-link">callr</a>, and so on.</p>
 <div class="section level2">
 <h2 id="why-is-this-important">Why is this important?<a class="anchor" aria-label="anchor" href="#why-is-this-important"></a>
 </h2>
@@ -108,7 +112,7 @@ do this is with the <code><a href="../reference/check_session.html">check_sessio
 could put this as the very line of their R script:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_session.html">check_session</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span></code></pre></div>
-<p>When executed in a clean environment this function does nothing, and
+<p>When executed in a clean R session this function does nothing, and
 the script will continue to run as it normally would. However, if the
 session is “dirty” – for some specific interpretation of what that means
 – it will produce an error, prevent the script from running, and prompt
@@ -120,9 +124,8 @@ Here is an example showing the error that a user might see if they run a
 “session checked” script in a dirty R session:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_session.html">check_session</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: Session checks found the following issues:</span></span>
-<span><span class="co">#&gt; - Loaded namespaces: digest, desc, R6, fastmap, and 19 more</span></span>
-<span><span class="co">#&gt; - Other attached environments: tools:callr</span></span>
+<span><span class="co">#&gt; Error: Session check detected the following issues:</span></span>
+<span><span class="co">#&gt; - Attached non-package environments: tools:callr</span></span>
 <span><span class="co">#&gt; It may be necessary to restart R</span></span></code></pre></div>
 <p>The error message lists two specific problems:</p>
 <ul>
@@ -135,15 +138,59 @@ path</li>
 <div class="section level2">
 <h2 id="how-does-sessioncheck-work">How does sessioncheck work?<a class="anchor" aria-label="anchor" href="#how-does-sessioncheck-work"></a>
 </h2>
+<p>The <strong>sessioncheck</strong> package is built on several
+functions that each check one specific aspect to the R session: the
+<code><a href="../reference/check_session.html">check_session()</a></code> function itself merely aggregates the
+results of the individual checks. When calling
+<code><a href="../reference/check_session.html">check_session()</a></code> you can customise exactly which checks are
+performed and what rules should apply to each check, but for now let’s
+look at what the individual check functions do. Let’s load the package
+first, so that we can explore the behaviour of the check functions one
+at a time:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/sessioncheck" class="external-link">sessioncheck</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/sessioncheck" class="external-link">sessioncheck</a></span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="check-the-global-environment">Check the global environment<a class="anchor" aria-label="anchor" href="#check-the-global-environment"></a>
+</h3>
+<p>The first and simplest of the checks is
+<code><a href="../reference/sessionchecks.html">check_globalenv()</a></code>, and it focuses on the same aspect of the
+R session that the traditional <code>rm(list=ls())</code> method does:
+the contents of the global environment. At the moment there is nothing
+in the global environment, so it is considered “clean”. As a
+consequence, nothing happens when we run this check:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/sessionchecks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>To get the check to produce a warning, we’ll need to add some
+variables:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">visible_1</span> <span class="op">&lt;-</span> <span class="st">"this will get detected"</span></span>
+<span><span class="va">visible_2</span> <span class="op">&lt;-</span> <span class="st">"so will this"</span></span>
+<span><span class="va">.hidden_1</span> <span class="op">&lt;-</span> <span class="st">"but this will not"</span></span>
+<span></span>
 <span><span class="fu"><a href="../reference/sessionchecks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/sessionchecks.html">check_packages</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Found packages: sessioncheck</span></span>
-<span><span class="fu"><a href="../reference/sessionchecks.html">check_attachments</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Found attachments: tools:callr</span></span>
-<span><span class="fu"><a href="../reference/sessionchecks.html">check_namespaces</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Found objects: visible_1, visible_2</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="check-the-attached-packages">Check the attached packages<a class="anchor" aria-label="anchor" href="#check-the-attached-packages"></a>
+</h3>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/sessionchecks.html">check_packages</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Found packages: sessioncheck</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="check-for-other-attached-environments">Check for other attached environments<a class="anchor" aria-label="anchor" href="#check-for-other-attached-environments"></a>
+</h3>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/sessionchecks.html">check_attachments</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Found attachments: tools:callr</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="check-loaded-namespaces">Check loaded namespaces<a class="anchor" aria-label="anchor" href="#check-loaded-namespaces"></a>
+</h3>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/sessionchecks.html">check_namespaces</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Found namespaces: digest, desc, R6, fastmap, and 19 more</span></span></code></pre></div>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

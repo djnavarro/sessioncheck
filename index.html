@@ -51,7 +51,8 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>The goal of <strong>sessioncheck</strong> is to provide simple tools that can be called at the top of a script, and produce warnings or errors if it detects hints that it is not being executed in a clean R session. It not intended as a replacement for sophisticated tools available to expert R users. Instead, it is intended as drop-in replacement for the common (but unsafe) approach of placing <code>rm(list = ls())</code> at the top of the script. Rather than attempt to clean a dirty session using <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code>, which rarely works as well as one might hope, you can put <code><a href="reference/check_session.html">check_session()</a></code> at the top of the script to produce a warning or an error if the R session looks dirty</p>
+<p>The goal of <strong>sessioncheck</strong> is to provide simple tools that can be called at the top of a script, and produce warnings or errors if it detects signs that the script is not being executed in a clean R session. The intended user for <strong>sessioncheck</strong> is a beginner or intermediate level R user who has learned enough about R to understand the limitations of using <code>rm(list = ls())</code> as a method to clean the R session, but is perhaps not at the point that they can take advantage of sophisticated tools like <a href="https://books.ropensci.org/targets/" class="external-link">targets</a>, <a href="https://callr.r-lib.org/" class="external-link">callr</a>, and so on.</p>
+<p>In short, the goal is to provide a simple drop-in replacement for <code>rm(list = ls())</code>.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -61,15 +62,15 @@
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"djnavarro/sessioncheck"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="basic-use">Basic use<a class="anchor" aria-label="anchor" href="#basic-use"></a>
+<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
 <p>The intention when using <strong>sessioncheck</strong> is that you would rarely if ever load it with <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code>. Instead, a single line of code like this would be added at the top of the script:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="reference/check_session.html">check_session</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Session checks found the following issues:</span></span>
-<span><span class="co">#&gt; - Attached packages: pak, pkgdown, testthat, usethis</span></span>
-<span><span class="co">#&gt; - Loaded namespaces: digest, R6, fastmap, xfun, and 19 more</span></span></code></pre></div>
-<p>The default behaviour is to produce a warning when potential issues are detected, but more often you’d want it to produce an error, which can be accomplished with <code>sessioncheck::check_session("error")</code>. Explanations of how the checks work – and how they can be customised – are provided in the package documentation and vignettes.</p>
+<span><span class="co">#&gt; Warning: Session check detected the following issues:</span></span>
+<span><span class="co">#&gt; - Attached packages: pak, pkgdown, testthat, usethis</span></span></code></pre></div>
+<p>The default behaviour is to warn the user when issues are detected, but this can be converted to an error by using <code>sessioncheck::check_session("error")</code> if a stricter check is required.</p>
+<p>Explanations of how the checks work and how they can be customised are provided in the package documentation and on the <a href="https://sessioncheck.djnavarro.net/articles/sessioncheck.html">get started</a> page.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
