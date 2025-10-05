@@ -18,14 +18,14 @@
 #' the entity is ignored, `FALSE` if it triggers an action.
 #'  
 #' @examples
-#' check_session(action = "message")
+#' sessioncheck(action = "message")
 #'  
 #' @details
-#' `check_session()` allows the user to apply multiple session checks in a single function
+#' `sessioncheck()` allows the user to apply multiple session checks in a single function
 #' 
 #' @export
 #' 
-check_session <- function(
+sessioncheck <- function(
   action = "warn", 
   checks = c("globalenv", "packages", "attachments"),
   settings = getOption("sessioncheck.settings")
@@ -52,7 +52,7 @@ check_session <- function(
   
   if (length(msg) > 0L) {
     msg <- paste(unlist(msg), collapse = "\n")
-    msg <- paste("Session check detected the following issues:", msg, sep = "\n")
+    msg <- paste("sessioncheck() detected the following issues:", msg, sep = "\n")
     if (action == "error") {
       msg <- paste(msg, "It may be necessary to restart R", sep = "\n")
     }

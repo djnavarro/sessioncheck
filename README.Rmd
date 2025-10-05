@@ -41,10 +41,10 @@ The intention when using **sessioncheck** is that you would rarely load it with 
 
 ```{r}
 #| label: default-behaviour
-sessioncheck::check_session()
+sessioncheck::sessioncheck()
 ```
 
-The default behaviour is to warn the user when issues are detected, but this can be converted to an error by using `sessioncheck::check_session("error")` if a stricter check is required.
+The default behaviour is to warn the user if issues are detected, but this can be converted to an error by using `sessioncheck::sessioncheck("error")` if a stricter check is required.
 
 Explanations of how the checks work and how they can be customised are provided in the package documentation and on the [get started](https://sessioncheck.djnavarro.net/articles/sessioncheck.html) page.
 

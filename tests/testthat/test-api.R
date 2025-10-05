@@ -20,3 +20,20 @@ test_that("session checkers match the correct internal function", {
   expect_equal(check_packages("none"), .get_package_status(NULL))
 
 })
+
+test_that("sessioncheck() returns list of status vectors", {
+
+  ss <- sessioncheck(
+    action = "none", 
+    checks = c("globalenv", "packages", "namespaces", "attachments"),
+    settings = NULL
+  )
+  ii <- list(
+    globalenv = check_globalenv(action = "none", allow = NULL),
+    packages = check_packages(action = "none", allow = NULL),
+    namespaces = check_namespaces(action = "none", allow = NULL),
+    attachments = check_attachments(action = "none", allow = NULL)
+  )
+
+  expect_equal(ss, ii)
+})

@@ -31,12 +31,12 @@ Any of these can affect how your script executes, and `rm(list = ls())` does not
 
 ## How does sessioncheck help?
 
-The principle that underpins **sessioncheck** is that scripts should not attempt a "clean up" of the environment. A better approach is to include a snippet of code that inspects the state of the R session, and produces a warning (or even an error) if it detects signs that the script is not being run in a clean session. The simplest way to do this is with the `check_session()` function. The user could put this as the very line of their R script:
+The principle that underpins **sessioncheck** is that scripts should not attempt a "clean up" of the environment. A better approach is to include a snippet of code that inspects the state of the R session, and produces a warning (or even an error) if it detects signs that the script is not being run in a clean session. The simplest way to do this is with the `sessioncheck()` function. In the typical case, you wouldn't load the package with `library()`. Instead, you would put this as the very line of their R script:
 
 ```{r}
 #| label: basic-use
 #| eval: false
-sessioncheck::check_session("error")
+sessioncheck::sessioncheck("error")
 ```
 
 When executed in a clean R session this function does nothing, and the script will continue to run as it normally would. However, if the session is "dirty" -- for some specific interpretation of what that means -- it will produce an error, prevent the script from running, and prompt the user to consider restarting the R session. 
@@ -46,16 +46,16 @@ This intended behaviour is very easy to illustrate in this vignette, because the
 ```{r}
 #| label: error-example
 #| error: true
-sessioncheck::check_session("error")
+sessioncheck::sessioncheck("error")
 ```
 
 The error lists specific issues that were detected and prompts the user to restart R.
 
 ## How does sessioncheck work?
 
-The **sessioncheck** package is built on several functions that each check one specific aspect to the R session: the `check_session()` function itself merely aggregates the results of the individual checks. 
+The **sessioncheck** package is built on several functions that each check one specific aspect to the R session: the `sessioncheck()` function itself merely aggregates the results of the individual checks. 
 
-When calling `check_session()` you can customise exactly which checks are performed and what rules should apply to each check, but for now let's look at what the individual check functions do. For the purposes of this vignette we'll only look at the three checks that are performed by default: checks of the global environment, checks of the attached packages, and checks of the attached non-package environments. Let's load the package, so that we can explore the behaviour of these three check functions one at a time
+When calling `sessioncheck()` you can customise exactly which checks are performed and what rules should apply to each check, but for now let's look at what the individual check functions do. For the purposes of this vignette we'll only look at the three checks that are performed by default: checks of the global environment, checks of the attached packages, and checks of the attached non-package environments. Let's load the package, so that we can explore the behaviour of these three check functions one at a time
 
 ```{r}
 #| label: load-package

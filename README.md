@@ -42,14 +42,14 @@ it with `library()`. Instead, a single line of code like this would be
 added at the top of the script:
 
 ``` r
-sessioncheck::check_session()
-#> Warning: Session check detected the following issues:
-#> - Attached packages: pak, pkgdown, testthat, usethis
+sessioncheck::sessioncheck()
+#> Warning: sessioncheck() detected the following issues:
+#> - Attached packages: sessioncheck, pak, pkgdown, testthat, and 1 more
 ```
 
-The default behaviour is to warn the user when issues are detected, but
+The default behaviour is to warn the user if issues are detected, but
 this can be converted to an error by using
-`sessioncheck::check_session("error")` if a stricter check is required.
+`sessioncheck::sessioncheck("error")` if a stricter check is required.
 
 Explanations of how the checks work and how they can be customised are
 provided in the package documentation and on the [get
