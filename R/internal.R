@@ -67,7 +67,7 @@
 .message_text <- function(prefix, status, max_len = 4L) {
   lst <- names(status[!status])
   len <- length(lst)
-  if (len == 0L) return(NULL)
+  if (len == 0L) return(paste(prefix, "[no issues]"))
   if (len <= max_len) {
     txt <- paste(lst, collapse = ", ")
   } else {

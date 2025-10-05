@@ -44,7 +44,9 @@ added at the top of the script:
 ``` r
 sessioncheck::sessioncheck()
 #> Warning: sessioncheck() detected the following issues:
-#> - Attached packages: pak, pkgdown, testthat, usethis
+#> - Objects in global environment: [no issues]
+#> - Attached packages: sessioncheck, pak, pkgdown, testthat, and 1 more
+#> - Attached non-package environments: [no issues]
 ```
 
 The default behaviour is to warn the user if issues are detected, but

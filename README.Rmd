@@ -48,4 +48,3 @@ The default behaviour is to warn the user if issues are detected, but this can b
 
 Explanations of how the checks work and how they can be customised are provided in the package documentation and on the [get started](https://sessioncheck.djnavarro.net/articles/sessioncheck.html) page.
 
-
