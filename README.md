@@ -37,9 +37,9 @@ pak::pak("djnavarro/sessioncheck")
 
 ## Example
 
-The intention when using **sessioncheck** is that you would rarely if
-ever load it with `library()`. Instead, a single line of code like this
-would be added at the top of the script:
+The intention when using **sessioncheck** is that you would rarely load
+it with `library()`. Instead, a single line of code like this would be
+added at the top of the script:
 
 ``` r
 sessioncheck::check_session()

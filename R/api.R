@@ -121,7 +121,7 @@ check_globalenv <- function(action = "warn", ignore = NULL) {
   .validate_action(action)
   .validate_ignore(ignore)
   status <- .get_globalenv_status(ignore)
-  msg  <- .message_text("Found objects:", status)
+  msg  <- .message_text("Detected objects:", status)
   .action(action, status, msg)
 }
 
@@ -131,7 +131,7 @@ check_packages <- function(action = "warn", ignore = NULL) {
   .validate_action(action)
   .validate_ignore(ignore)
   status <- .get_package_status(ignore)
-  msg <- .message_text("Found packages:", status)
+  msg <- .message_text("Detected attached packages:", status)
   .action(action, status, msg)
 }
 
@@ -141,7 +141,7 @@ check_namespaces <- function(action = "warn", ignore = NULL) {
   .validate_action(action)
   .validate_ignore(ignore)
   status <- .get_namespace_status(ignore)
-  msg <- .message_text("Found namespaces:", status)
+  msg <- .message_text("Dectected loaded namespaces:", status)
   .action(action, status, msg)
 }
 
@@ -151,6 +151,6 @@ check_attachments <- function(action = "warn", ignore = NULL) {
   .validate_action(action)
   .validate_ignore(ignore)
   status <- .get_attachment_status(ignore)
-  msg <- .message_text("Found attachments:", status)
+  msg <- .message_text("Detected attached environments:", status)
   .action(action, status, msg)
 }
