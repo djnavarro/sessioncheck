@@ -277,21 +277,21 @@ which checks are performed and what rules should apply to each check,
 but for now let’s look at the three specific checks that are performed
 by default: checks of the global environment, checks of the attached
 packages, and checks of the attached non-package environments. These can
-be run as standalone checks using <code><a href="../reference/allowlist_checks.html">check_globalenv()</a></code>,
-<code><a href="../reference/allowlist_checks.html">check_packages()</a></code> and <code><a href="../reference/allowlist_checks.html">check_attachments()</a></code>, so
+be run as standalone checks using <code><a href="../reference/object_checks.html">check_globalenv()</a></code>,
+<code><a href="../reference/package_checks.html">check_packages()</a></code> and <code><a href="../reference/object_checks.html">check_attachments()</a></code>, so
 the natural place to start is examining the behaviour of the standalone
 checks.</p>
 <div class="section level3">
 <h3 id="check-1-global-environment">Check 1: global environment<a class="anchor" aria-label="anchor" href="#check-1-global-environment"></a>
 </h3>
 <p>The first and simplest of the checks is
-<code><a href="../reference/allowlist_checks.html">check_globalenv()</a></code>, and it focuses on the same aspect of the
+<code><a href="../reference/object_checks.html">check_globalenv()</a></code>, and it focuses on the same aspect of the
 R session that the traditional <code>rm(list=ls())</code> method does:
 the contents of the global environment. At the moment there is nothing
 in the global environment, so it is considered “clean”. As a
 consequence, nothing happens when we run this check:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/allowlist_checks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/object_checks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>To get the check to produce a warning, we’ll need to add some
 variables:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -299,13 +299,13 @@ variables:</p>
 <span><span class="va">visible_2</span> <span class="op">&lt;-</span> <span class="st">"so will this"</span></span>
 <span><span class="va">.hidden_1</span> <span class="op">&lt;-</span> <span class="st">"but this will not"</span></span>
 <span></span>
-<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/allowlist_checks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/object_checks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Detected objects: visible_1, visible_2</span></span></code></pre></div>
 <p>The output indicates that the script has detected
 <code>visible_1</code> and <code>visible_2</code> in the global
 environment, and issues a warning to suggest that the R session may be
 contaminated.</p>
-<p>There are two arguments to <code><a href="../reference/allowlist_checks.html">check_globalenv()</a></code>:</p>
+<p>There are two arguments to <code><a href="../reference/object_checks.html">check_globalenv()</a></code>:</p>
 <ul>
 <li>
 <code>action</code> specifies what the function should do if an
@@ -327,7 +327,7 @@ and by setting the <code>allow</code> argument to an empty string,
 <em>any</em> variable in the global environment will trigger the
 message, even the “hidden” ones:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/allowlist_checks.html">check_globalenv</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, allow <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/object_checks.html">check_globalenv</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, allow <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Detected objects: .hidden_1, .Random.seed, visible_1, visible_2</span></span></code></pre></div>
 <p>This time we notice that the check detects the <code>visible_1</code>
 and <code>visible_2</code> like last time, but it now detects two hidden
@@ -339,18 +339,18 @@ state of the random number generator.</p>
 <h3 id="check-2-attached-packages">Check 2: attached packages<a class="anchor" aria-label="anchor" href="#check-2-attached-packages"></a>
 </h3>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/allowlist_checks.html">check_packages</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/package_checks.html">check_packages</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The warning notes that the <strong>sessioncheck</strong> package has
 been attached. This might be considered acceptable, so we can ask the
 check to <code>allow</code> this package:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/allowlist_checks.html">check_packages</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"warn"</span>, allow <span class="op">=</span> <span class="st">"sessioncheck"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/package_checks.html">check_packages</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"warn"</span>, allow <span class="op">=</span> <span class="st">"sessioncheck"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="check-3-other-attachments">Check 3: other attachments<a class="anchor" aria-label="anchor" href="#check-3-other-attachments"></a>
 </h3>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/allowlist_checks.html">check_attachments</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/object_checks.html">check_attachments</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="other-checks">Other checks<a class="anchor" aria-label="anchor" href="#other-checks"></a>
@@ -361,7 +361,7 @@ are permitted (i.e. the list of things that <em>don’t</em> trigger an
 action):</p>
 <ul>
 <li>
-<code><a href="../reference/allowlist_checks.html">check_namespaces()</a></code> looks for packages that have been
+<code><a href="../reference/package_checks.html">check_namespaces()</a></code> looks for packages that have been
 loaded but not attached</li>
 </ul>
 <p>The others are “block list” checks, where the user specifies which
