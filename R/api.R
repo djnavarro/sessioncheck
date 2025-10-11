@@ -62,26 +62,81 @@ sessioncheck <- function(
 }
 
 
-#' @title Check specific aspects to the R session
+#' @title Check loaded namespaces and attached packages
 #' 
 #' @description
-#' Individual session check functions that each inspect one way in which an R
-#' session could be considered not to be "clean". Session checkers can produce
-#' errors, warnings, or messages if requested.
+#' Individual session check functions that examine attached packages and loaded
+#' namespaces. Session checkers can produce errors, warnings, or messages if requested.
 #' 
 #' @param action Behaviour to take if the status is not clean. Possible values are 
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
-#' @param allow Character vector containing names of objects, packages, environment
-#' names that are "allowed", and will not trigger an action. Some entities are always
-#' allowed and will never trigger actions (see details).
+#' @param allow Character vector containing names of packages that are "allowed", 
+#' and will not trigger an action. Base priority packages are always allowed and will 
+#' never trigger actions (see details).
 #'
 #' @returns Invisibly returns a status vector, a logical vector with names referring
-#' to a detected entity (e.g., object, package, environment). Values are `TRUE` if 
-#' the entity is ignored, `FALSE` if it triggers an action.
+#' to a detected package. Values are `TRUE` if the package is ignored, `FALSE` if it 
+#' triggers an action.
 #'  
 #' @examples
 #' check_packages(action = "message")
 #' check_namespaces(action = "message")
+#'  
+#' @details
+#' The default behaviour of the `allow` argument is slightly for each checker:
+#' 
+#' - `check_packages()`: This checker inspects the list of packages that have been
+#' attached to the search path (e.g., via `library()`). Regardless of the value of 
+#' `allow`, R packages that have "base" priority (e.g., **base**, **utils**, and 
+#' **grDevices**) do not trigger an action. When `allow = NULL` these are the only
+#' packages that will not trigger actions. 
+#' 
+#' - `check_namespaces()`: This checker inspects the list of loaded namespaces 
+#' (packages that have been loaded but not attached). The `allow` argument for this
+#' checker is almost identical to `check_packages()`: the only difference is that 
+#' the **sessioncheck** package is always allowed as a loaded namespace, since the 
+#' package namespace must be loaded in order to call the function itself.
+#' 
+#' @name package_checks
+NULL
+
+#' @export
+#' @rdname package_checks
+check_packages <- function(action = "warn", allow = NULL) {
+  .validate_action(action)
+  .validate_allow(allow)
+  status <- .get_package_status(allow)
+  msg <- .message_text("Detected attached packages:", status)
+  .action(action, status, msg)
+}
+
+#' @export
+#' @rdname package_checks
+check_namespaces <- function(action = "warn", allow = NULL) {
+  .validate_action(action)
+  .validate_allow(allow)
+  status <- .get_namespace_status(allow)
+  msg <- .message_text("Dectected loaded namespaces:", status)
+  .action(action, status, msg)
+}
+
+#' @title Check global environment and attached environments
+#' 
+#' @description
+#' Individual session check functions that inspect the contents of the global 
+#' environment and the names of attached non-package environments. Session checkers 
+#' can produce errors, warnings, or messages if requested.
+#' 
+#' @param action Behaviour to take if the status is not clean. Possible values are 
+#' "error", "warn", "message", and "none". The default is `action = "warn"`.
+#' @param allow Character vector containing names of objects or environments
+#' that are "allowed", and will not trigger an action.
+#'
+#' @returns Invisibly returns a status vector, a logical vector with names referring
+#' to a detected entity (e.g., object, or environment). Values are `TRUE` if 
+#' the entity is ignored, `FALSE` if it triggers an action.
+#'  
+#' @examples
 #' check_globalenv(action = "message")
 #' check_attachments(action = "message")
 #'  
@@ -92,19 +147,7 @@ sessioncheck <- function(
 #' and takes action based on the objects found there. When `allow = NULL`, variables 
 #' in the global environment will not trigger an action if the name starts with a dot. 
 #' For example, `.Random.seed` and `.Last.value` do not trigger actions by default.
-#' 
-#' - `check_packages()`: This checker inspects the list of packages that have been
-#' attached to the search path (e.g., via `library()`). Regardless of the value of 
-#' `allow`, R packages that have "base" priority (e.g., **base**, **utils**, and 
-#' **grDevices**) do not trigger an action. When `allow = NULL` these are the only
-#' packages that will not trigger actions. 
-#' 
-#' - `check_namespaces()`: This checker inspects the list of loaded namespaces (e.g.
-#' packages that have been loaded but not attached). The `allow` argument for this
-#' checker is almost identical to `check_packages()`: the only difference is that 
-#' the **sessioncheck** package is always allowed as a loaded namespace, since the 
-#' package namespace must be loaded in order to call the function itself.
-#' 
+#'  
 #' - `check_attachments()`: This checker inspects all environments on the search
 #' path. This includes attached packages, anything added using `attach()`, and the
 #' global environment. When `allow = NULL`, package environents do not trigger an
@@ -112,11 +155,11 @@ sessioncheck <- function(
 #' The global environment and the package environment for the **base** package 
 #' never trigger actions.
 #' 
-#' @name allowlist_checks
+#' @name object_checks
 NULL
 
 #' @export
-#' @rdname allowlist_checks
+#' @rdname object_checks
 check_globalenv <- function(action = "warn", allow = NULL) {
   .validate_action(action)
   .validate_allow(allow)
@@ -126,27 +169,7 @@ check_globalenv <- function(action = "warn", allow = NULL) {
 }
 
 #' @export
-#' @rdname allowlist_checks
-check_packages <- function(action = "warn", allow = NULL) {
-  .validate_action(action)
-  .validate_allow(allow)
-  status <- .get_package_status(allow)
-  msg <- .message_text("Detected attached packages:", status)
-  .action(action, status, msg)
-}
-
-#' @export
-#' @rdname allowlist_checks
-check_namespaces <- function(action = "warn", allow = NULL) {
-  .validate_action(action)
-  .validate_allow(allow)
-  status <- .get_namespace_status(allow)
-  msg <- .message_text("Dectected loaded namespaces:", status)
-  .action(action, status, msg)
-}
-
-#' @export
-#' @rdname allowlist_checks
+#' @rdname object_checks
 check_attachments <- function(action = "warn", allow = NULL) {
   .validate_action(action)
   .validate_allow(allow)
@@ -154,3 +177,4 @@ check_attachments <- function(action = "warn", allow = NULL) {
   msg <- .message_text("Detected attached environments:", status)
   .action(action, status, msg)
 }
+
