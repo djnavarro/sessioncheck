@@ -17,15 +17,7 @@
   stopifnot("`settings` must be a list or NULL" = is.list(settings) | is.null(settings))
 }
 
-# status checkers ------
-
-.get_globalenv_status <- function(allow) {
-  obj <- ls(envir = .GlobalEnv, all.names = TRUE)
-  if (is.null(allow)) allow <- obj[grepl(pattern = "^\\.", x = obj)]
-  status <- obj %in% allow
-  names(status) <- obj
-  status
-}
+# status checkers: packages and namespaces ------
 
 .get_namespace_status <- function(allow) {
   if (is.null(allow)) allow <- character(0L)
@@ -48,6 +40,16 @@
   status
 }
 
+# status checkers: global environment and attachments ------
+
+.get_globalenv_status <- function(allow) {
+  obj <- ls(envir = .GlobalEnv, all.names = TRUE)
+  if (is.null(allow)) allow <- obj[grepl(pattern = "^\\.", x = obj)]
+  status <- obj %in% allow
+  names(status) <- obj
+  status
+}
+
 .get_attachment_status <- function(allow) {
   if (is.null(allow)) allow <- c("tools:rstudio", "tools:positron", "tools:callr", "Autoloads")
   allow <- union(".GlobalEnv", allow)
@@ -61,6 +63,38 @@
   names(status) <- attached
   status
 }
+
+# status checkers: session time ------
+
+.get_session_time_status <- function() {
+  pt <- proc.time()
+}
+
+
+# status checkers: options, locale, and system env variables ------
+
+.get_option_status <- function(block) {
+  opts <- options()
+}
+
+.get_sysenv_status <- function() {
+  env <- Sys.getenv()
+}
+
+.get_locale_status <- function() {
+  lc <- Sys.getlocale()
+}
+
+
+# possibilities?
+
+# .get_sessioninfo_status <- function() {
+#   si <- utils::sessionInfo()
+# }
+
+# .get_conflicts_status <- function() {
+#   cc <- conflicts(detail = TRUE)
+# }
 
 # actions and messages ------
 
