@@ -66,10 +66,14 @@
 
 # status checkers: session time ------
 
-.get_session_time_status <- function() {
+.get_session_time_status <- function(tol) {
+  if (is.null(tol)) tol <- 300
   pt <- proc.time()
+  elapsed <- pt["elapsed"]
+  status <- elapsed > tol
+  names(status) <- paste(elapsed, "sec elapsed")
+  status
 }
-
 
 # status checkers: options, locale, and system env variables ------
 

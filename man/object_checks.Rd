@@ -18,9 +18,10 @@ check_attachments(action = "warn", allow = NULL)
 that are "allowed", and will not trigger an action.}
 }
 \value{
-Invisibly returns a status vector, a logical vector with names referring
-to a detected entity (e.g., object, or environment). Values are \code{TRUE} if
-the entity is ignored, \code{FALSE} if it triggers an action.
+Invisibly returns a status flag vector, a logical vector with names
+referring to a detected entity (object in the global environment, or a non-package
+environment attached to the search path). Values are \code{TRUE} if the entity triggers
+an action, \code{FALSE} if it does not.
 }
 \description{
 Individual session check functions that inspect the contents of the global

@@ -179,3 +179,35 @@ check_attachments <- function(action = "warn", allow = NULL) {
   .action(action, status, msg)
 }
 
+
+
+#' @title Check session run time
+#' 
+#' @description
+#' Individual session check functions that inspect the session run time information. 
+#' Session checkers can produce errors, warnings, or messages if requested.
+#' 
+#' @param action Behaviour to take if the status is not clean. Possible values are 
+#' "error", "warn", "message", and "none". The default is `action = "warn"`.
+#' @param tol Maximum session time permitted before the checker takes action
+#'
+#' @returns Invisibly returns a status flag: `TRUE` if the 
+#' 
+#' a logical vector with names referring
+#' to a detected entity (e.g., object, or environment). Values are `TRUE` if 
+#' the entity is ignored, `FALSE` if it triggers an action.
+#'  
+#' @examples
+#' check_globalenv(action = "message")
+#' 
+#' @name sessiontime_checks
+NULL
+
+#' @export
+#' @rdname sessiontime_checks
+check_session_time <- function(action = "warn", tol = NULL) {
+  .validate_action(action)
+  status <- .get_session_time_status(tol)
+  msg <- .message_text("Session runtime:", status)
+  .action(action, status, msg)
+}

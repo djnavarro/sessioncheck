@@ -22,7 +22,7 @@ default is to run \code{checks = c("globalenv", "packages", "attachments")}}
 \value{
 Invisibly returns a status object, a list of a named logical vectors. Each vector
 has names that refer to detected entities for each specific check. Values are \code{TRUE} if
-the entity is ignored, \code{FALSE} if it triggers an action.
+that entity triggers an action, \code{FALSE} if it does not.
 }
 \description{
 Individual session check functions that each inspect one way in which an R

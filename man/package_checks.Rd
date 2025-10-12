@@ -19,9 +19,9 @@ and will not trigger an action. Base priority packages are always allowed and wi
 never trigger actions (see details).}
 }
 \value{
-Invisibly returns a status vector, a logical vector with names referring
-to a detected package. Values are \code{TRUE} if the package is ignored, \code{FALSE} if it
-triggers an action.
+Invisibly returns a status flag vector, a logical vector with names referring
+to a detected package. Values are \code{TRUE} if the package triggers an action, \code{FALSE}
+if it does not.
 }
 \description{
 Individual session check functions that examine attached packages and loaded
