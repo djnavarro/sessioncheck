@@ -24,7 +24,7 @@
   allow <- union(allow, "sessioncheck")
   status <- vapply(
     loadedNamespaces(), 
-    function(x) identical(utils::packageDescription(x)$Priority, "base") | x %in% allow, 
+    function(x) !(identical(utils::packageDescription(x)$Priority, "base") | x %in% allow), 
     logical(1L)
   )
   status
@@ -34,7 +34,7 @@
   if (is.null(allow)) allow <- character(0L)
   status <- vapply(
     .packages(), 
-    function(x) identical(utils::packageDescription(x)$Priority, "base") | x %in% allow, 
+    function(x) !(identical(utils::packageDescription(x)$Priority, "base") | x %in% allow), 
     logical(1L)
   )
   status
@@ -45,7 +45,7 @@
 .get_globalenv_status <- function(allow) {
   obj <- ls(envir = .GlobalEnv, all.names = TRUE)
   if (is.null(allow)) allow <- obj[grepl(pattern = "^\\.", x = obj)]
-  status <- obj %in% allow
+  status <- !(obj %in% allow)
   names(status) <- obj
   status
 }
@@ -59,7 +59,7 @@
     function(ind) !is.null(attr(as.environment(ind), "path")) | ind == length(attached),
     logical(1L)
   )
-  status <- is_pkg | attached %in% allow
+  status <- !(is_pkg | attached %in% allow)
   names(status) <- attached
   status
 }
@@ -99,7 +99,7 @@
 # actions and messages ------
 
 .message_text <- function(prefix, status, max_len = 4L) {
-  lst <- names(status[!status])
+  lst <- names(status[status])
   len <- length(lst)
   if (len == 0L) return(paste(prefix, "[no issues]"))
   if (len <= max_len) {
@@ -114,9 +114,9 @@
 
 .action <- function(action, status, message = NULL) {
   if (action == "none") return(invisible(status)) 
-  if (is.atomic(status) && !any(!status)) return(invisible(status))
+  if (is.atomic(status) && !any(status)) return(invisible(status))
   if (!is.atomic(status)) {
-    is_ok <- vapply(status, function(s) !any(!s), logical(1L))
+    is_ok <- vapply(status, function(s) !any(s), logical(1L))
     if (all(is_ok)) return(invisible(status))
   }
   if (action == "message") {

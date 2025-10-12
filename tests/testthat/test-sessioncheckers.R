@@ -30,66 +30,66 @@ test_that("base-priority packages are always allowed", {
   pp <- .get_package_status(allow = NULL)
   nn <- .get_namespace_status(allow = NULL)
   aa <- .get_attachment_status(allow = NULL)
-  expect_true(pp["base"])
-  expect_true(nn["base"])
-  expect_true(aa["package:base"])
-  expect_true(pp["utils"])
-  expect_true(nn["utils"])
-  expect_true(aa["package:utils"])
-  expect_true(pp["grDevices"])
-  expect_true(nn["grDevices"])
-  expect_true(aa["package:grDevices"])
+  expect_false(pp["base"])
+  expect_false(nn["base"])
+  expect_false(aa["package:base"])
+  expect_false(pp["utils"])
+  expect_false(nn["utils"])
+  expect_false(aa["package:utils"])
+  expect_false(pp["grDevices"])
+  expect_false(nn["grDevices"])
+  expect_false(aa["package:grDevices"])
 
   pp <- .get_package_status(allow = character(0L))
   nn <- .get_namespace_status(allow = character(0L))
   aa <- .get_attachment_status(allow = character(0L))
-  expect_true(pp["base"])
-  expect_true(nn["base"])
-  expect_true(aa["package:base"])
-  expect_true(pp["utils"])
-  expect_true(nn["utils"])
-  expect_true(aa["package:utils"])
-  expect_true(pp["grDevices"])
-  expect_true(nn["grDevices"])
-  expect_true(aa["package:grDevices"])
+  expect_false(pp["base"])
+  expect_false(nn["base"])
+  expect_false(aa["package:base"])
+  expect_false(pp["utils"])
+  expect_false(nn["utils"])
+  expect_false(aa["package:utils"])
+  expect_false(pp["grDevices"])
+  expect_false(nn["grDevices"])
+  expect_false(aa["package:grDevices"])
 })
 
 test_that("sessioncheck is always an allowed namespace", {
   nn <- .get_namespace_status(allow = NULL)
-  expect_true(nn["sessioncheck"])
+  expect_false(nn["sessioncheck"])
 
   nn <- .get_namespace_status(allow = character(0L))
-  expect_true(nn["sessioncheck"])
+  expect_false(nn["sessioncheck"])
 })
 
 test_that("sessioncheck is flaggable as an attached package", {
   pp <- .get_package_status(allow = NULL)
-  expect_false(pp["sessioncheck"])
+  expect_true(pp["sessioncheck"])
 
   pp <- .get_package_status(allow = character(0L))
-  expect_false(pp["sessioncheck"])
+  expect_true(pp["sessioncheck"])
 })
 
 # non-package attachment checks ------
 
 test_that("global environment is always an allowed attachment", {
   aa <- .get_attachment_status(allow = NULL)
-  expect_true(aa[".GlobalEnv"])
+  expect_false(aa[".GlobalEnv"])
 
   aa <- .get_attachment_status(allow = character(0L))
-  expect_true(aa[".GlobalEnv"])
+  expect_false(aa[".GlobalEnv"])
 })
 
 test_that("non-package environments are flaggable", {
   attach(iris)
   aa <- .get_attachment_status(allow = NULL)
-  expect_false(aa["iris"])
+  expect_true(aa["iris"])
 
   aa <- .get_attachment_status(allow = character(0L))
-  expect_false(aa["iris"])
+  expect_true(aa["iris"])
 
   aa <- .get_attachment_status(allow = "iris")
-  expect_true(aa["iris"])
+  expect_false(aa["iris"])
   detach(iris)
 })
 
@@ -111,10 +111,10 @@ test_that("dot-prefixed variables are flaggable but allowed by default in the gl
   assign(x = ".sessioncheck_test", value = NA, envir = .GlobalEnv)
 
   vv <- .get_globalenv_status(allow = NULL)
-  expect_true(vv[".sessioncheck_test"])
+  expect_false(vv[".sessioncheck_test"])
 
   vv <- .get_globalenv_status(allow = character(0L))
-  expect_false(vv[".sessioncheck_test"])
+  expect_true(vv[".sessioncheck_test"])
  
   rm(.sessioncheck_test, envir = .GlobalEnv)  
 })

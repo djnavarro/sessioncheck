@@ -15,7 +15,7 @@
 #'
 #' @returns Invisibly returns a status object, a list of a named logical vectors. Each vector
 #' has names that refer to detected entities for each specific check. Values are `TRUE` if 
-#' the entity is ignored, `FALSE` if it triggers an action.
+#' that entity triggers an action, `FALSE` if it does not.
 #'  
 #' @examples
 #' sessioncheck(action = "message")
@@ -74,9 +74,9 @@ sessioncheck <- function(
 #' and will not trigger an action. Base priority packages are always allowed and will 
 #' never trigger actions (see details).
 #'
-#' @returns Invisibly returns a status vector, a logical vector with names referring
-#' to a detected package. Values are `TRUE` if the package is ignored, `FALSE` if it 
-#' triggers an action.
+#' @returns Invisibly returns a status flag vector, a logical vector with names referring
+#' to a detected package. Values are `TRUE` if the package triggers an action, `FALSE` 
+#' if it does not.
 #'  
 #' @examples
 #' check_packages(action = "message")
@@ -132,9 +132,10 @@ check_namespaces <- function(action = "warn", allow = NULL) {
 #' @param allow Character vector containing names of objects or environments
 #' that are "allowed", and will not trigger an action.
 #'
-#' @returns Invisibly returns a status vector, a logical vector with names referring
-#' to a detected entity (e.g., object, or environment). Values are `TRUE` if 
-#' the entity is ignored, `FALSE` if it triggers an action.
+#' @returns Invisibly returns a status flag vector, a logical vector with names 
+#' referring to a detected entity (object in the global environment, or a non-package
+#' environment attached to the search path). Values are `TRUE` if the entity triggers 
+#' an action, `FALSE` if it does not.
 #'  
 #' @examples
 #' check_globalenv(action = "message")
