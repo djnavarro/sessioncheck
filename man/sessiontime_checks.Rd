@@ -2,29 +2,26 @@
 % Please edit documentation in R/api.R
 \name{sessiontime_checks}
 \alias{sessiontime_checks}
-\alias{check_session_time}
+\alias{check_sessiontime}
 \title{Check session run time}
 \usage{
-check_session_time(action = "warn", tol = NULL)
+check_sessiontime(action = "warn", tol = NULL)
 }
 \arguments{
 \item{action}{Behaviour to take if the status is not clean. Possible values are
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
-\item{tol}{Maximum session time permitted before the checker takes action}
+\item{tol}{Maximum session time permitted in seconds before the checker takes action}
 }
 \value{
-Invisibly returns a status flag: \code{TRUE} if the
-
-a logical vector with names referring
-to a detected entity (e.g., object, or environment). Values are \code{TRUE} if
-the entity is ignored, \code{FALSE} if it triggers an action.
+Invisibly returns a status flag: \code{TRUE} if the elapsed run time for the
+current session exceeds the tolerance, \code{FALSE} if it does not.
 }
 \description{
 Individual session check functions that inspect the session run time information.
 Session checkers can produce errors, warnings, or messages if requested.
 }
 \examples{
-check_globalenv(action = "message")
+check_sessiontime(action = "message")
 
 }

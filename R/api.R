@@ -37,18 +37,21 @@ sessioncheck <- function(
   check_packages    <- "packages" %in% checks
   check_namespaces  <- "namespaces" %in% checks
   check_attachments <- "attachments" %in% checks
+  check_sessiontime <- "sessiontime" %in% checks
 
   status <- list()
   if (check_globalenv)   status$globalenv   <- .get_globalenv_status(settings$globalenv)
   if (check_packages)    status$packages    <- .get_package_status(settings$packages)
   if (check_namespaces)  status$namespaces  <- .get_namespace_status(settings$namespaces)
   if (check_attachments) status$attachments <- .get_attachment_status(settings$attachment)
+  if (check_sessiontime) status$sessiontime <- .get_sessiontime_status(settings$sessiontime)
 
   msg <- list()
   if (check_globalenv)   msg$globalenv   <- .message_text("- Objects in global environment:", status$globalenv)
   if (check_packages)    msg$packages    <- .message_text("- Attached packages:", status$packages)
   if (check_namespaces)  msg$namespaces  <- .message_text("- Loaded namespaces:", status$namespaces)
   if (check_attachments) msg$attachments <- .message_text("- Attached non-package environments:", status$attachments)
+  if (check_sessiontime) msg$sessiontime <- .message_text("- Session runtime:", status$sessiontime)
   
   if (length(msg) > 0L) {
     msg <- paste(unlist(msg), collapse = "\n")
@@ -189,25 +192,23 @@ check_attachments <- function(action = "warn", allow = NULL) {
 #' 
 #' @param action Behaviour to take if the status is not clean. Possible values are 
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
-#' @param tol Maximum session time permitted before the checker takes action
+#' @param tol Maximum session time permitted in seconds before the checker takes action
 #'
-#' @returns Invisibly returns a status flag: `TRUE` if the 
-#' 
-#' a logical vector with names referring
-#' to a detected entity (e.g., object, or environment). Values are `TRUE` if 
-#' the entity is ignored, `FALSE` if it triggers an action.
+#' @returns Invisibly returns a status flag: `TRUE` if the elapsed run time for the 
+#' current session exceeds the tolerance, `FALSE` if it does not.
 #'  
 #' @examples
-#' check_globalenv(action = "message")
+#' check_sessiontime(action = "message")
 #' 
 #' @name sessiontime_checks
 NULL
 
 #' @export
 #' @rdname sessiontime_checks
-check_session_time <- function(action = "warn", tol = NULL) {
+check_sessiontime <- function(action = "warn", tol = NULL) {
   .validate_action(action)
-  status <- .get_session_time_status(tol)
+  .validate_tol(tol)
+  status <- .get_sessiontime_status(tol)
   msg <- .message_text("Session runtime:", status)
   .action(action, status, msg)
 }

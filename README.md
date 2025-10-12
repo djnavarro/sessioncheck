@@ -57,6 +57,6 @@ is required, and additional checks (e.g., loaded namespaces, session
 runtime) can be added if desired.
 
 Explanations of how the checks work and how they can be customised are
-provided in the package documentation and on the [get
+provided on the [get
 started](https://sessioncheck.djnavarro.net/articles/sessioncheck.html)
 page.

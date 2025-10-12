@@ -46,5 +46,4 @@ sessioncheck::sessioncheck()
 
 The default behaviour is to check for objects in the global environment and to check packages and environments attached to the search path and produce a warning if issues are detected. This can be converted to an error by using `sessioncheck::sessioncheck("error")` if a stricter check is required, and additional checks (e.g., loaded namespaces, session runtime) can be added if desired.
 
-Explanations of how the checks work and how they can be customised are provided in the package documentation and on the [get started](https://sessioncheck.djnavarro.net/articles/sessioncheck.html) page.
-
+Explanations of how the checks work and how they can be customised are provided on the [get started](https://sessioncheck.djnavarro.net/articles/sessioncheck.html) page. 

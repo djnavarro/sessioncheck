@@ -10,6 +10,8 @@ test_that("session checkers call the validators", {
     expect_error(chk(action = "none", allow = 1L))
     expect_error(chk(action = "asdf", allow = NULL))
   }
+  expect_error(check_sessiontime(action = "asdf", tol = NULL))
+  expect_error(check_sessiontime(action = "none", tol = "asdf"))
 })
 
 test_that("session checkers match the correct internal function", {
@@ -18,7 +20,10 @@ test_that("session checkers match the correct internal function", {
   expect_equal(check_globalenv("none"), .get_globalenv_status(NULL))
   expect_equal(check_namespaces("none"), .get_namespace_status(NULL))
   expect_equal(check_packages("none"), .get_package_status(NULL))
-
+  expect_equal( # names won't be the same
+    unname(check_sessiontime("none")), 
+    unname(.get_sessiontime_status(NULL))
+  )
 })
 
 test_that("sessioncheck() returns list of status vectors", {

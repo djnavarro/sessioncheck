@@ -13,6 +13,11 @@
   stopifnot("`allow` must be a character vector or NULL" = is.character(allow) | is.null(allow))
 }
 
+.validate_tol <- function(tol) {
+  if (is.null(tol)) return(invisible(NULL))
+  stopifnot("`tol` must be a single numeric value or NULL" = is.numeric(tol) & length(tol) == 1L)
+}
+
 .validate_settings <- function(settings) {
   stopifnot("`settings` must be a list or NULL" = is.list(settings) | is.null(settings))
 }
@@ -66,7 +71,7 @@
 
 # status checkers: session time ------
 
-.get_session_time_status <- function(tol) {
+.get_sessiontime_status <- function(tol) {
   if (is.null(tol)) tol <- 300
   pt <- proc.time()
   elapsed <- pt["elapsed"]

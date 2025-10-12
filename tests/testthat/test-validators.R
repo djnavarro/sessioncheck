@@ -23,3 +23,17 @@ test_that("valid `allow` arguments are permitted", {
   expect_no_error(.validate_allow(allow = ""))
   expect_no_error(.validate_allow(allow = "sessioncheck"))
 })
+
+test_that("invalid `tol` arguments are detected", {
+  expect_error(.validate_tol(tol = "asdf"))
+  expect_error(.validate_tol(tol = TRUE))
+  expect_error(.validate_tol(tol = list()))
+  expect_error(.validate_tol(tol = c(123, 456)))
+})
+
+test_that("valid `tol` arguments are permitted", {
+  expect_no_error(.validate_tol(tol = NULL))
+  expect_no_error(.validate_tol(tol = 123.45))
+  expect_no_error(.validate_tol(tol = 123L))
+  expect_no_error(.validate_tol(tol = Inf))
+})

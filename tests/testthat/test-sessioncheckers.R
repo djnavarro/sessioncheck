@@ -119,3 +119,11 @@ test_that("dot-prefixed variables are flaggable but allowed by default in the gl
   rm(.sessioncheck_test, envir = .GlobalEnv)  
 })
 
+# session runtime checks ------
+
+test_that("session time elapsed is flaggable", {
+  Sys.sleep(.01)
+  expect_true(.get_sessiontime_status(tol = 0.001))
+  expect_false(.get_sessiontime_status(tol = Inf))
+})
+
