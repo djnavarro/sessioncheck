@@ -45,13 +45,16 @@ added at the top of the script:
 sessioncheck::sessioncheck()
 #> Warning: sessioncheck() detected the following issues:
 #> - Objects in global environment: [no issues]
-#> - Attached packages: pak, pkgdown, testthat, usethis
-#> - Attached non-package environments: [no issues]
+#> - Attached packages: sessioncheck, pak, pkgdown, testthat, and 1 more
+#> - Attached non-package environments: devtools_shims
 ```
 
-The default behaviour is to warn the user if issues are detected, but
-this can be converted to an error by using
-`sessioncheck::sessioncheck("error")` if a stricter check is required.
+The default behaviour is to check for objects in the global environment
+and to check packages and environments attached to the search path and
+produce a warning if issues are detected. This can be converted to an
+error by using `sessioncheck::sessioncheck("error")` if a stricter check
+is required, and additional checks (e.g., loaded namespaces, session
+runtime) can be added if desired.
 
 Explanations of how the checks work and how they can be customised are
 provided in the package documentation and on the [get
