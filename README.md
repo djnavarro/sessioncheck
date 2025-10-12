@@ -45,8 +45,8 @@ added at the top of the script:
 sessioncheck::sessioncheck()
 #> Warning: sessioncheck() detected the following issues:
 #> - Objects in global environment: [no issues]
-#> - Attached packages: sessioncheck, pak, pkgdown, testthat, and 1 more
-#> - Attached non-package environments: devtools_shims
+#> - Attached packages: pak, pkgdown, testthat, usethis
+#> - Attached non-package environments: [no issues]
 ```
 
 The default behaviour is to check for objects in the global environment
