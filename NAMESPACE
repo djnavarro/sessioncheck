@@ -2,7 +2,10 @@
 
 export(check_attachments)
 export(check_globalenv)
+export(check_locale)
 export(check_namespaces)
+export(check_options)
 export(check_packages)
 export(check_sessiontime)
+export(check_sysenv)
 export(sessioncheck)

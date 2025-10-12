@@ -212,3 +212,57 @@ check_sessiontime <- function(action = "warn", tol = NULL) {
   msg <- .message_text("Session runtime:", status)
   .action(action, status, msg)
 }
+
+#' @title Check required values for options, locale, and environment
+#' 
+#' @description
+#' Individual session check functions that inspect the session options, locale, 
+#' or system environment variables. Session checkers can produce errors, warnings, 
+#' or messages if requested.
+#' 
+#' @param action Behaviour to take if the status is not clean. Possible values are 
+#' "error", "warn", "message", and "none". The default is `action = "warn"`.
+#' @param required A named list of required options, locale settings, or environment
+#' variables. If any of these values are missing, or have different values, an
+#' action is triggered.
+#'
+#' @returns Invisibly returns a status flag vector, a logical vector with names 
+#' that match those in `required`. If the session value matches the required 
+#' value, no action is triggered and the status flag is `FALSE`. For mismatches
+#' or absent values, the flag is `TRUE`.
+#'  
+#' @examples
+#' check_options(action = "message", required = list(scipen = 0L, max.print = 50L))
+#' 
+#' @name value_checks
+NULL
+
+#' @export
+#' @rdname value_checks
+check_options <- function(action = "warn", required = NULL) {
+  .validate_action(action)
+  #.validate_require(required)
+  status <- .get_options_status(required)
+  msg <- .message_text("Option mismatches:", status)
+  .action(action, status, msg)
+}
+
+#' @export
+#' @rdname value_checks
+check_sysenv <- function(action = "warn", required = NULL) {
+  .validate_action(action)
+  #.validate_require(required)
+  status <- .get_sysenv_status(required)
+  msg <- .message_text("Environment variable mismatches:", status)
+  .action(action, status, msg)
+}
+
+#' @export
+#' @rdname value_checks
+check_locale <- function(action = "warn", required = NULL) {
+  .validate_action(action)
+  #.validate_require(required)
+  status <- .get_locale_status(required)
+  msg <- .message_text("Locale mismatches:", status)
+  .action(action, status, msg)
+}

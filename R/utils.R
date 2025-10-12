@@ -18,3 +18,19 @@
     sys_env = Sys.getenv()
   )
 }
+
+# status code:
+# FALSE = exists in both and matches
+# TRUE  = mismatched value or not in y
+# (not included) = does not exist in x 
+.get_xiny_status <- function(x, y) (
+  vapply(
+    names(x),
+    function(nn) {
+      if (!(nn %in% names(y))) return(c(nn = TRUE))
+      if (identical(x[[nn]], y[[nn]])) return(c(nn = FALSE))
+      c(nn = TRUE)
+    },
+    logical(1L)
+  )
+)

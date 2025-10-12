@@ -21,3 +21,12 @@ test_that(".message_text() produces the expected text", {
   expect_equal(.message_text("no", ss, 5L), "no b, c, d")
   expect_equal(.message_text("hi", ss, 1L), "hi b, and 2 more")
 })
+
+test_that(".get_xiny_status() returns expected integer status", {
+  x <- list(a = 1L, b = 2L, c = 3L)
+  y <- list(a = 1L, b = "", d = 3L)
+  expect_equal(
+    .get_xiny_status(x, y),
+    c(a = FALSE, b = TRUE, c = TRUE)
+  )
+})

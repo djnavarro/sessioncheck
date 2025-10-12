@@ -82,17 +82,30 @@
 
 # status checkers: options, locale, and system env variables ------
 
-.get_option_status <- function(block) {
+.get_options_status <- function(required) {
   opts <- options()
+  status <- .get_xiny_status(x = required, y = opts)
+  status
 }
 
-.get_sysenv_status <- function() {
-  env <- Sys.getenv()
+.get_sysenv_status <- function(required) {
+  env <- as.list(Sys.getenv())
+  status <- .get_xiny_status(x = required, y = env)
+  status
 }
 
-.get_locale_status <- function() {
-  lc <- Sys.getlocale()
+.get_locale_status <- function(required) {
+  lc_vec <- strsplit(Sys.getlocale(), ";")[[1]]
+  lc_lst <- strsplit(lc_vec, "=", fixed = TRUE)
+  lc_lbl <- vapply(lc_lst, function(x) x[1L], character(1L))
+  lc_val <- vapply(lc_lst, function(x) x[2L], character(1L))
+  lc <- as.list(lc_val)
+  names(lc) <- lc_lbl
+  status <- .get_xiny_status(x = required, y = lc)
+  status
 }
+
+
 
 
 # possibilities?
