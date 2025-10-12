@@ -3,7 +3,8 @@ pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   sessioncheck: sessioncheck.html
-last_built: 2025-10-12T01:45Z
+  articles/why-check-the-r-session: why-check-the-r-session.html
+last_built: 2025-10-12T02:26Z
 urls:
   reference: https://sessioncheck.djnavarro.net/reference
   article: https://sessioncheck.djnavarro.net/articles
