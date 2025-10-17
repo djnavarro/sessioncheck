@@ -95,12 +95,13 @@ alter how your code is interpreted</li>
 <code>.Random.seed</code> that affect R code execution and are ignored
 by <code>rm(list = ls())</code>
 </li>
-<li>…and many more; there’s a long list of subtler ways in which the R
-session state matters</li>
 </ul>
-<p>Any of these can affect how your script executes, and
+<p>This is by no means an exhaustive list, but it’s enough to illustrate
+the many different factors that can can affect how your script executes:
 <code>rm(list = ls())</code> does not protect you against any of them.
-Because of this, a better practice is to <strong>restart the R
+Jenny Bryan provides a good discussion of the <a href="https://www.tidyverse.org/blog/2017/12/workflow-vs-script/" class="external-link">problems
+with the “object nuking” approach</a> on the tidyverse blog.</p>
+<p>Because of this, a better practice is to <strong>restart the R
 session</strong> immediately before running the script. By running the
 script in a fresh R session, you’re much less likely to encounter these
 issues.</p>
