@@ -15,9 +15,10 @@ A common practice when writing R scripts is to include a snippet of code like `r
 - data sets or other environments that may have been added to the search path with `attach()` and alter the variables and functions that are visible to your code
 - options that may have been set with `options()` and can alter how your code is interpreted 
 - "hidden" variables in the global environment like `.Random.seed` that affect R code execution and are ignored by `rm(list = ls())`
-- ...and many more; there's a long list of subtler ways in which the R session state matters
 
-Any of these can affect how your script executes, and `rm(list = ls())` does not protect you against any of them. Because of this, a better practice is to **restart the R session** immediately before running the script. By running the script in a fresh R session, you're much less likely to encounter these issues.
+This is by no means an exhaustive list, but it's enough to illustrate the many different factors that can can affect how your script executes: `rm(list = ls())` does not protect you against any of them. Jenny Bryan provides a good discussion of the [problems with the "object nuking" approach](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/) on the tidyverse blog.
+
+Because of this, a better practice is to **restart the R session** immediately before running the script. By running the script in a fresh R session, you're much less likely to encounter these issues.
 
 ## How does sessioncheck help?
 
