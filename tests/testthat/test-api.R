@@ -24,6 +24,9 @@ test_that("session checkers match the correct internal function", {
     unname(check_sessiontime("none")$status), 
     unname(.get_sessiontime_status(NULL)$status)
   )
+  expect_equal(check_options("none"), .get_options_status(NULL))
+  expect_equal(check_sysenv("none"), .get_sysenv_status(NULL))
+  expect_equal(check_locale("none"), .get_locale_status(NULL))
 })
 
 test_that("sessioncheck() returns list of status vectors", {
