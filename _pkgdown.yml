@@ -2,3 +2,22 @@ url: https://sessioncheck.djnavarro.net/
 template:
   bootstrap: 5
   light-switch: true
+
+reference:
+- title: Session check 
+  desc: Run one or more checks at once
+- contents:
+  - sessioncheck
+- title: Session checkers 
+  desc: Individual session check functions
+- contents:
+  - object_checks
+  - package_checks
+  - sessiontime_checks
+  - value_checks
+- title: Methods
+  desc: S3 methods for session check classes
+- contents:
+  - display_methods
+  - coercion_methods
+
