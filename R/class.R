@@ -1,4 +1,6 @@
 
+# class constructors -------
+
 new_status <- function(status, type) {
   stopifnot("status objects must be logical vectors" = is.logical(status))
   stopifnot("status objects must be named" = !is.null(attr(status, "names")))
@@ -12,13 +14,19 @@ new_sessioncheck <- function(...) {
   structure(list(...), class = "sessioncheck_sessioncheck")
 }
 
-#' Format a status object for printing
+
+# methods --------
+
+#' Format and print sessioncheck objects
 #'
-#' @param x An object of class `sessioncheck_status`
+#' @param x An object of class `sessioncheck_status` or `sessioncheck_sessioncheck`
 #' @param ... Ignored
 #'
 #' @returns Character vector
 #'
+#' @name methods
+
+#' @rdname methods
 #' @exportS3Method base::format
 format.sessioncheck_status <- function(x, ...) {
   if (x$type == "namespace")   prefix <- "Loaded namespaces:"
@@ -32,13 +40,7 @@ format.sessioncheck_status <- function(x, ...) {
   .message_text(prefix, x$status)
 }
 
-#' Format a sessioncheck object for printing
-#'
-#' @param x An object of class `sessioncheck_sessioncheck`
-#' @param ... Ignored
-#'
-#' @returns Character vector
-#'
+#' @rdname methods
 #' @exportS3Method base::format
 format.sessioncheck_sessioncheck <- function(x, ...) {
   msg <- vapply(x, format, "")
@@ -50,26 +52,14 @@ format.sessioncheck_sessioncheck <- function(x, ...) {
   msg
 }
 
-#' Print a status object
-#'
-#' @param x An object of class `sessioncheck_status`
-#' @param ... Ignored
-#'
-#' @returns Character vector
-#'
+#' @rdname methods
 #' @exportS3Method base::print
 print.sessioncheck_status <- function(x, ...) {
   cat(format(x, ...))
   invisible(x)
 }
 
-#' Print a sessioncheck object
-#'
-#' @param x An object of class `sessioncheck_sessioncheck`
-#' @param ... Ignored
-#'
-#' @returns Character vector
-#'
+#' @rdname methods
 #' @exportS3Method base::print
 print.sessioncheck_sessioncheck <- function(x, ...) {
   cat(format(x, ...))
