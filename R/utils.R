@@ -34,3 +34,13 @@
     logical(1L)
   )
 )
+
+.get_locale_list <- function() {
+  lc_vec <- strsplit(Sys.getlocale(), ";")[[1]]
+  lc_lst <- strsplit(lc_vec, "=", fixed = TRUE)
+  lc_lbl <- vapply(lc_lst, function(x) x[1L], character(1L))
+  lc_val <- vapply(lc_lst, function(x) x[2L], character(1L))
+  lc <- as.list(lc_val)
+  names(lc) <- lc_lbl
+  lc
+}
