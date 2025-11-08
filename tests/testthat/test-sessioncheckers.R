@@ -131,3 +131,11 @@ test_that("session time elapsed is flaggable", {
   expect_false(.get_sessiontime_status(tol = Inf)$status)
 })
 
+test_that("options are flaggable", {
+  opts <- options(scipen = 11L)
+  expect_true(.get_options_status(required = list(scipen = 10L))$status)
+  expect_false(.get_options_status(required = list(scipen = 11L))$status)
+  expect_true(.get_options_status(required = list(asdfasdfasdf = 10))$status)
+  options(opts)
+})
+
