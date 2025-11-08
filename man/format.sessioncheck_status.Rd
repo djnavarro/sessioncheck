@@ -4,7 +4,7 @@
 \alias{format.sessioncheck_status}
 \title{Format a status object for printing}
 \usage{
-\method{format}{sessioncheck_status}(x, max_len = 4L, ...)
+\method{format}{sessioncheck_status}(x, ...)
 }
 \arguments{
 \item{x}{An object of class \code{sessioncheck_status}}

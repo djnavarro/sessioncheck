@@ -20,7 +20,7 @@ new_sessioncheck <- function(...) {
 #' @returns Character vector
 #'
 #' @exportS3Method base::format
-format.sessioncheck_status <- function(x, max_len = 4L, ...) {
+format.sessioncheck_status <- function(x, ...) {
   if (x$type == "namespace")   prefix <- "Loaded namespaces:"
   if (x$type == "package")     prefix <- "Attached packages:"
   if (x$type == "globalenv")   prefix <- "Objects in global environment:"
@@ -29,7 +29,7 @@ format.sessioncheck_status <- function(x, max_len = 4L, ...) {
   if (x$type == "options")     prefix <- "Unexpected options:"
   if (x$type == "sysenv")      prefix <- "Unexpected system environment variables:"
   if (x$type == "locale")      prefix <- "Unexpected locale setttings:"
-  .message_text(prefix, x$status, max_len)
+  .message_text(prefix, x$status)
 }
 
 #' Format a sessioncheck object for printing
