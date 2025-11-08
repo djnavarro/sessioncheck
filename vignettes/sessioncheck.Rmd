@@ -40,11 +40,11 @@ When calling `sessioncheck()` you can customise exactly which checks are perform
 
 ### Check 1: global environment
 
-The first and simplest of the checks is `check_globalenv()`, and it focuses on the same aspect of the R session that the traditional `rm(list=ls())` method does: the contents of the global environment. At the moment there is nothing in the global environment, so it is considered "clean". As a consequence, nothing happens when we run this check:
+The first and simplest of the checks is `check_globalenv_objects()`, and it focuses on the same aspect of the R session that the traditional `rm(list=ls())` method does: the contents of the global environment. At the moment there is nothing in the global environment, so it is considered "clean". As a consequence, nothing happens when we run this check:
 
 ```{r}
 #| label: check-globalenv
-sessioncheck::check_globalenv()
+sessioncheck::check_globalenv_objects()
 ```
 
 To get the check to produce a warning, we'll need to add some variables:
@@ -54,20 +54,20 @@ visible_1 <- "this will get detected"
 visible_2 <- "so will this"
 .hidden_1 <- "but this will not"
 
-sessioncheck::check_globalenv()
+sessioncheck::check_globalenv_objects()
 ```
 
 The output indicates that the script has detected `visible_1` and `visible_2` in the global environment, and issues a warning to suggest that the R session may be contaminated.
 
-There are two arguments to `check_globalenv()`:
+There are two arguments to `check_globalenv_objects()`:
 
 - `action` specifies what the function should do if an issue is detected. There are four allowed values: `error`, `warn` (the default), `message`, and `none`.
-- `allow` is a character vector used to specify the rules that are used to decide *which* objects should trigger an action. A variable name that is included in the `allow` list will not trigger an action. There is a special case: `allow = NULL` will apply the same rule that `ls()` uses when listing the contents of the global environment: variables that start with a `.` will be ignored, and will not trigger an action. 
+- `allow_globalenv_objects` is a character vector used to specify the rules that are used to decide *which* objects should trigger an action. A variable name that is included in the `allow` list will not trigger an action. There is a special case: `allow_globalenv_objects = NULL` will apply the same rule that `ls()` uses when listing the contents of the global environment: variables that start with a `.` will be ignored, and will not trigger an action. 
 
-The example below illustrates how both of these actions are used. Here, the action taken will be to print a message rather than a warning; and by setting the `allow` argument to an empty string, *any* variable in the global environment will trigger the message, even the "hidden" ones:
+The example below illustrates how both of these actions are used. Here, the action taken will be to print a message rather than a warning; and by setting the `allow_globalenv_objects` argument to an empty string, *any* variable in the global environment will trigger the message, even the "hidden" ones:
 
 ```{r}
-sessioncheck::check_globalenv(action = "message", allow = "")
+sessioncheck::check_globalenv_objects(action = "message", allow_globalenv_objects = "")
 ```
 
 This time we notice that the check detects the `visible_1` and `visible_2` like last time, but it now detects two hidden variables: the `.hidden_1` variable that I created earlier, and also the `.Random.seed` variable that R uses to store the state of the random number generator.
@@ -78,33 +78,21 @@ This time we notice that the check detects the `visible_1` and `visible_2` like 
 
 ```{r}
 #| label: check-packages
-sessioncheck::check_packages()
+sessioncheck::check_attached_packages()
 ```
 
 The warning notes that the **sessioncheck** package has been attached. This might be considered acceptable, so we can ask the check to `allow` this package:
 
 ```{r}
-sessioncheck::check_packages(action = "warn", allow = "sessioncheck")
+sessioncheck::check_attached_packages(action = "warn", allow_attached_packages = "sessioncheck")
 ```
 
 ### Check 3: other attachments
 
 ```{r}
 #| label: check-attachments
-sessioncheck::check_attachments()
+sessioncheck::check_attached_environments()
 ```
-
-
-### Other checks
-
-There are other checks that are not called by default. One is an "allow list" check, where the user must specify exactly which entities are permitted (i.e. the list of things that *don't* trigger an action):
-
-- `check_namespaces()` looks for packages that have been loaded but not attached 
-
-The others are "block list" checks, where the user specifies which cases are to be blocked (i.e., the list of things that *do* trigger an action) 
-
-- TODO: `check_options()` looks for specific options that might be of concern
-- TODO: `check_sysenv()` looks for system environment variables
 
 
 

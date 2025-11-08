@@ -11,10 +11,14 @@ reference:
 - title: Session checkers 
   desc: Individual session check functions
 - contents:
-  - object_checks
-  - package_checks
-  - sessiontime_checks
-  - value_checks
+  - check_globalenv_objects
+  - check_attached_environments
+  - check_attached_packages
+  - check_loaded_namespaces
+  - check_sessiontime
+  - check_required_options
+  - check_required_locale
+  - check_required_sysenv
 - title: Methods
   desc: S3 methods for session check classes
 - contents:

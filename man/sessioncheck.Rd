@@ -6,18 +6,18 @@
 \usage{
 sessioncheck(
   action = "warn",
-  checks = c("globalenv", "packages", "attachments"),
-  settings = getOption("sessioncheck.settings")
+  checks = c("globalenv_objects", "attached_packages", "attached_environments"),
+  ...
 )
 }
 \arguments{
 \item{action}{Behaviour to take if the status is not clean. Possible values are
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
-\item{checks}{Character vector listing the checks to run. The
-default is to run \code{checks = c("globalenv", "packages", "attachments")}}
+\item{checks}{Character vector listing the checks to run. The default is to run
+\code{checks = c("globalenv_objects", "attached_packages", "attached_environments")}}
 
-\item{settings}{A list specifying the rules applied for individual checks}
+\item{...}{Arguments passed to individual checks}
 }
 \value{
 Invisibly returns a status object, a list of a named logical vectors. Each vector
