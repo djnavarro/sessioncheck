@@ -83,18 +83,21 @@
 # status checkers: options, locale, and system env variables ------
 
 .get_options_status <- function(required) {
+  if (is.null(required)) required <- list()
   opts <- options()
   status <- .get_xiny_status(x = required, y = opts)
   new_status(status, type = "options")
 }
 
 .get_sysenv_status <- function(required) {
+  if (is.null(required)) required <- list()
   env <- as.list(Sys.getenv())
   status <- .get_xiny_status(x = required, y = env)
   new_status(status, type = "sysenv")
 }
 
 .get_locale_status <- function(required) {
+  if (is.null(required)) required <- list()
   lc_vec <- strsplit(Sys.getlocale(), ";")[[1]]
   lc_lst <- strsplit(lc_vec, "=", fixed = TRUE)
   lc_lbl <- vapply(lc_lst, function(x) x[1L], character(1L))
