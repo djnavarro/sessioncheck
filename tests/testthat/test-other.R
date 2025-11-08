@@ -1,8 +1,10 @@
 
 status_true  <- new_status(status = c(x = TRUE),  type = "globalenv")
 status_false <- new_status(status = c(x = FALSE), type = "globalenv")
+sessioncheck_true  <- new_sessioncheck(status_true)
+sessioncheck_false <- new_sessioncheck(status_false)
 
-test_that(".action() produces the requested action", {
+test_that(".action() produces the requested action for status objects", {
   # action occurs if status is TRUE and action is requested
   expect_error(.action(action = "error", status = status_true))
   expect_warning(.action(action = "warn", status = status_true))
@@ -17,6 +19,20 @@ test_that(".action() produces the requested action", {
   expect_no_message(.action(action = "none", status = status_true))
 })
 
+test_that(".action() produces the requested action for sessioncheck objects", {
+  # action occurs if status is TRUE and action is requested
+  expect_error(.action(action = "error", status = sessioncheck_true))
+  expect_warning(.action(action = "warn", status = sessioncheck_true))
+  expect_message(.action(action = "message", status = sessioncheck_true))
+  # no action occurs if status is FALSE
+  expect_no_error(.action(action = "error", status = sessioncheck_false))
+  expect_no_warning(.action(action = "warn", status = sessioncheck_false))
+  expect_no_message(.action(action = "message", status = sessioncheck_false))
+  # no action occurs if action is "none" even if status is TRUE
+  expect_no_error(.action(action = "none", status = sessioncheck_true))
+  expect_no_warning(.action(action = "none", status = sessioncheck_true))
+  expect_no_message(.action(action = "none", status = sessioncheck_true))
+})
 
 test_that(".message_text() produces the expected text", {
   ss <- c(a = FALSE, b = TRUE, c = TRUE, d = TRUE)  
