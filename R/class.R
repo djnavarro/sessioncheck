@@ -3,7 +3,7 @@
 
 new_status <- function(status, type) {
   stopifnot("status objects must be logical vectors" = is.logical(status))
-  stopifnot("status objects must be named" = !is.null(attr(status, "names")))
+  stopifnot("status objects must be named" = !length(status) | !is.null(attr(status, "names")))
   structure(
     list(status = status, type = type), 
     class = "sessioncheck_status"
