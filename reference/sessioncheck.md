@@ -9,8 +9,8 @@ produce errors, warnings, or messages if requested.
 ``` r
 sessioncheck(
   action = "warn",
-  checks = c("globalenv", "packages", "attachments"),
-  settings = getOption("sessioncheck.settings")
+  checks = c("globalenv_objects", "attached_packages", "attached_environments"),
+  ...
 )
 ```
 
@@ -25,11 +25,11 @@ sessioncheck(
 - checks:
 
   Character vector listing the checks to run. The default is to run
-  `checks = c("globalenv", "packages", "attachments")`
+  `checks = c("globalenv_objects", "attached_packages", "attached_environments")`
 
-- settings:
+- ...:
 
-  A list specifying the rules applied for individual checks
+  Arguments passed to individual checks
 
 ## Value
 

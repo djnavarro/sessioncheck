@@ -132,21 +132,21 @@ which checks are performed and what rules should apply to each check,
 but for now let’s look at the three specific checks that are performed
 by default: checks of the global environment, checks of the attached
 packages, and checks of the attached non-package environments. These can
-be run as standalone checks using <code><a href="../reference/object_checks.html">check_globalenv()</a></code>,
-<code><a href="../reference/package_checks.html">check_packages()</a></code> and <code><a href="../reference/object_checks.html">check_attachments()</a></code>, so
+be run as standalone checks using <code>check_globalenv()</code>,
+<code>check_packages()</code> and <code>check_attachments()</code>, so
 the natural place to start is examining the behaviour of the standalone
 checks.</p>
 <div class="section level3">
 <h3 id="check-1-global-environment">Check 1: global environment<a class="anchor" aria-label="anchor" href="#check-1-global-environment"></a>
 </h3>
 <p>The first and simplest of the checks is
-<code><a href="../reference/object_checks.html">check_globalenv()</a></code>, and it focuses on the same aspect of the
-R session that the traditional <code>rm(list=ls())</code> method does:
-the contents of the global environment. At the moment there is nothing
-in the global environment, so it is considered “clean”. As a
+<code><a href="../reference/check_globalenv_objects.html">check_globalenv_objects()</a></code>, and it focuses on the same
+aspect of the R session that the traditional <code>rm(list=ls())</code>
+method does: the contents of the global environment. At the moment there
+is nothing in the global environment, so it is considered “clean”. As a
 consequence, nothing happens when we run this check:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/object_checks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>To get the check to produce a warning, we’ll need to add some
 variables:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -154,13 +154,14 @@ variables:</p>
 <span><span class="va">visible_2</span> <span class="op">&lt;-</span> <span class="st">"so will this"</span></span>
 <span><span class="va">.hidden_1</span> <span class="op">&lt;-</span> <span class="st">"but this will not"</span></span>
 <span></span>
-<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/object_checks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Objects in global environment: visible_1, visible_2</span></span></code></pre></div>
 <p>The output indicates that the script has detected
 <code>visible_1</code> and <code>visible_2</code> in the global
 environment, and issues a warning to suggest that the R session may be
 contaminated.</p>
-<p>There are two arguments to <code><a href="../reference/object_checks.html">check_globalenv()</a></code>:</p>
+<p>There are two arguments to
+<code><a href="../reference/check_globalenv_objects.html">check_globalenv_objects()</a></code>:</p>
 <ul>
 <li>
 <code>action</code> specifies what the function should do if an
@@ -168,21 +169,22 @@ issue is detected. There are four allowed values: <code>error</code>,
 <code>warn</code> (the default), <code>message</code>, and
 <code>none</code>.</li>
 <li>
-<code>allow</code> is a character vector used to specify the rules
-that are used to decide <em>which</em> objects should trigger an action.
-A variable name that is included in the <code>allow</code> list will not
-trigger an action. There is a special case: <code>allow = NULL</code>
-will apply the same rule that <code><a href="https://rdrr.io/r/base/ls.html" class="external-link">ls()</a></code> uses when listing the
-contents of the global environment: variables that start with a
-<code>.</code> will be ignored, and will not trigger an action.</li>
+<code>allow_globalenv_objects</code> is a character vector used to
+specify the rules that are used to decide <em>which</em> objects should
+trigger an action. A variable name that is included in the
+<code>allow</code> list will not trigger an action. There is a special
+case: <code>allow_globalenv_objects = NULL</code> will apply the same
+rule that <code><a href="https://rdrr.io/r/base/ls.html" class="external-link">ls()</a></code> uses when listing the contents of the global
+environment: variables that start with a <code>.</code> will be ignored,
+and will not trigger an action.</li>
 </ul>
 <p>The example below illustrates how both of these actions are used.
 Here, the action taken will be to print a message rather than a warning;
-and by setting the <code>allow</code> argument to an empty string,
-<em>any</em> variable in the global environment will trigger the
-message, even the “hidden” ones:</p>
+and by setting the <code>allow_globalenv_objects</code> argument to an
+empty string, <em>any</em> variable in the global environment will
+trigger the message, even the “hidden” ones:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/object_checks.html">check_globalenv</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, allow <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, allow_globalenv_objects <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Objects in global environment: .hidden_1, .Random.seed, visible_1, visible_2</span></span></code></pre></div>
 <p>This time we notice that the check detects the <code>visible_1</code>
 and <code>visible_2</code> like last time, but it now detects two hidden
@@ -194,40 +196,18 @@ state of the random number generator.</p>
 <h3 id="check-2-attached-packages">Check 2: attached packages<a class="anchor" aria-label="anchor" href="#check-2-attached-packages"></a>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/package_checks.html">check_packages</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_attached_packages.html">check_attached_packages</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The warning notes that the <strong>sessioncheck</strong> package has
 been attached. This might be considered acceptable, so we can ask the
 check to <code>allow</code> this package:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/package_checks.html">check_packages</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"warn"</span>, allow <span class="op">=</span> <span class="st">"sessioncheck"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_attached_packages.html">check_attached_packages</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"warn"</span>, allow_attached_packages <span class="op">=</span> <span class="st">"sessioncheck"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="check-3-other-attachments">Check 3: other attachments<a class="anchor" aria-label="anchor" href="#check-3-other-attachments"></a>
 </h3>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/object_checks.html">check_attachments</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="other-checks">Other checks<a class="anchor" aria-label="anchor" href="#other-checks"></a>
-</h3>
-<p>There are other checks that are not called by default. One is an
-“allow list” check, where the user must specify exactly which entities
-are permitted (i.e. the list of things that <em>don’t</em> trigger an
-action):</p>
-<ul>
-<li>
-<code><a href="../reference/package_checks.html">check_namespaces()</a></code> looks for packages that have been
-loaded but not attached</li>
-</ul>
-<p>The others are “block list” checks, where the user specifies which
-cases are to be blocked (i.e., the list of things that <em>do</em>
-trigger an action)</p>
-<ul>
-<li>TODO: <code><a href="../reference/value_checks.html">check_options()</a></code> looks for specific options that
-might be of concern</li>
-<li>TODO: <code><a href="../reference/value_checks.html">check_sysenv()</a></code> looks for system environment
-variables</li>
-</ul>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_attached_environments.html">check_attached_environments</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

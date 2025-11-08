@@ -49,18 +49,22 @@ Run one or more checks at once
 
 Individual session check functions
 
-- [`check_globalenv()`](https://sessioncheck.djnavarro.net/reference/object_checks.md)
-  [`check_attachments()`](https://sessioncheck.djnavarro.net/reference/object_checks.md)
-  : Check global environment and attached environments
-- [`check_packages()`](https://sessioncheck.djnavarro.net/reference/package_checks.md)
-  [`check_namespaces()`](https://sessioncheck.djnavarro.net/reference/package_checks.md)
-  : Check loaded namespaces and attached packages
-- [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/sessiontime_checks.md)
+- [`check_globalenv_objects()`](https://sessioncheck.djnavarro.net/reference/check_globalenv_objects.md)
+  : Check global environment objects
+- [`check_attached_environments()`](https://sessioncheck.djnavarro.net/reference/check_attached_environments.md)
+  : Check environments attached to the search path
+- [`check_attached_packages()`](https://sessioncheck.djnavarro.net/reference/check_attached_packages.md)
+  : Check attached packages
+- [`check_loaded_namespaces()`](https://sessioncheck.djnavarro.net/reference/check_loaded_namespaces.md)
+  : Check loaded namespaces
+- [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md)
   : Check session run time
-- [`check_options()`](https://sessioncheck.djnavarro.net/reference/value_checks.md)
-  [`check_sysenv()`](https://sessioncheck.djnavarro.net/reference/value_checks.md)
-  [`check_locale()`](https://sessioncheck.djnavarro.net/reference/value_checks.md)
-  : Check required values for options, locale, and environment
+- [`check_required_options()`](https://sessioncheck.djnavarro.net/reference/check_required_options.md)
+  : Check required values for options
+- [`check_required_locale()`](https://sessioncheck.djnavarro.net/reference/check_required_locale.md)
+  : Check required values for locale settings
+- [`check_required_sysenv()`](https://sessioncheck.djnavarro.net/reference/check_required_sysenv.md)
+  : Check required values for system environment variables
 
 ## Methods
 

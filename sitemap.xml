@@ -7,13 +7,17 @@
 <url><loc>https://sessioncheck.djnavarro.net/articles/why-check-the-r-session.html</loc></url>
 <url><loc>https://sessioncheck.djnavarro.net/authors.html</loc></url>
 <url><loc>https://sessioncheck.djnavarro.net/index.html</loc></url>
+<url><loc>https://sessioncheck.djnavarro.net/reference/check_attached_environments.html</loc></url>
+<url><loc>https://sessioncheck.djnavarro.net/reference/check_attached_packages.html</loc></url>
+<url><loc>https://sessioncheck.djnavarro.net/reference/check_globalenv_objects.html</loc></url>
+<url><loc>https://sessioncheck.djnavarro.net/reference/check_loaded_namespaces.html</loc></url>
+<url><loc>https://sessioncheck.djnavarro.net/reference/check_required_locale.html</loc></url>
+<url><loc>https://sessioncheck.djnavarro.net/reference/check_required_options.html</loc></url>
+<url><loc>https://sessioncheck.djnavarro.net/reference/check_required_sysenv.html</loc></url>
+<url><loc>https://sessioncheck.djnavarro.net/reference/check_sessiontime.html</loc></url>
 <url><loc>https://sessioncheck.djnavarro.net/reference/coercion_methods.html</loc></url>
 <url><loc>https://sessioncheck.djnavarro.net/reference/display_methods.html</loc></url>
 <url><loc>https://sessioncheck.djnavarro.net/reference/index.html</loc></url>
-<url><loc>https://sessioncheck.djnavarro.net/reference/object_checks.html</loc></url>
-<url><loc>https://sessioncheck.djnavarro.net/reference/package_checks.html</loc></url>
 <url><loc>https://sessioncheck.djnavarro.net/reference/sessioncheck.html</loc></url>
-<url><loc>https://sessioncheck.djnavarro.net/reference/sessiontime_checks.html</loc></url>
-<url><loc>https://sessioncheck.djnavarro.net/reference/value_checks.html</loc></url>
 </urlset>
 
