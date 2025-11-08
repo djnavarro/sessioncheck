@@ -207,11 +207,10 @@ see what happens when <code><a href="../reference/sessioncheck.html">sessionchec
 contaminated environment:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: sessioncheck() detected the following issues:</span></span>
+<span><span class="co">#&gt; Error: Session check results:</span></span>
 <span><span class="co">#&gt; - Objects in global environment: my_data</span></span>
 <span><span class="co">#&gt; - Attached packages: sessioncheck</span></span>
-<span><span class="co">#&gt; - Attached non-package environments: my_data</span></span>
-<span><span class="co">#&gt; It may be necessary to restart R</span></span></code></pre></div>
+<span><span class="co">#&gt; - Attached environments: my_data</span></span></code></pre></div>
 <p>If this code were placed at the top of the user script, that script
 would simply refuse to run in this contaminated environment. It would
 produce an error that indicates which checks were performed, and lists
@@ -237,11 +236,10 @@ that executes in this session. Importantly, notice that because
 approach, it still produces an error:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: sessioncheck() detected the following issues:</span></span>
+<span><span class="co">#&gt; Error: Session check results:</span></span>
 <span><span class="co">#&gt; - Objects in global environment: [no issues]</span></span>
 <span><span class="co">#&gt; - Attached packages: sessioncheck</span></span>
-<span><span class="co">#&gt; - Attached non-package environments: my_data</span></span>
-<span><span class="co">#&gt; It may be necessary to restart R</span></span></code></pre></div>
+<span><span class="co">#&gt; - Attached environments: my_data</span></span></code></pre></div>
 <p>Under normal circumstances the thing that the user – a human being –
 would likely do next is restart the R session, and all of these problems
 would go away. That is the intended way to use
@@ -270,7 +268,7 @@ should be reserved for the human analyst. Tools such as
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

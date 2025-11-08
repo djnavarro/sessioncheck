@@ -155,7 +155,7 @@ variables:</p>
 <span><span class="va">.hidden_1</span> <span class="op">&lt;-</span> <span class="st">"but this will not"</span></span>
 <span></span>
 <span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/object_checks.html">check_globalenv</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Detected objects: visible_1, visible_2</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: Objects in global environment: visible_1, visible_2</span></span></code></pre></div>
 <p>The output indicates that the script has detected
 <code>visible_1</code> and <code>visible_2</code> in the global
 environment, and issues a warning to suggest that the R session may be
@@ -183,7 +183,7 @@ and by setting the <code>allow</code> argument to an empty string,
 message, even the “hidden” ones:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/object_checks.html">check_globalenv</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, allow <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Detected objects: .hidden_1, .Random.seed, visible_1, visible_2</span></span></code></pre></div>
+<span><span class="co">#&gt; Objects in global environment: .hidden_1, .Random.seed, visible_1, visible_2</span></span></code></pre></div>
 <p>This time we notice that the check detects the <code>visible_1</code>
 and <code>visible_2</code> like last time, but it now detects two hidden
 variables: the <code>.hidden_1</code> variable that I created earlier,
@@ -241,7 +241,7 @@ variables</li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
