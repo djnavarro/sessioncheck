@@ -131,6 +131,8 @@ test_that("session time elapsed is flaggable", {
   expect_false(.get_sessiontime_status(tol = Inf)$status)
 })
 
+# value checks ------
+
 test_that("options are flaggable", {
   opts <- options(scipen = 11L)
   expect_true(.get_options_status(required = list(scipen = 10L))$status)
@@ -139,3 +141,10 @@ test_that("options are flaggable", {
   options(opts)
 })
 
+test_that("system environment variables are flaggable", {
+  Sys.setenv(R_TEST = "sessioncheck")
+  expect_true(.get_sysenv_status(required = list(R_TEST = "wrong value"))$status)
+  expect_false(.get_sysenv_status(required = list(R_TEST = "sessioncheck"))$status)
+  Sys.unsetenv("R_TEST")
+  expect_true(.get_sysenv_status(required = list(R_TEST = "sessioncheck"))$status)
+})
