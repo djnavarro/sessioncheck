@@ -148,3 +148,14 @@ test_that("system environment variables are flaggable", {
   Sys.unsetenv("R_TEST")
   expect_true(.get_sysenv_status(required = list(R_TEST = "sessioncheck"))$status)
 })
+
+test_that("locale settings are flaggable", {
+  old <- Sys.getlocale(category = "LC_TIME")
+  Sys.setlocale(category = "LC_TIME", locale = "C")
+  expect_true(.get_locale_status(required = list(LC_TIME = "en_US.UTF-8"))$status)
+  expect_false(.get_locale_status(required = list(LC_TIME = "C"))$status)
+  Sys.setlocale(category = "LC_TIME", locale = old)
+})
+
+
+
