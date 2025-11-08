@@ -25,18 +25,15 @@ sessioncheck(
 - checks:
 
   Character vector listing the checks to run. The default is to run
-  `checks = c("globalenv_objects", "attached_packages", "attached_environments")`
+  `checks = c("globalenv_objects", "attached_packages", "attached_environments")`.
 
 - ...:
 
-  Arguments passed to individual checks
+  Arguments passed to individual checks.
 
 ## Value
 
-Invisibly returns a status object, a list of a named logical vectors.
-Each vector has names that refer to detected entities for each specific
-check. Values are `TRUE` if that entity triggers an action, `FALSE` if
-it does not.
+Invisibly returns an object of class `sessioncheck_sessioncheck`.
 
 ## Details
 

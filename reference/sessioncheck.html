@@ -73,18 +73,16 @@ errors, warnings, or messages if requested.</p>
 
 <dt id="arg-checks">checks<a class="anchor" aria-label="anchor" href="#arg-checks"></a></dt>
 <dd><p>Character vector listing the checks to run. The default is to run
-<code>checks = c("globalenv_objects", "attached_packages", "attached_environments")</code></p></dd>
+<code>checks = c("globalenv_objects", "attached_packages", "attached_environments")</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Arguments passed to individual checks</p></dd>
+<dd><p>Arguments passed to individual checks.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Invisibly returns a status object, a list of a named logical vectors. Each vector
-has names that refer to detected entities for each specific check. Values are <code>TRUE</code> if
-that entity triggers an action, <code>FALSE</code> if it does not.</p>
+    <p>Invisibly returns an object of class <code>sessioncheck_sessioncheck</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
