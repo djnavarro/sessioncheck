@@ -41,7 +41,33 @@ it does not.
 ## Details
 
 `sessioncheck()` allows the user to apply multiple session checks in a
-single function
+single function. The following arguments are recognised via `...`:
+
+- `allow_globalenv_objects` is passed to
+  [`check_globalenv_objects()`](https://sessioncheck.djnavarro.net/reference/check_globalenv_objects.md)
+
+- `allow_attached_packages` is passed to
+  [`check_attached_packages()`](https://sessioncheck.djnavarro.net/reference/check_attached_packages.md)
+
+- `allow_attached_environments` is passed to
+  [`check_attached_environments()`](https://sessioncheck.djnavarro.net/reference/check_attached_environments.md)
+
+- `allow_loaded_namespaces` is passed to
+  [`check_loaded_namespaces()`](https://sessioncheck.djnavarro.net/reference/check_loaded_namespaces.md)
+
+- `max_sessiontime` is passed to
+  [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md)
+
+- `required_options` is passed to
+  [`check_required_options()`](https://sessioncheck.djnavarro.net/reference/check_required_options.md)
+
+- `required_locale` is passed to
+  [`check_required_locale()`](https://sessioncheck.djnavarro.net/reference/check_required_locale.md)
+
+- `required_sysenv` is passed to
+  [`check_required_sysenv()`](https://sessioncheck.djnavarro.net/reference/check_required_sysenv.md)
+
+Other arguments are ignored.
 
 ## Examples
 

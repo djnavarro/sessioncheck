@@ -88,7 +88,16 @@ that entity triggers an action, <code>FALSE</code> if it does not.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><code>sessioncheck()</code> allows the user to apply multiple session checks in a single function</p>
+    <p><code>sessioncheck()</code> allows the user to apply multiple session checks in a single function.
+The following arguments are recognised via <code>...</code>:</p><ul><li><p><code>allow_globalenv_objects</code> is passed to <code><a href="check_globalenv_objects.html">check_globalenv_objects()</a></code></p></li>
+<li><p><code>allow_attached_packages</code> is passed to <code><a href="check_attached_packages.html">check_attached_packages()</a></code></p></li>
+<li><p><code>allow_attached_environments</code> is passed to <code><a href="check_attached_environments.html">check_attached_environments()</a></code></p></li>
+<li><p><code>allow_loaded_namespaces</code> is passed to <code><a href="check_loaded_namespaces.html">check_loaded_namespaces()</a></code></p></li>
+<li><p><code>max_sessiontime</code> is passed to <code><a href="check_sessiontime.html">check_sessiontime()</a></code></p></li>
+<li><p><code>required_options</code> is passed to <code><a href="check_required_options.html">check_required_options()</a></code></p></li>
+<li><p><code>required_locale</code> is passed to <code><a href="check_required_locale.html">check_required_locale()</a></code></p></li>
+<li><p><code>required_sysenv</code> is passed to <code><a href="check_required_sysenv.html">check_required_sysenv()</a></code></p></li>
+</ul><p>Other arguments are ignored.</p>
     </div>
 
     <div class="section level2">
