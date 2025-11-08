@@ -33,3 +33,25 @@ test_that(".get_xiny_status() returns expected integer status", {
     c(a = FALSE, b = TRUE, c = TRUE)
   )
 })
+
+test_that(".session_snapshot works", {
+  expect_no_error(.session_snapshot())
+})
+
+ss <- .session_snapshot()
+
+test_that(".session_snapshot returns named list", {
+  expect_true(is.list(ss))
+  expect_named(ss, c(
+    "sys_time",
+    "options",
+    "packages",
+    "namespaces",
+    "attached",
+    "proc_time",
+    "globalenv",
+    "locale",
+    "sys_env"
+  ))
+})
+
