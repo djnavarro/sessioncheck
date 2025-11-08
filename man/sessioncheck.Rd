@@ -30,7 +30,20 @@ session could be considered not to be "clean". Session checkers can produce
 errors, warnings, or messages if requested.
 }
 \details{
-\code{sessioncheck()} allows the user to apply multiple session checks in a single function
+\code{sessioncheck()} allows the user to apply multiple session checks in a single function.
+The following arguments are recognised via \code{...}:
+\itemize{
+\item \code{allow_globalenv_objects} is passed to \code{check_globalenv_objects()}
+\item \code{allow_attached_packages} is passed to \code{check_attached_packages()}
+\item \code{allow_attached_environments} is passed to \code{check_attached_environments()}
+\item \code{allow_loaded_namespaces} is passed to \code{check_loaded_namespaces()}
+\item \code{max_sessiontime} is passed to \code{check_sessiontime()}
+\item \code{required_options} is passed to \code{check_required_options()}
+\item \code{required_locale} is passed to \code{check_required_locale()}
+\item \code{required_sysenv} is passed to \code{check_required_sysenv()}
+}
+
+Other arguments are ignored.
 }
 \examples{
 sessioncheck(action = "message")

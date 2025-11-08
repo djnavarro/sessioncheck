@@ -1,5 +1,4 @@
 
-
 #' @title Checks the overall status of the R session
 #' 
 #' @description
@@ -21,8 +20,19 @@
 #' sessioncheck(action = "message")
 #'  
 #' @details
-#' `sessioncheck()` allows the user to apply multiple session checks in a single function
+#' `sessioncheck()` allows the user to apply multiple session checks in a single function. 
+#' The following arguments are recognised via `...`:
 #' 
+#' - `allow_globalenv_objects` is passed to `check_globalenv_objects()`
+#' - `allow_attached_packages` is passed to `check_attached_packages()`
+#' - `allow_attached_environments` is passed to `check_attached_environments()`
+#' - `allow_loaded_namespaces` is passed to `check_loaded_namespaces()`
+#' - `max_sessiontime` is passed to `check_sessiontime()`
+#' - `required_options` is passed to `check_required_options()`
+#' - `required_locale` is passed to `check_required_locale()`
+#' - `required_sysenv` is passed to `check_required_sysenv()`
+#' 
+#' Other arguments are ignored.
 #' @export
 sessioncheck <- function(
   action = "warn", 
