@@ -222,7 +222,7 @@ NULL
 #' @rdname value_checks
 check_options <- function(action = "warn", required = NULL) {
   .validate_action(action)
-  #.validate_require(required)
+  .validate_required(required)
   status <- .get_options_status(required)
   .action(action, status)
 }
@@ -231,7 +231,7 @@ check_options <- function(action = "warn", required = NULL) {
 #' @rdname value_checks
 check_sysenv <- function(action = "warn", required = NULL) {
   .validate_action(action)
-  #.validate_require(required)
+  .validate_required(required)
   status <- .get_sysenv_status(required)
   .action(action, status)
 }
@@ -240,7 +240,7 @@ check_sysenv <- function(action = "warn", required = NULL) {
 #' @rdname value_checks
 check_locale <- function(action = "warn", required = NULL) {
   .validate_action(action)
-  #.validate_require(required)
+  .validate_required(required)
   status <- .get_locale_status(required)
   .action(action, status)
 }

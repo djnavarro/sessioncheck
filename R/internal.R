@@ -22,6 +22,10 @@
   stopifnot("`settings` must be a list or NULL" = is.list(settings) | is.null(settings))
 }
 
+.validate_required <- function(required) {
+  stopifnot("`required` must be a list or NULL" = is.list(required) | is.null(required))
+}
+
 # status checkers: packages and namespaces ------
 
 .get_namespace_status <- function(allow) {
