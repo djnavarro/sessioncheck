@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   sessioncheck: sessioncheck.html
   articles/why-check-the-r-session: why-check-the-r-session.html
-last_built: 2025-11-08T09:38Z
+last_built: 2025-11-08T09:44Z
 urls:
   reference: https://sessioncheck.djnavarro.net/reference
   article: https://sessioncheck.djnavarro.net/articles
