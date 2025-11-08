@@ -1,25 +1,25 @@
-test_that("returned status is logical", {
-  expect_type(.get_attachment_status(allow = NULL), "logical")
-  expect_type(.get_globalenv_status(allow = NULL), "logical")
-  expect_type(.get_package_status(allow = NULL), "logical")
-  expect_type(.get_namespace_status(allow = NULL), "logical")
+test_that("returned status is a sessoncheck status object", {
+  expect_s3_class(.get_attachment_status(allow = NULL), "sessioncheck_status")
+  expect_s3_class(.get_globalenv_status(allow = NULL), "sessioncheck_status")
+  expect_s3_class(.get_package_status(allow = NULL), "sessioncheck_status")
+  expect_s3_class(.get_namespace_status(allow = NULL), "sessioncheck_status")
 })
 
-test_that("returned status is named", {
+test_that("returned status is named correctly", {
   expect_named(
-    object = .get_attachment_status(allow = NULL), 
+    object = .get_attachment_status(allow = NULL)$status, 
     expected = search()
   )
   expect_named(
-    object = .get_globalenv_status(allow = NULL), 
+    object = .get_globalenv_status(allow = NULL)$status, 
     expected = ls(envir = .GlobalEnv, all.names = TRUE)
   )
   expect_named( 
-    object = .get_package_status(allow = NULL), 
+    object = .get_package_status(allow = NULL)$status, 
     expected = .packages()
   )
   expect_named(
-    object = .get_namespace_status(allow = NULL), 
+    object = .get_namespace_status(allow = NULL)$status, 
     expected = loadedNamespaces()
   )
 })
@@ -27,9 +27,9 @@ test_that("returned status is named", {
 # package and namespace checks ------
 
 test_that("base-priority packages are always allowed", {
-  pp <- .get_package_status(allow = NULL)
-  nn <- .get_namespace_status(allow = NULL)
-  aa <- .get_attachment_status(allow = NULL)
+  pp <- .get_package_status(allow = NULL)$status
+  nn <- .get_namespace_status(allow = NULL)$status
+  aa <- .get_attachment_status(allow = NULL)$status
   expect_false(pp["base"])
   expect_false(nn["base"])
   expect_false(aa["package:base"])
@@ -40,9 +40,9 @@ test_that("base-priority packages are always allowed", {
   expect_false(nn["grDevices"])
   expect_false(aa["package:grDevices"])
 
-  pp <- .get_package_status(allow = character(0L))
-  nn <- .get_namespace_status(allow = character(0L))
-  aa <- .get_attachment_status(allow = character(0L))
+  pp <- .get_package_status(allow = character(0L))$status
+  nn <- .get_namespace_status(allow = character(0L))$status
+  aa <- .get_attachment_status(allow = character(0L))$status
   expect_false(pp["base"])
   expect_false(nn["base"])
   expect_false(aa["package:base"])
@@ -55,40 +55,40 @@ test_that("base-priority packages are always allowed", {
 })
 
 test_that("sessioncheck is always an allowed namespace", {
-  nn <- .get_namespace_status(allow = NULL)
+  nn <- .get_namespace_status(allow = NULL)$status
   expect_false(nn["sessioncheck"])
 
-  nn <- .get_namespace_status(allow = character(0L))
+  nn <- .get_namespace_status(allow = character(0L))$status
   expect_false(nn["sessioncheck"])
 })
 
 test_that("sessioncheck is flaggable as an attached package", {
-  pp <- .get_package_status(allow = NULL)
+  pp <- .get_package_status(allow = NULL)$status
   expect_true(pp["sessioncheck"])
 
-  pp <- .get_package_status(allow = character(0L))
+  pp <- .get_package_status(allow = character(0L))$status
   expect_true(pp["sessioncheck"])
 })
 
 # non-package attachment checks ------
 
 test_that("global environment is always an allowed attachment", {
-  aa <- .get_attachment_status(allow = NULL)
+  aa <- .get_attachment_status(allow = NULL)$status
   expect_false(aa[".GlobalEnv"])
 
-  aa <- .get_attachment_status(allow = character(0L))
+  aa <- .get_attachment_status(allow = character(0L))$status
   expect_false(aa[".GlobalEnv"])
 })
 
 test_that("non-package environments are flaggable", {
   attach(iris)
-  aa <- .get_attachment_status(allow = NULL)
+  aa <- .get_attachment_status(allow = NULL)$status
   expect_true(aa["iris"])
 
-  aa <- .get_attachment_status(allow = character(0L))
+  aa <- .get_attachment_status(allow = character(0L))$status
   expect_true(aa["iris"])
 
-  aa <- .get_attachment_status(allow = "iris")
+  aa <- .get_attachment_status(allow = "iris")$status
   expect_false(aa["iris"])
   detach(iris)
 })
@@ -98,10 +98,10 @@ test_that("non-package environments are flaggable", {
 test_that("dot-prefixed variables are always detected in the global environment", {
   assign(x = ".sessioncheck_test", value = NA, envir = .GlobalEnv)
 
-  vv <- .get_globalenv_status(allow = NULL)
+  vv <- .get_globalenv_status(allow = NULL)$status
   expect_true(".sessioncheck_test" %in% names(vv))
 
-  vv <- .get_globalenv_status(allow = character(0L))
+  vv <- .get_globalenv_status(allow = character(0L))$status
   expect_true(".sessioncheck_test" %in% names(vv))
  
   rm(.sessioncheck_test, envir = .GlobalEnv)
@@ -110,10 +110,10 @@ test_that("dot-prefixed variables are always detected in the global environment"
 test_that("dot-prefixed variables are flaggable but allowed by default in the global environment", {
   assign(x = ".sessioncheck_test", value = NA, envir = .GlobalEnv)
 
-  vv <- .get_globalenv_status(allow = NULL)
+  vv <- .get_globalenv_status(allow = NULL)$status
   expect_false(vv[".sessioncheck_test"])
 
-  vv <- .get_globalenv_status(allow = character(0L))
+  vv <- .get_globalenv_status(allow = character(0L))$status
   expect_true(vv[".sessioncheck_test"])
  
   rm(.sessioncheck_test, envir = .GlobalEnv)  
@@ -123,7 +123,7 @@ test_that("dot-prefixed variables are flaggable but allowed by default in the gl
 
 test_that("session time elapsed is flaggable", {
   Sys.sleep(.01)
-  expect_true(.get_sessiontime_status(tol = 0.001))
-  expect_false(.get_sessiontime_status(tol = Inf))
+  expect_true(.get_sessiontime_status(tol = 0.001)$status)
+  expect_false(.get_sessiontime_status(tol = Inf)$status)
 })
 

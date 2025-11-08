@@ -1,17 +1,20 @@
 
+status_true  <- new_status(status = c(x = TRUE),  type = "globalenv")
+status_false <- new_status(status = c(x = FALSE), type = "globalenv")
+
 test_that(".action() produces the requested action", {
   # action occurs if status is TRUE and action is requested
-  expect_error(.action(action = "error", status = TRUE))
-  expect_warning(.action(action = "warn", status = TRUE))
-  expect_message(.action(action = "message", status = TRUE))
+  expect_error(.action(action = "error", status = status_true))
+  expect_warning(.action(action = "warn", status = status_true))
+  expect_message(.action(action = "message", status = status_true))
   # no action occurs if status is FALSE
-  expect_no_error(.action(action = "error", status = FALSE))
-  expect_no_warning(.action(action = "warn", status = FALSE))
-  expect_no_message(.action(action = "message", status = FALSE))
+  expect_no_error(.action(action = "error", status = status_false))
+  expect_no_warning(.action(action = "warn", status = status_false))
+  expect_no_message(.action(action = "message", status = status_false))
   # no action occurs if action is "none" even if status is TRUE
-  expect_no_error(.action(action = "none", status = TRUE))
-  expect_no_warning(.action(action = "none", status = TRUE))
-  expect_no_message(.action(action = "none", status = TRUE))
+  expect_no_error(.action(action = "none", status = status_true))
+  expect_no_warning(.action(action = "none", status = status_true))
+  expect_no_message(.action(action = "none", status = status_true))
 })
 
 

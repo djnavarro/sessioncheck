@@ -21,8 +21,8 @@ test_that("session checkers match the correct internal function", {
   expect_equal(check_namespaces("none"), .get_namespace_status(NULL))
   expect_equal(check_packages("none"), .get_package_status(NULL))
   expect_equal( # names won't be the same
-    unname(check_sessiontime("none")), 
-    unname(.get_sessiontime_status(NULL))
+    unname(check_sessiontime("none")$status), 
+    unname(.get_sessiontime_status(NULL)$status)
   )
 })
 
@@ -39,6 +39,7 @@ test_that("sessioncheck() returns list of status vectors", {
     namespaces = check_namespaces(action = "none", allow = NULL),
     attachments = check_attachments(action = "none", allow = NULL)
   )
+  class(ii) <- "sessioncheck_sessioncheck"
 
   expect_equal(ss, ii)
 })

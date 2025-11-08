@@ -39,29 +39,15 @@ sessioncheck <- function(
   check_attachments <- "attachments" %in% checks
   check_sessiontime <- "sessiontime" %in% checks
 
-  status <- list()
-  if (check_globalenv)   status$globalenv   <- .get_globalenv_status(settings$globalenv)
-  if (check_packages)    status$packages    <- .get_package_status(settings$packages)
-  if (check_namespaces)  status$namespaces  <- .get_namespace_status(settings$namespaces)
-  if (check_attachments) status$attachments <- .get_attachment_status(settings$attachment)
-  if (check_sessiontime) status$sessiontime <- .get_sessiontime_status(settings$sessiontime)
+  checks <- list()
+  if (check_globalenv)   checks$globalenv   <- .get_globalenv_status(settings$globalenv)
+  if (check_packages)    checks$packages    <- .get_package_status(settings$packages)
+  if (check_namespaces)  checks$namespaces  <- .get_namespace_status(settings$namespaces)
+  if (check_attachments) checks$attachments <- .get_attachment_status(settings$attachment)
+  if (check_sessiontime) checks$sessiontime <- .get_sessiontime_status(settings$sessiontime)
+  scheck <- do.call(new_sessioncheck, args = checks)
 
-  msg <- list()
-  if (check_globalenv)   msg$globalenv   <- .message_text("- Objects in global environment:", status$globalenv)
-  if (check_packages)    msg$packages    <- .message_text("- Attached packages:", status$packages)
-  if (check_namespaces)  msg$namespaces  <- .message_text("- Loaded namespaces:", status$namespaces)
-  if (check_attachments) msg$attachments <- .message_text("- Attached non-package environments:", status$attachments)
-  if (check_sessiontime) msg$sessiontime <- .message_text("- Session runtime:", status$sessiontime)
-  
-  if (length(msg) > 0L) {
-    msg <- paste(unlist(msg), collapse = "\n")
-    msg <- paste("sessioncheck() detected the following issues:", msg, sep = "\n")
-    if (action == "error") {
-      msg <- paste(msg, "It may be necessary to restart R", sep = "\n")
-    }
-  }
-
-  .action(action, status, msg)
+  .action(action, scheck)
 }
 
 
@@ -109,8 +95,7 @@ check_packages <- function(action = "warn", allow = NULL) {
   .validate_action(action)
   .validate_allow(allow)
   status <- .get_package_status(allow)
-  msg <- .message_text("Detected attached packages:", status)
-  .action(action, status, msg)
+  .action(action, status)
 }
 
 #' @export
@@ -119,8 +104,7 @@ check_namespaces <- function(action = "warn", allow = NULL) {
   .validate_action(action)
   .validate_allow(allow)
   status <- .get_namespace_status(allow)
-  msg <- .message_text("Dectected loaded namespaces:", status)
-  .action(action, status, msg)
+  .action(action, status)
 }
 
 #' @title Check global environment and attached environments
@@ -168,8 +152,7 @@ check_globalenv <- function(action = "warn", allow = NULL) {
   .validate_action(action)
   .validate_allow(allow)
   status <- .get_globalenv_status(allow)
-  msg  <- .message_text("Detected objects:", status)
-  .action(action, status, msg)
+  .action(action, status)
 }
 
 #' @export
@@ -178,8 +161,7 @@ check_attachments <- function(action = "warn", allow = NULL) {
   .validate_action(action)
   .validate_allow(allow)
   status <- .get_attachment_status(allow)
-  msg <- .message_text("Detected attached environments:", status)
-  .action(action, status, msg)
+  .action(action, status)
 }
 
 
@@ -209,8 +191,7 @@ check_sessiontime <- function(action = "warn", tol = NULL) {
   .validate_action(action)
   .validate_tol(tol)
   status <- .get_sessiontime_status(tol)
-  msg <- .message_text("Session runtime:", status)
-  .action(action, status, msg)
+  .action(action, status)
 }
 
 #' @title Check required values for options, locale, and environment
@@ -243,8 +224,7 @@ check_options <- function(action = "warn", required = NULL) {
   .validate_action(action)
   #.validate_require(required)
   status <- .get_options_status(required)
-  msg <- .message_text("Option mismatches:", status)
-  .action(action, status, msg)
+  .action(action, status)
 }
 
 #' @export
@@ -253,8 +233,7 @@ check_sysenv <- function(action = "warn", required = NULL) {
   .validate_action(action)
   #.validate_require(required)
   status <- .get_sysenv_status(required)
-  msg <- .message_text("Environment variable mismatches:", status)
-  .action(action, status, msg)
+  .action(action, status)
 }
 
 #' @export
@@ -263,6 +242,5 @@ check_locale <- function(action = "warn", required = NULL) {
   .validate_action(action)
   #.validate_require(required)
   status <- .get_locale_status(required)
-  msg <- .message_text("Locale mismatches:", status)
-  .action(action, status, msg)
+  .action(action, status)
 }

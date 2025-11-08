@@ -32,7 +32,7 @@
     function(x) !(identical(utils::packageDescription(x)$Priority, "base") | x %in% allow), 
     logical(1L)
   )
-  status
+  new_status(status, type = "namespace")
 }
 
 .get_package_status <- function(allow) {
@@ -42,7 +42,7 @@
     function(x) !(identical(utils::packageDescription(x)$Priority, "base") | x %in% allow), 
     logical(1L)
   )
-  status
+  new_status(status, type = "package")
 }
 
 # status checkers: global environment and attachments ------
@@ -52,7 +52,7 @@
   if (is.null(allow)) allow <- obj[grepl(pattern = "^\\.", x = obj)]
   status <- !(obj %in% allow)
   names(status) <- obj
-  status
+  new_status(status, type = "globalenv")
 }
 
 .get_attachment_status <- function(allow) {
@@ -66,7 +66,7 @@
   )
   status <- !(is_pkg | attached %in% allow)
   names(status) <- attached
-  status
+  new_status(status, type = "attachment")
 }
 
 # status checkers: session time ------
@@ -77,7 +77,7 @@
   elapsed <- pt["elapsed"]
   status <- elapsed > tol
   names(status) <- paste(elapsed, "sec elapsed")
-  status
+  new_status(status, type = "sessiontime")
 }
 
 # status checkers: options, locale, and system env variables ------
@@ -85,13 +85,13 @@
 .get_options_status <- function(required) {
   opts <- options()
   status <- .get_xiny_status(x = required, y = opts)
-  status
+  new_status(status, type = "options")
 }
 
 .get_sysenv_status <- function(required) {
   env <- as.list(Sys.getenv())
   status <- .get_xiny_status(x = required, y = env)
-  status
+  new_status(status, type = "sysenv")
 }
 
 .get_locale_status <- function(required) {
@@ -102,7 +102,7 @@
   lc <- as.list(lc_val)
   names(lc) <- lc_lbl
   status <- .get_xiny_status(x = required, y = lc)
-  status
+  new_status(status, type = "locale")
 }
 
 
@@ -134,21 +134,23 @@
   paste(prefix, txt)
 }
 
-.action <- function(action, status, message = NULL) {
+.action <- function(action, status) {
   if (action == "none") return(invisible(status)) 
-  if (is.atomic(status) && !any(status)) return(invisible(status))
-  if (!is.atomic(status)) {
-    is_ok <- vapply(status, function(s) !any(s), logical(1L))
-    if (all(is_ok)) return(invisible(status))
+  if (inherits(status, "sessioncheck_status")) is_ok <- !any(status$status)
+  if (inherits(status, "sessioncheck_sessioncheck")) {
+    is_ok <- vapply(status, function(s) !any(s$status), logical(1L))
+    is_ok <- all(is_ok)
   }
+  if (is_ok) return(invisible(status))
+  msg <- format(status)
   if (action == "message") {
-    message(message)
+    message(msg)
     return(invisible(status))
   } 
   if (action == "warn") {
-    warning(message, call. = FALSE)
+    warning(msg, call. = FALSE)
     return(invisible(status))
   }
-  stop(message, call. = FALSE)
+  stop(msg, call. = FALSE)
 }
 

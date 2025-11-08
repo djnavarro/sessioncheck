@@ -43,10 +43,6 @@ added at the top of the script:
 
 ``` r
 sessioncheck::sessioncheck()
-#> Warning: sessioncheck() detected the following issues:
-#> - Objects in global environment: [no issues]
-#> - Attached packages: pak, pkgdown, testthat, usethis
-#> - Attached non-package environments: [no issues]
 ```
 
 The default behaviour is to check for objects in the global environment
