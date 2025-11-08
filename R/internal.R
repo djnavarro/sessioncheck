@@ -105,19 +105,6 @@
   new_status(status, type = "locale")
 }
 
-
-
-
-# possibilities?
-
-# .get_sessioninfo_status <- function() {
-#   si <- utils::sessionInfo()
-# }
-
-# .get_conflicts_status <- function() {
-#   cc <- conflicts(detail = TRUE)
-# }
-
 # actions and messages ------
 
 .message_text <- function(prefix, status, max_len = 4L) {
