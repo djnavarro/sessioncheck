@@ -15,14 +15,12 @@ sessioncheck(
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
 \item{checks}{Character vector listing the checks to run. The default is to run
-\code{checks = c("globalenv_objects", "attached_packages", "attached_environments")}}
+\code{checks = c("globalenv_objects", "attached_packages", "attached_environments")}.}
 
-\item{...}{Arguments passed to individual checks}
+\item{...}{Arguments passed to individual checks.}
 }
 \value{
-Invisibly returns a status object, a list of a named logical vectors. Each vector
-has names that refer to detected entities for each specific check. Values are \code{TRUE} if
-that entity triggers an action, \code{FALSE} if it does not.
+Invisibly returns an object of class \code{sessioncheck_sessioncheck}.
 }
 \description{
 Individual session check functions that each inspect one way in which an R
