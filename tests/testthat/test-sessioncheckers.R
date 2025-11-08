@@ -3,6 +3,10 @@ test_that("returned status is a sessoncheck status object", {
   expect_s3_class(.get_globalenv_status(allow = NULL), "sessioncheck_status")
   expect_s3_class(.get_package_status(allow = NULL), "sessioncheck_status")
   expect_s3_class(.get_namespace_status(allow = NULL), "sessioncheck_status")
+  expect_s3_class(.get_sessiontime_status(tol = NULL), "sessioncheck_status")
+  expect_s3_class(.get_options_status(required = NULL), "sessioncheck_status")
+  expect_s3_class(.get_sysenv_status(required = NULL), "sessioncheck_status")
+  expect_s3_class(.get_locale_status(required = NULL), "sessioncheck_status")
 })
 
 test_that("returned status is named correctly", {
