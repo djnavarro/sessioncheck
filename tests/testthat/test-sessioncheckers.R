@@ -150,6 +150,8 @@ test_that("system environment variables are flaggable", {
 })
 
 test_that("locale settings are flaggable", {
+  skip_on_os(oc = c("mac", "solaris"))
+  skip_on_cran()
   old <- Sys.getlocale(category = "LC_TIME")
   Sys.setlocale(category = "LC_TIME", locale = "C")
   expect_true(.get_locale_status(required = list(LC_TIME = "en_US.UTF-8"))$status)
