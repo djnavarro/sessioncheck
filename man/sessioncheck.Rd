@@ -4,17 +4,15 @@
 \alias{sessioncheck}
 \title{Checks the overall status of the R session}
 \usage{
-sessioncheck(
-  action = "warn",
-  checks = c("globalenv_objects", "attached_packages", "attached_environments"),
-  ...
-)
+sessioncheck(action = NULL, checks = NULL, ...)
 }
 \arguments{
 \item{action}{Behaviour to take if the status is not clean. Possible values are
-"error", "warn", "message", and "none". The default is \code{action = "warn"}.}
+"error", "warn", "message", and "none". If the user does not specify an action
+the default to set \code{action = "warn"}.}
 
-\item{checks}{Character vector listing the checks to run. The default is to run
+\item{checks}{Character vector listing the checks to run. If the user does not
+specify the checks, the default is to run
 \code{checks = c("globalenv_objects", "attached_packages", "attached_environments")}.}
 
 \item{...}{Arguments passed to individual checks.}

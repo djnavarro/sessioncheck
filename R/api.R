@@ -7,8 +7,10 @@
 #' errors, warnings, or messages if requested.
 #' 
 #' @param action Behaviour to take if the status is not clean. Possible values are 
-#' "error", "warn", "message", and "none". The default is `action = "warn"`.
-#' @param checks Character vector listing the checks to run. The default is to run
+#' "error", "warn", "message", and "none". If the user does not specify an action 
+#' the default to set `action = "warn"`.
+#' @param checks Character vector listing the checks to run. If the user does not 
+#' specify the checks, the default is to run
 #' `checks = c("globalenv_objects", "attached_packages", "attached_environments")`.
 #' @param ... Arguments passed to individual checks.
 #'
@@ -33,22 +35,40 @@
 #' Other arguments are ignored.
 #' @export
 sessioncheck <- function(
-  action = "warn", 
-  checks = c("globalenv_objects", "attached_packages", "attached_environments"),
+  action = NULL, 
+  checks = NULL,
   ...
 ) {
-  .validate_action(action)
-  settings <- list(...)
+  .validate_action(action, allow_null = TRUE)
+  args <- list(action = action, checks = checks, ...)
+
+  opts_args <- getOption("sessioncheck")
+  if (is.list(opts_args)) {
+    if (is.null(args$action)) args$action <- opts_args$action
+    if (is.null(args$checks)) args$checks <- opts_args$checks
+    if (is.null(args$allow_globalenv_objects)) args$allow_globalenv_objects <- opts_args$allow_globalenv_objects
+    if (is.null(args$allow_attached_packages)) args$allow_attached_packages <- opts_args$allow_attached_packages
+    if (is.null(args$allow_loaded_namespaces)) args$allow_loaded_namespaces <- opts_args$allow_loaded_namespaces
+    if (is.null(args$allow_attached_environments)) args$allow_attached_environments <- opts_args$allow_attached_environments
+    if (is.null(args$max_sessiontime)) args$max_sessiontime <- opts_args$max_sessiontime
+    if (is.null(args$required_options)) args$required_options <- opts_args$required_options
+    if (is.null(args$required_locale)) args$required_locale <- opts_args$required_locale
+    if (is.null(args$required_sysenv)) args$required_sysenv <- opts_args$required_sysenv 
+  }
+
+  if (is.null(args$action)) args$action <- "warn"
+  if (is.null(args$checks)) args$checks <- c("globalenv_objects", "attached_packages", "attached_environments")
+
   results <- list()
-  if ("globalenv_objects" %in% checks) results$globalenv <- .get_globalenv_status(settings$allow_globalenv_objects)
-  if ("attached_packages" %in% checks) results$packages <- .get_package_status(settings$allow_attached_packages)
-  if ("loaded_namespaces" %in% checks) results$namespaces <- .get_namespace_status(settings$allow_loaded_namespaces)
-  if ("attached_environments" %in% checks) results$attachments <- .get_attachment_status(settings$allow_attached_environments)
-  if ("sessiontime" %in% checks) results$sessiontime <- .get_sessiontime_status(settings$max_sessiontime)
-  if ("required_options" %in% checks) results$options <- .get_sessiontime_status(settings$required_options)
-  if ("required_locale" %in% checks) results$options <- .get_sessiontime_status(settings$required_locale)
-  if ("required_sysenv" %in% checks) results$options <- .get_sessiontime_status(settings$required_sysenv) 
-  .action(action, do.call(new_sessioncheck, args = results))
+  if ("globalenv_objects" %in% args$checks) results$globalenv <- .get_globalenv_status(args$allow_globalenv_objects)
+  if ("attached_packages" %in% args$checks) results$packages <- .get_package_status(args$allow_attached_packages)
+  if ("loaded_namespaces" %in% args$checks) results$namespaces <- .get_namespace_status(args$allow_loaded_namespaces)
+  if ("attached_environments" %in% args$checks) results$attachments <- .get_attachment_status(args$allow_attached_environments)
+  if ("sessiontime" %in% args$checks) results$sessiontime <- .get_sessiontime_status(args$max_sessiontime)
+  if ("required_options" %in% args$checks) results$options <- .get_sessiontime_status(args$required_options)
+  if ("required_locale" %in% args$checks) results$options <- .get_sessiontime_status(args$required_locale)
+  if ("required_sysenv" %in% args$checks) results$options <- .get_sessiontime_status(args$required_sysenv) 
+  .action(args$action, do.call(new_sessioncheck, results))
 }
 
 #' @title Check attached packages

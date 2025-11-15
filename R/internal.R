@@ -1,7 +1,8 @@
 
 # argument validators ------
 
-.validate_action <- function(action) {
+.validate_action <- function(action, allow_null = FALSE) {
+  if (allow_null & is.null(action)) return(invisible(NULL))
   stopifnot(
     "`action` must be one of 'error', 'warn', 'message', or 'none'" = length(action) == 1L,
     "`action` must be one of 'error', 'warn', 'message', or 'none'" = is.character(action),
