@@ -77,41 +77,38 @@
 that can be called at the top of a script, and produce warnings or
 errors if it detects signs that the script is not being executed in a
 clean R session. The intended user for <strong>sessioncheck</strong> is
-a beginner or intermediate level R user who has learned enough about R
-to understand the limitations of using <code>rm(list = ls())</code> as a
-method to clean the R session, but is perhaps not at the point that they
-can take advantage of sophisticated tools like <a href="https://books.ropensci.org/targets/" class="external-link">targets</a>, <a href="https://callr.r-lib.org/" class="external-link">callr</a>, and so on.</p>
+a beginner or intermediate level R user who wants to take reasonable
+precautions to ensure that their analysis scripts execute reproducibly,
+but is not looking for a full-featured solution that might require
+substantial time investment to learn and deploy.</p>
 <div class="section level2">
-<h2 id="why-is-this-important">Why is this important?<a class="anchor" aria-label="anchor" href="#why-is-this-important"></a>
+<h2 id="who-is-this-for-and-why">Who is this for, and why?<a class="anchor" aria-label="anchor" href="#who-is-this-for-and-why"></a>
 </h2>
 <p>A common practice when writing R scripts is to include a snippet of
 code like <code>rm(list = ls())</code> at the top of the script. The
 reason people do this is for reproducibility purposes, to ensure that
-the script is run in the context of a “clean” R session. The goal is a
-good one, but the method used to attain it is not very effective. The
-only thing that <code>rm(list = ls())</code> does is remove any
-variables currently stored in the global environment, but this is only
-one of many different ways in which previously-executed code can alter
-the state of the R session. This approach doesn’t provide any degree of
-safety from any of the following:</p>
-<ul>
-<li>packages that may have been loaded with <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> and
-change which functions get executed by your code</li>
-<li>data sets or other environments that may have been added to the
-search path with <code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code> and alter the variables and
-functions that are visible to your code</li>
-<li>options that may have been set with <code><a href="https://rdrr.io/r/base/options.html" class="external-link">options()</a></code> and can
-alter how your code is interpreted</li>
-<li>“hidden” variables in the global environment like
-<code>.Random.seed</code> that affect R code execution and are ignored
-by <code>rm(list = ls())</code>
-</li>
-<li>…and many more; there’s a long list of subtler ways in which the R
-session state matters</li>
-</ul>
-<p>Any of these can affect how your script executes, and
-<code>rm(list = ls())</code> does not protect you against any of them.
-Because of this, a better practice is to <strong>restart the R
+the script is run in the context of a “clean” R session. Unfortunately,
+while the goal is a good one the solution is not. The problem with this
+approach is that the only thing it does is remove objects from the
+global environment. If your goal is to ensure that the R session is
+clean, this isn’t sufficient. The reason it’s not enough is that the
+state of an R session is defined by a <em>lot</em> of different things,
+and the objects in the global environment form a very small part of that
+state. Yes, using <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code> to clear the global environment will
+“clean” this specific aspect to the R session state, but it has no
+effect on any of the other things. What’s worse, the <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code>
+approach can create false confidence: if users rely on <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code>
+as an “automated” method for cleaning the session state, they may end up
+executing scripts in a profoundly irreproducible way, never noticing
+that something bad has happened. This is, to put it mildly, not
+ideal.</p>
+<p>One of the reasons this problem is painful in real life is that it
+requires a certain level of sophistication to force a script to execute
+in a precisely controlled environment. There are some very powerful
+tools pitched at the expert user – e.g., docker, targets, and renv –
+that you can use to execute scripts in a reproducible way. There are not
+as many options for beginners or intermediate level R users.</p>
+<p>Because of this, a better practice is to <strong>restart the R
 session</strong> immediately before running the script. By running the
 script in a fresh R session, you’re much less likely to encounter these
 issues. By exension, the reason for including a call to

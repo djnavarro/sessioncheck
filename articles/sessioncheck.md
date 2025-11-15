@@ -4,44 +4,43 @@ The goal of **sessioncheck** is to provide simple tools that can be
 called at the top of a script, and produce warnings or errors if it
 detects signs that the script is not being executed in a clean R
 session. The intended user for **sessioncheck** is a beginner or
-intermediate level R user who has learned enough about R to understand
-the limitations of using `rm(list = ls())` as a method to clean the R
-session, but is perhaps not at the point that they can take advantage of
-sophisticated tools like [targets](https://books.ropensci.org/targets/),
-[callr](https://callr.r-lib.org/), and so on.
+intermediate level R user who wants to take reasonable precautions to
+ensure that their analysis scripts execute reproducibly, but is not
+looking for a full-featured solution that might require substantial time
+investment to learn and deploy.
 
-## Why is this important?
+## Who is this for, and why?
 
 A common practice when writing R scripts is to include a snippet of code
 like `rm(list = ls())` at the top of the script. The reason people do
 this is for reproducibility purposes, to ensure that the script is run
-in the context of a “clean” R session. The goal is a good one, but the
-method used to attain it is not very effective. The only thing that
-`rm(list = ls())` does is remove any variables currently stored in the
-global environment, but this is only one of many different ways in which
-previously-executed code can alter the state of the R session. This
-approach doesn’t provide any degree of safety from any of the following:
+in the context of a “clean” R session. Unfortunately, while the goal is
+a good one the solution is not. The problem with this approach is that
+the only thing it does is remove objects from the global environment. If
+your goal is to ensure that the R session is clean, this isn’t
+sufficient. The reason it’s not enough is that the state of an R session
+is defined by a *lot* of different things, and the objects in the global
+environment form a very small part of that state. Yes, using
+[`rm()`](https://rdrr.io/r/base/rm.html) to clear the global environment
+will “clean” this specific aspect to the R session state, but it has no
+effect on any of the other things. What’s worse, the
+[`rm()`](https://rdrr.io/r/base/rm.html) approach can create false
+confidence: if users rely on [`rm()`](https://rdrr.io/r/base/rm.html) as
+an “automated” method for cleaning the session state, they may end up
+executing scripts in a profoundly irreproducible way, never noticing
+that something bad has happened. This is, to put it mildly, not ideal.
 
-- packages that may have been loaded with
-  [`library()`](https://rdrr.io/r/base/library.html) and change which
-  functions get executed by your code
-- data sets or other environments that may have been added to the search
-  path with [`attach()`](https://rdrr.io/r/base/attach.html) and alter
-  the variables and functions that are visible to your code
-- options that may have been set with
-  [`options()`](https://rdrr.io/r/base/options.html) and can alter how
-  your code is interpreted
-- “hidden” variables in the global environment like `.Random.seed` that
-  affect R code execution and are ignored by `rm(list = ls())`
-- …and many more; there’s a long list of subtler ways in which the R
-  session state matters
+One of the reasons this problem is painful in real life is that it
+requires a certain level of sophistication to force a script to execute
+in a precisely controlled environment. There are some very powerful
+tools pitched at the expert user – e.g., docker, targets, and renv –
+that you can use to execute scripts in a reproducible way. There are not
+as many options for beginners or intermediate level R users.
 
-Any of these can affect how your script executes, and `rm(list = ls())`
-does not protect you against any of them. Because of this, a better
-practice is to **restart the R session** immediately before running the
-script. By running the script in a fresh R session, you’re much less
-likely to encounter these issues. By exension, the reason for including
-a call to
+Because of this, a better practice is to **restart the R session**
+immediately before running the script. By running the script in a fresh
+R session, you’re much less likely to encounter these issues. By
+exension, the reason for including a call to
 [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
 at the top of a script is to **prompt the user** when potential issues
 are detected.

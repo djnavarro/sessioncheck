@@ -7,11 +7,7 @@ produce errors, warnings, or messages if requested.
 ## Usage
 
 ``` r
-sessioncheck(
-  action = "warn",
-  checks = c("globalenv_objects", "attached_packages", "attached_environments"),
-  ...
-)
+sessioncheck(action = NULL, checks = NULL, ...)
 ```
 
 ## Arguments
@@ -19,12 +15,13 @@ sessioncheck(
 - action:
 
   Behaviour to take if the status is not clean. Possible values are
-  "error", "warn", "message", and "none". The default is
-  `action = "warn"`.
+  "error", "warn", "message", and "none". If the user does not specify
+  an action the default to set `action = "warn"`.
 
 - checks:
 
-  Character vector listing the checks to run. The default is to run
+  Character vector listing the checks to run. If the user does not
+  specify the checks, the default is to run
   `checks = c("globalenv_objects", "attached_packages", "attached_environments")`.
 
 - ...:
