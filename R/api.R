@@ -39,23 +39,8 @@ sessioncheck <- function(
   checks = NULL,
   ...
 ) {
+  args <- .parse_args(action = action, checks = checks, ...)
   .validate_action(action, allow_null = TRUE)
-  args <- list(action = action, checks = checks, ...)
-
-  opts_args <- getOption("sessioncheck")
-  if (is.list(opts_args)) {
-    if (is.null(args$action)) args$action <- opts_args$action
-    if (is.null(args$checks)) args$checks <- opts_args$checks
-    if (is.null(args$allow_globalenv_objects)) args$allow_globalenv_objects <- opts_args$allow_globalenv_objects
-    if (is.null(args$allow_attached_packages)) args$allow_attached_packages <- opts_args$allow_attached_packages
-    if (is.null(args$allow_loaded_namespaces)) args$allow_loaded_namespaces <- opts_args$allow_loaded_namespaces
-    if (is.null(args$allow_attached_environments)) args$allow_attached_environments <- opts_args$allow_attached_environments
-    if (is.null(args$max_sessiontime)) args$max_sessiontime <- opts_args$max_sessiontime
-    if (is.null(args$required_options)) args$required_options <- opts_args$required_options
-    if (is.null(args$required_locale)) args$required_locale <- opts_args$required_locale
-    if (is.null(args$required_sysenv)) args$required_sysenv <- opts_args$required_sysenv 
-  }
-
   if (is.null(args$action)) args$action <- "warn"
   if (is.null(args$checks)) args$checks <- c("globalenv_objects", "attached_packages", "attached_environments")
 
