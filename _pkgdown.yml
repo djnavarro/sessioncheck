@@ -25,3 +25,10 @@ reference:
   - display_methods
   - coercion_methods
 
+articles:
+  - title:
+    navbar:
+    contents: 
+      - articles/why-check-the-r-session
+      - articles/customizing-sessioncheck
+      - articles/individual-checks

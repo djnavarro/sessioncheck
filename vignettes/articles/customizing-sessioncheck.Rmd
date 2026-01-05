@@ -1,0 +1,89 @@
+---
+title: "Customizing sessioncheck() behavior"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This article discusses how to customise the checks that are performed when `sessioncheck()` is called. The easiest way to alter its behavior is via the `action` argument, which specifies what action should be taken if an issue is detected (allowed values: `"warn"`, `"error"`, `"message"`, `"none"`), and via the `checks` argument, which specifies which checks should be performed. The default behaviour corresponds to this:
+
+```{r}
+sessioncheck::sessioncheck(
+  action = "warn",
+  checks = c(
+    "globalenv_objects", 
+    "attached_packages", 
+    "attached_environments"
+  )
+)
+```
+
+In this case, three checks are performed:
+
+- `"globalenv_objects"` indicates that `check_globalenv_objects()` should be used
+- `"attached_packages"` indicates that `check_attached_packages()` should be used
+- `"attached_environments"` indicates that `check_attached_environments()` should be used
+
+Several other options can be specified:
+
+- `"loaded_namespaces"` indicates that `check_loaded_namespaces()` should be used
+- `"sessiontime"` indicates that `check_sessiontime()` should be used
+- `"required_options"` indicates that `check_required_options()` should be used
+- `"required_locale"` indicates that `check_required_locale()` should be used
+- `"required_sysenv"` indicates that `check_required_sysenv()` should be used
+
+For example, this checks the loaded namespaces only:
+
+```{r}
+sessioncheck::sessioncheck(
+  action = "warn",
+  checks = "loaded_namespaces"
+)
+```
+
+The individual checks can themselves be customized. Each check function has one extra argument that is used to control its behavior, and these can be passed to the check function via `...`. For example, you can do this:
+
+```{r}
+sessioncheck::sessioncheck(
+  action = "warn",
+  checks = c("loaded_namespaces", "required_options"),
+  allow_loaded_namespaces = c("knitr", "vctrs", "cli"),
+  required_options = list(scipen = 0L, max.print = 50L)
+)
+```
+
+The relevant arguments that can be passed via `...` are as follows: 
+
+- `allow_globalenv_objects` is passed to `check_globalenv_objects()`
+- `allow_attached_packages` is passed to `check_attached_packages()`
+- `allow_attached_environments` is passed to `check_attached_environments()`
+- `allow_loaded_namespaces` is passed to `check_loaded_namespaces()`
+- `max_sessiontime` is passed to `check_sessiontime()`
+- `required_options` is passed to `check_required_options()`
+- `required_locale` is passed to `check_required_locale()`
+- `required_sysenv` is passed to `check_required_sysenv()`
+
+To make life a little easier, the default values for all arguments can be specified via `options()`. For example, you could include something like this in the `.Rprofile`:
+
+```{r}
+options(
+  sessioncheck = list(
+    action = "message",
+    checks = c("loaded_namespaces", "required_options"),
+    allow_loaded_namespaces = c("knitr", "vctrs", "cli"),
+    required_options = list(scipen = 0L, max.print = 50L)
+  )
+)
+```
+
+When called, `sessioncheck()` will now use these values:
+
+```{r}
+sessioncheck::sessioncheck()
+```
+
+For more information on the specifics of each check, please see the documentation of the relevant check function or the article on [individual check](https://sessioncheck.djnavarro.net/articles/individual-checks.html).
