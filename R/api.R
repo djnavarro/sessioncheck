@@ -50,9 +50,9 @@ sessioncheck <- function(
   if ("loaded_namespaces" %in% args$checks) results$namespaces <- .get_namespace_status(args$allow_loaded_namespaces)
   if ("attached_environments" %in% args$checks) results$attachments <- .get_attachment_status(args$allow_attached_environments)
   if ("sessiontime" %in% args$checks) results$sessiontime <- .get_sessiontime_status(args$max_sessiontime)
-  if ("required_options" %in% args$checks) results$options <- .get_sessiontime_status(args$required_options)
-  if ("required_locale" %in% args$checks) results$options <- .get_sessiontime_status(args$required_locale)
-  if ("required_sysenv" %in% args$checks) results$options <- .get_sessiontime_status(args$required_sysenv) 
+  if ("required_options" %in% args$checks) results$options <- .get_options_status(args$required_options)
+  if ("required_locale" %in% args$checks) results$locale <- .get_locale_status(args$required_locale)
+  if ("required_sysenv" %in% args$checks) results$sysenv <- .get_sysenv_status(args$required_sysenv) 
   .action(args$action, do.call(new_sessioncheck, results))
 }
 
