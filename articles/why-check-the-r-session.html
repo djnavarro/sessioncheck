@@ -35,6 +35,8 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/why-check-the-r-session.html">Why is it important to check the R session?</a></li>
+    <li><a class="dropdown-item" href="../articles/customizing-sessioncheck.html">Customizing sessioncheck() behavior</a></li>
+    <li><a class="dropdown-item" href="../articles/individual-checks.html">Individual session check functions</a></li>
   </ul>
 </li>
       </ul>
@@ -207,7 +209,8 @@ see what happens when <code><a href="../reference/sessioncheck.html">sessionchec
 contaminated environment:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: Session check results:</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Session check results:</span></span>
 <span><span class="co">#&gt; - Objects in global environment: my_data</span></span>
 <span><span class="co">#&gt; - Attached packages: sessioncheck</span></span>
 <span><span class="co">#&gt; - Attached environments: my_data</span></span></code></pre></div>
@@ -236,7 +239,8 @@ that executes in this session. Importantly, notice that because
 approach, it still produces an error:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: Session check results:</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Session check results:</span></span>
 <span><span class="co">#&gt; - Objects in global environment: [no issues]</span></span>
 <span><span class="co">#&gt; - Attached packages: sessioncheck</span></span>
 <span><span class="co">#&gt; - Attached environments: my_data</span></span></code></pre></div>

@@ -80,9 +80,3 @@ S3 methods for session check classes
   : Coerce session check object to a data frame
 
 # Articles
-
-### All vignettes
-
-- [sessioncheck](https://sessioncheck.djnavarro.net/articles/sessioncheck.md):
-- [Why is it important to check the R
-  session?](https://sessioncheck.djnavarro.net/articles/why-check-the-r-session.md):

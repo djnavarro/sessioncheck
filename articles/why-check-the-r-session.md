@@ -154,7 +154,8 @@ is called in a contaminated environment:
 
 ``` r
 sessioncheck::sessioncheck("error")
-#> Error: Session check results:
+#> Error:
+#> ! Session check results:
 #> - Objects in global environment: my_data
 #> - Attached packages: sessioncheck
 #> - Attached environments: my_data
@@ -194,7 +195,8 @@ it still produces an error:
 
 ``` r
 sessioncheck::sessioncheck("error")
-#> Error: Session check results:
+#> Error:
+#> ! Session check results:
 #> - Objects in global environment: [no issues]
 #> - Attached packages: sessioncheck
 #> - Attached environments: my_data

@@ -1,4 +1,4 @@
-# sessioncheck
+# Introduction to sessioncheck
 
 The goal of **sessioncheck** is to provide simple tools that can be
 called at the top of a script, and produce warnings or errors if it
@@ -30,118 +30,106 @@ an “automated” method for cleaning the session state, they may end up
 executing scripts in a profoundly irreproducible way, never noticing
 that something bad has happened. This is, to put it mildly, not ideal.
 
-One of the reasons this problem is painful in real life is that it
-requires a certain level of sophistication to force a script to execute
-in a precisely controlled environment. There are some very powerful
-tools pitched at the expert user – e.g., docker, targets, and renv –
-that you can use to execute scripts in a reproducible way. There are not
-as many options for beginners or intermediate level R users.
-
 Because of this, a better practice is to **restart the R session**
 immediately before running the script. By running the script in a fresh
 R session, you’re much less likely to encounter these issues. By
-exension, the reason for including a call to
+extension, the reason for including a call to
 [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
-at the top of a script is to **prompt the user** when potential issues
-are detected.
-
-For additional background see the article on [why session checking is
+at the top of a script is not to try to clean the R session (which is
+very hard to automate). Instead, what it does is **prompt the user** to
+take appropriate action if potential issues are detected. For additional
+background, see the article on [why session checking is
 useful](https://sessioncheck.djnavarro.net/articles/why-check-the-r-session.html).
 
-## How does sessioncheck work?
+## What does sessioncheck do?
 
-The **sessioncheck** package is built on several functions that each
-check one specific aspect to the R session: the
+The main function in **sessioncheck** is
+[`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md),
+which examines the state of the R session and informs the user if
+potential issues are detected. The behaviour of
 [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
-function itself merely aggregates the results of the individual checks.
+is
+[customisable](https://sessioncheck.djnavarro.net/articles/customizing-sessioncheck.html),
+allowing the user to make decisions about what criteria should be used
+to decide if an R session is “dirty”.
 
-When calling
+For the purposes of this article we will stick to the default checks.
+The simplest of these examines the contents of the global environment,
+very much in line with the “traditional” method of inserting
+`rm(list=ls())` into the top of a script. At the moment there is nothing
+in the global environment, so it is considered “clean”. When
 [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
-you can customise exactly which checks are performed and what rules
-should apply to each check, but for now let’s look at the three specific
-checks that are performed by default: checks of the global environment,
-checks of the attached packages, and checks of the attached non-package
-environments. These can be run as standalone checks using
-`check_globalenv()`, `check_packages()` and `check_attachments()`, so
-the natural place to start is examining the behaviour of the standalone
-checks.
-
-### Check 1: global environment
-
-The first and simplest of the checks is
-[`check_globalenv_objects()`](https://sessioncheck.djnavarro.net/reference/check_globalenv_objects.md),
-and it focuses on the same aspect of the R session that the traditional
-`rm(list=ls())` method does: the contents of the global environment. At
-the moment there is nothing in the global environment, so it is
-considered “clean”. As a consequence, nothing happens when we run this
-check:
+is called in a clean state, no message is printed:
 
 ``` r
-sessioncheck::check_globalenv_objects()
+sessioncheck::sessioncheck()
 ```
 
-To get the check to produce a warning, we’ll need to add some variables:
+By default,
+[`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
+adheres to the R convention that variables starting with a period are
+hidden variables, and so does not report any issues if the session
+contains a variable like `.Random.seed` or `.Last.value`. This can be
+customised, but for the purposes of this article we’ll just look at the
+default behaviour:
 
 ``` r
 visible_1 <- "this will get detected"
 visible_2 <- "so will this"
 .hidden_1 <- "but this will not"
 
-sessioncheck::check_globalenv_objects()
-#> Warning: Objects in global environment: visible_1, visible_2
+sessioncheck::sessioncheck()
+#> Warning: Session check results:
+#> - Objects in global environment: visible_1, visible_2
+#> - Attached packages: [no issues]
+#> - Attached environments: [no issues]
 ```
 
-The output indicates that the script has detected `visible_1` and
-`visible_2` in the global environment, and issues a warning to suggest
-that the R session may be contaminated.
-
-There are two arguments to
-[`check_globalenv_objects()`](https://sessioncheck.djnavarro.net/reference/check_globalenv_objects.md):
-
-- `action` specifies what the function should do if an issue is
-  detected. There are four allowed values: `error`, `warn` (the
-  default), `message`, and `none`.
-- `allow_globalenv_objects` is a character vector used to specify the
-  rules that are used to decide *which* objects should trigger an
-  action. A variable name that is included in the `allow` list will not
-  trigger an action. There is a special case:
-  `allow_globalenv_objects = NULL` will apply the same rule that
-  [`ls()`](https://rdrr.io/r/base/ls.html) uses when listing the
-  contents of the global environment: variables that start with a `.`
-  will be ignored, and will not trigger an action.
-
-The example below illustrates how both of these actions are used. Here,
-the action taken will be to print a message rather than a warning; and
-by setting the `allow_globalenv_objects` argument to an empty string,
-*any* variable in the global environment will trigger the message, even
-the “hidden” ones:
+The first line of this output indicates that the script has detected
+`visible_1` and `visible_2` in the global environment, and issues a
+warning to suggest that the R session may be contaminated. This can be
+escalated to an error if so desired:
 
 ``` r
-sessioncheck::check_globalenv_objects(action = "message", allow_globalenv_objects = "")
-#> Objects in global environment: .hidden_1, .Random.seed, visible_1, visible_2
+sessioncheck::sessioncheck(action = "error")
+#> Error:
+#> ! Session check results:
+#> - Objects in global environment: visible_1, visible_2
+#> - Attached packages: [no issues]
+#> - Attached environments: [no issues]
 ```
 
-This time we notice that the check detects the `visible_1` and
-`visible_2` like last time, but it now detects two hidden variables: the
-`.hidden_1` variable that I created earlier, and also the `.Random.seed`
-variable that R uses to store the state of the random number generator.
-
-### Check 2: attached packages
+Notice that there are two additional lines of output in the session
+check message. By default,
+[`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
+reports the results of three checks. The first is the global environment
+check discussed above. The second checks for packages that have been
+attached to the search path, usually via
+[`library()`](https://rdrr.io/r/base/library.html) or
+[`require()`](https://rdrr.io/r/base/library.html). The third checks for
+other environments that have may have been attached, perhaps by
+inadvertently calling the
+[`attach()`](https://rdrr.io/r/base/attach.html) function. This is
+illustrated in the following example
 
 ``` r
-sessioncheck::check_attached_packages()
+require(knitr) # non-base packages are detected
+#> Loading required package: knitr
+require(stats) # base R packages are ignored
+attach(iris)   # attached data frames are detected
+
+sessioncheck::sessioncheck()
+#> Warning: Session check results:
+#> - Objects in global environment: visible_1, visible_2
+#> - Attached packages: knitr
+#> - Attached environments: iris
 ```
 
-The warning notes that the **sessioncheck** package has been attached.
-This might be considered acceptable, so we can ask the check to `allow`
-this package:
+## Further reading
 
-``` r
-sessioncheck::check_attached_packages(action = "warn", allow_attached_packages = "sessioncheck")
-```
-
-### Check 3: other attachments
-
-``` r
-sessioncheck::check_attached_environments()
-```
+- [Why session checking is
+  useful](https://sessioncheck.djnavarro.net/articles/why-check-the-r-session.html)
+- [Customizing
+  sessioncheck()](https://sessioncheck.djnavarro.net/articles/customizing-sessioncheck.html)
+- [Individual check
+  functions](https://sessioncheck.djnavarro.net/articles/individual-checks.html)

@@ -9,13 +9,13 @@
 Source:
 [`DESCRIPTION`](https://github.com/djnavarro/sessioncheck/blob/main/DESCRIPTION)
 
-Navarro D (2025). *sessioncheck: Checks Session Status*. R package
+Navarro D (2026). *sessioncheck: Checks Session Status*. R package
 version 0.0.0.9000, <https://github.com/djnavarro/sessioncheck>.
 
     @Manual{,
       title = {sessioncheck: Checks Session Status},
       author = {Danielle Navarro},
-      year = {2025},
+      year = {2026},
       note = {R package version 0.0.0.9000},
       url = {https://github.com/djnavarro/sessioncheck},
     }

@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>sessioncheck • sessioncheck</title>
+<title>Introduction to sessioncheck • sessioncheck</title>
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="sessioncheck">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Introduction to sessioncheck">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -35,6 +35,8 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/why-check-the-r-session.html">Why is it important to check the R session?</a></li>
+    <li><a class="dropdown-item" href="../articles/customizing-sessioncheck.html">Customizing sessioncheck() behavior</a></li>
+    <li><a class="dropdown-item" href="../articles/individual-checks.html">Individual session check functions</a></li>
   </ul>
 </li>
       </ul>
@@ -64,7 +66,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>sessioncheck</h1>
+      <h1>Introduction to sessioncheck</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/djnavarro/sessioncheck/blob/main/vignettes/sessioncheck.Rmd" class="external-link"><code>vignettes/sessioncheck.Rmd</code></a></small>
@@ -102,110 +104,94 @@ as an “automated” method for cleaning the session state, they may end up
 executing scripts in a profoundly irreproducible way, never noticing
 that something bad has happened. This is, to put it mildly, not
 ideal.</p>
-<p>One of the reasons this problem is painful in real life is that it
-requires a certain level of sophistication to force a script to execute
-in a precisely controlled environment. There are some very powerful
-tools pitched at the expert user – e.g., docker, targets, and renv –
-that you can use to execute scripts in a reproducible way. There are not
-as many options for beginners or intermediate level R users.</p>
 <p>Because of this, a better practice is to <strong>restart the R
 session</strong> immediately before running the script. By running the
 script in a fresh R session, you’re much less likely to encounter these
-issues. By exension, the reason for including a call to
-<code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> at the top of a script is to <strong>prompt
-the user</strong> when potential issues are detected.</p>
-<p>For additional background see the article on <a href="https://sessioncheck.djnavarro.net/articles/why-check-the-r-session.html">why
+issues. By extension, the reason for including a call to
+<code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> at the top of a script is not to try to
+clean the R session (which is very hard to automate). Instead, what it
+does is <strong>prompt the user</strong> to take appropriate action if
+potential issues are detected. For additional background, see the
+article on <a href="https://sessioncheck.djnavarro.net/articles/why-check-the-r-session.html">why
 session checking is useful</a>.</p>
 </div>
 <div class="section level2">
-<h2 id="how-does-sessioncheck-work">How does sessioncheck work?<a class="anchor" aria-label="anchor" href="#how-does-sessioncheck-work"></a>
+<h2 id="what-does-sessioncheck-do">What does sessioncheck do?<a class="anchor" aria-label="anchor" href="#what-does-sessioncheck-do"></a>
 </h2>
-<p>The <strong>sessioncheck</strong> package is built on several
-functions that each check one specific aspect to the R session: the
-<code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> function itself merely aggregates the
-results of the individual checks.</p>
-<p>When calling <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> you can customise exactly
-which checks are performed and what rules should apply to each check,
-but for now let’s look at the three specific checks that are performed
-by default: checks of the global environment, checks of the attached
-packages, and checks of the attached non-package environments. These can
-be run as standalone checks using <code>check_globalenv()</code>,
-<code>check_packages()</code> and <code>check_attachments()</code>, so
-the natural place to start is examining the behaviour of the standalone
-checks.</p>
-<div class="section level3">
-<h3 id="check-1-global-environment">Check 1: global environment<a class="anchor" aria-label="anchor" href="#check-1-global-environment"></a>
-</h3>
-<p>The first and simplest of the checks is
-<code><a href="../reference/check_globalenv_objects.html">check_globalenv_objects()</a></code>, and it focuses on the same
-aspect of the R session that the traditional <code>rm(list=ls())</code>
-method does: the contents of the global environment. At the moment there
-is nothing in the global environment, so it is considered “clean”. As a
-consequence, nothing happens when we run this check:</p>
+<p>The main function in <strong>sessioncheck</strong> is
+<code><a href="../reference/sessioncheck.html">sessioncheck()</a></code>, which examines the state of the R session
+and informs the user if potential issues are detected. The behaviour of
+<code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> is <a href="https://sessioncheck.djnavarro.net/articles/customizing-sessioncheck.html">customisable</a>,
+allowing the user to make decisions about what criteria should be used
+to decide if an R session is “dirty”.</p>
+<p>For the purposes of this article we will stick to the default checks.
+The simplest of these examines the contents of the global environment,
+very much in line with the “traditional” method of inserting
+<code>rm(list=ls())</code> into the top of a script. At the moment there
+is nothing in the global environment, so it is considered “clean”. When
+<code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> is called in a clean state, no message is
+printed:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>To get the check to produce a warning, we’ll need to add some
-variables:</p>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>By default, <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> adheres to the R convention
+that variables starting with a period are hidden variables, and so does
+not report any issues if the session contains a variable like
+<code>.Random.seed</code> or <code>.Last.value</code>. This can be
+customised, but for the purposes of this article we’ll just look at the
+default behaviour:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">visible_1</span> <span class="op">&lt;-</span> <span class="st">"this will get detected"</span></span>
 <span><span class="va">visible_2</span> <span class="op">&lt;-</span> <span class="st">"so will this"</span></span>
 <span><span class="va">.hidden_1</span> <span class="op">&lt;-</span> <span class="st">"but this will not"</span></span>
 <span></span>
-<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Objects in global environment: visible_1, visible_2</span></span></code></pre></div>
-<p>The output indicates that the script has detected
+<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Session check results:</span></span>
+<span><span class="co">#&gt; - Objects in global environment: visible_1, visible_2</span></span>
+<span><span class="co">#&gt; - Attached packages: [no issues]</span></span>
+<span><span class="co">#&gt; - Attached environments: [no issues]</span></span></code></pre></div>
+<p>The first line of this output indicates that the script has detected
 <code>visible_1</code> and <code>visible_2</code> in the global
 environment, and issues a warning to suggest that the R session may be
-contaminated.</p>
-<p>There are two arguments to
-<code><a href="../reference/check_globalenv_objects.html">check_globalenv_objects()</a></code>:</p>
-<ul>
-<li>
-<code>action</code> specifies what the function should do if an
-issue is detected. There are four allowed values: <code>error</code>,
-<code>warn</code> (the default), <code>message</code>, and
-<code>none</code>.</li>
-<li>
-<code>allow_globalenv_objects</code> is a character vector used to
-specify the rules that are used to decide <em>which</em> objects should
-trigger an action. A variable name that is included in the
-<code>allow</code> list will not trigger an action. There is a special
-case: <code>allow_globalenv_objects = NULL</code> will apply the same
-rule that <code><a href="https://rdrr.io/r/base/ls.html" class="external-link">ls()</a></code> uses when listing the contents of the global
-environment: variables that start with a <code>.</code> will be ignored,
-and will not trigger an action.</li>
-</ul>
-<p>The example below illustrates how both of these actions are used.
-Here, the action taken will be to print a message rather than a warning;
-and by setting the <code>allow_globalenv_objects</code> argument to an
-empty string, <em>any</em> variable in the global environment will
-trigger the message, even the “hidden” ones:</p>
+contaminated. This can be escalated to an error if so desired:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, allow_globalenv_objects <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Objects in global environment: .hidden_1, .Random.seed, visible_1, visible_2</span></span></code></pre></div>
-<p>This time we notice that the check detects the <code>visible_1</code>
-and <code>visible_2</code> like last time, but it now detects two hidden
-variables: the <code>.hidden_1</code> variable that I created earlier,
-and also the <code>.Random.seed</code> variable that R uses to store the
-state of the random number generator.</p>
-</div>
-<div class="section level3">
-<h3 id="check-2-attached-packages">Check 2: attached packages<a class="anchor" aria-label="anchor" href="#check-2-attached-packages"></a>
-</h3>
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"error"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Session check results:</span></span>
+<span><span class="co">#&gt; - Objects in global environment: visible_1, visible_2</span></span>
+<span><span class="co">#&gt; - Attached packages: [no issues]</span></span>
+<span><span class="co">#&gt; - Attached environments: [no issues]</span></span></code></pre></div>
+<p>Notice that there are two additional lines of output in the session
+check message. By default, <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> reports the
+results of three checks. The first is the global environment check
+discussed above. The second checks for packages that have been attached
+to the search path, usually via <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> or
+<code><a href="https://rdrr.io/r/base/library.html" class="external-link">require()</a></code>. The third checks for other environments that
+have may have been attached, perhaps by inadvertently calling the
+<code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code> function. This is illustrated in the following
+example</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_attached_packages.html">check_attached_packages</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>The warning notes that the <strong>sessioncheck</strong> package has
-been attached. This might be considered acceptable, so we can ask the
-check to <code>allow</code> this package:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_attached_packages.html">check_attached_packages</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"warn"</span>, allow_attached_packages <span class="op">=</span> <span class="st">"sessioncheck"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://yihui.org/knitr/" class="external-link">knitr</a></span><span class="op">)</span> <span class="co"># non-base packages are detected</span></span>
+<span><span class="co">#&gt; Loading required package: knitr</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va">stats</span><span class="op">)</span> <span class="co"># base R packages are ignored</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>   <span class="co"># attached data frames are detected</span></span>
+<span></span>
+<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Session check results:</span></span>
+<span><span class="co">#&gt; - Objects in global environment: visible_1, visible_2</span></span>
+<span><span class="co">#&gt; - Attached packages: knitr</span></span>
+<span><span class="co">#&gt; - Attached environments: iris</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="check-3-other-attachments">Check 3: other attachments<a class="anchor" aria-label="anchor" href="#check-3-other-attachments"></a>
-</h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_attached_environments.html">check_attached_environments</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-</div>
+<div class="section level2">
+<h2 id="further-reading">Further reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>
+</h2>
+<ul>
+<li><a href="https://sessioncheck.djnavarro.net/articles/why-check-the-r-session.html">Why
+session checking is useful</a></li>
+<li><a href="https://sessioncheck.djnavarro.net/articles/customizing-sessioncheck.html">Customizing
+sessioncheck()</a></li>
+<li><a href="https://sessioncheck.djnavarro.net/articles/individual-checks.html">Individual
+check functions</a></li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
