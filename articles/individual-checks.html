@@ -37,6 +37,7 @@
 <li><a class="dropdown-item" href="../articles/why-check-the-r-session.html">Why is it important to check the R session?</a></li>
     <li><a class="dropdown-item" href="../articles/customizing-sessioncheck.html">Customizing sessioncheck() behavior</a></li>
     <li><a class="dropdown-item" href="../articles/individual-checks.html">Individual session check functions</a></li>
+    <li><a class="dropdown-item" href="../articles/s3-classes.html">S3 classes and methods</a></li>
   </ul>
 </li>
       </ul>
@@ -78,115 +79,292 @@
 <p>The <strong>sessioncheck</strong> package is built on several
 functions that each check one specific aspect to the R session: the
 <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> function itself merely aggregates the
-results of individual check functions like
-<code>check_globalenv()</code>, <code>check_packages()</code> and
-<code>check_attachments()</code>. In a typical workflow the user would
-be unlikely to use these directly, relying instead on the high-level
-interface provided by <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code>. Nevertheless, it’s
-useful to look at what each one does in a little more detail.</p>
+results of individual check functions. Currently available checks
+are:</p>
+<ul>
+<li><code><a href="../reference/check_globalenv_objects.html">check_globalenv_objects()</a></code></li>
+<li><code><a href="../reference/check_attached_packages.html">check_attached_packages()</a></code></li>
+<li><code><a href="../reference/check_attached_environments.html">check_attached_environments()</a></code></li>
+<li><code><a href="../reference/check_loaded_namespaces.html">check_loaded_namespaces()</a></code></li>
+<li><code><a href="../reference/check_sessiontime.html">check_sessiontime()</a></code></li>
+<li><code><a href="../reference/check_required_options.html">check_required_options()</a></code></li>
+<li><code><a href="../reference/check_required_locale.html">check_required_locale()</a></code></li>
+<li><code><a href="../reference/check_required_sysenv.html">check_required_sysenv()</a></code></li>
+</ul>
+<p>All of these functions take an <code>action</code> argument,
+specifying the action to be taken if the check does not pass. Allowed
+values for this argument are <code>error</code>, <code>warn</code> (the
+default), <code>message</code>, and <code>none</code>. However, each of
+them has a second argument that can be used to customize the behavior of
+the check.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/sessioncheck" class="external-link">sessioncheck</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="check-the-global-environment">Check the global environment<a class="anchor" aria-label="anchor" href="#check-the-global-environment"></a>
 </h3>
-<p>The first and simplest of the checks is
-<code><a href="../reference/check_globalenv_objects.html">check_globalenv_objects()</a></code>, and it focuses on the same
-aspect of the R session that the traditional <code>rm(list=ls())</code>
-method does: the contents of the global environment. At the moment there
-is nothing in the global environment, so it is considered “clean”. As a
-consequence, nothing happens when we run this check:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>To get the check to produce a warning, we’ll need to add some
-variables:</p>
+<p>The <code><a href="../reference/check_globalenv_objects.html">check_globalenv_objects()</a></code> function performs a
+session check that is roughly analogous to the one that is implicitly
+performed by the traditional method of including
+<code>rm(list=ls())</code> at the top of the script. It inspects the
+contents of the global environment using <code><a href="https://rdrr.io/r/base/ls.html" class="external-link">ls()</a></code>, but instead
+of removing any variables detected in this way, it triggers a warning in
+order to prompt the user to take the appropriate action.</p>
+<p>At present there are no variables in the global environment that
+would be detected by <code><a href="https://rdrr.io/r/base/ls.html" class="external-link">ls()</a></code>, so the environment is considered
+clean and nothing happens when <code><a href="../reference/check_globalenv_objects.html">check_globalenv_objects()</a></code> is
+called:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>If we add variables to the global environment, the warning is
+triggered:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">visible_1</span> <span class="op">&lt;-</span> <span class="st">"this will get detected"</span></span>
 <span><span class="va">visible_2</span> <span class="op">&lt;-</span> <span class="st">"so will this"</span></span>
 <span><span class="va">.hidden_1</span> <span class="op">&lt;-</span> <span class="st">"but this will not"</span></span>
 <span></span>
-<span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Objects in global environment: visible_1, visible_2</span></span></code></pre></div>
 <p>The output indicates that the script has detected
 <code>visible_1</code> and <code>visible_2</code> in the global
 environment, and issues a warning to suggest that the R session may be
 contaminated.</p>
-<p>There are two arguments to
-<code><a href="../reference/check_globalenv_objects.html">check_globalenv_objects()</a></code>:</p>
-<ul>
-<li>
-<code>action</code> specifies what the function should do if an
-issue is detected. There are four allowed values: <code>error</code>,
-<code>warn</code> (the default), <code>message</code>, and
-<code>none</code>.</li>
-<li>
-<code>allow_globalenv_objects</code> is a character vector used to
-specify the rules that are used to decide <em>which</em> objects should
-trigger an action. A variable name that is included in the
-<code>allow</code> list will not trigger an action. There is a special
-case: <code>allow_globalenv_objects = NULL</code> will apply the same
-rule that <code><a href="https://rdrr.io/r/base/ls.html" class="external-link">ls()</a></code> uses when listing the contents of the global
+<p>The <code>allow_globalenv_objects</code> argument is used to
+customize the behavior of this check. It takes a character vector as
+input, and is used as an “allow list”. Any variable name that is listed
+in this argument will not trigger an action. There is a special case:
+<code>allow_globalenv_objects = NULL</code> will apply the same rule
+that <code><a href="https://rdrr.io/r/base/ls.html" class="external-link">ls()</a></code> uses when listing the contents of the global
 environment: variables that start with a <code>.</code> will be ignored,
-and will not trigger an action.</li>
-</ul>
-<p>The example below illustrates how both of these actions are used.
-Here, the action taken will be to print a message rather than a warning;
-and by setting the <code>allow_globalenv_objects</code> argument to an
-empty string, <em>any</em> variable in the global environment will
-trigger the message, even the “hidden” ones:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, allow_globalenv_objects <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Objects in global environment: .hidden_1, .Random.seed, visible_1, visible_2</span></span></code></pre></div>
-<p>This time we notice that the check detects the <code>visible_1</code>
-and <code>visible_2</code> like last time, but it now detects two hidden
-variables: the <code>.hidden_1</code> variable that I created earlier,
-and also the <code>.Random.seed</code> variable that R uses to store the
-state of the random number generator.</p>
+and will not trigger an action. If the desired behavior is to detect all
+variables in the global environment regardless of their name, set
+<code>allow_globalenv_objects = ""</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span>allow_globalenv_objects <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Objects in global environment: .hidden_1, .Random.seed, visible_1,</span></span>
+<span><span class="co">#&gt; visible_2</span></span></code></pre></div>
+<p>This time the check detects the <code>.hidden_1</code> variable and
+the <code>.Random.seed</code> variable. To see this in a little more
+detail, we can convert the result to a data frame:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;        type       entity status</span></span>
+<span><span class="co">#&gt; 1 globalenv    .hidden_1  FALSE</span></span>
+<span><span class="co">#&gt; 2 globalenv .Random.seed  FALSE</span></span>
+<span><span class="co">#&gt; 3 globalenv    visible_1   TRUE</span></span>
+<span><span class="co">#&gt; 4 globalenv    visible_2   TRUE</span></span></code></pre></div>
+<p>This coercion is permitted for any of the check functions, and always
+returns a data frame with three columns: <code>type</code> column
+specifies the name of the check that was performed, the
+<code>entity</code> column specifies the entity that was detected, and
+<code>status</code> is a flag indicating whether that entity would
+trigger an action. In the example above, we see that “hidden” variables
+are always detected, but by default these have
+<code>status = FALSE</code> and accordingly will not trigger warnings,
+errors, or messages.</p>
 </div>
 <div class="section level3">
 <h3 id="check-the-attached-packages">Check the attached packages<a class="anchor" aria-label="anchor" href="#check-the-attached-packages"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_attached_packages.html">check_attached_packages</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>The warning notes that the <strong>sessioncheck</strong> package has
-been attached. This might be considered acceptable, so we can ask the
-check to <code>allow</code> this package:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_attached_packages.html">check_attached_packages</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"warn"</span>, allow_attached_packages <span class="op">=</span> <span class="st">"sessioncheck"</span><span class="op">)</span></span></code></pre></div>
+<p>The role of <code><a href="../reference/check_attached_packages.html">check_attached_packages()</a></code> is to inspect the
+search path to see which packages have been attached:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_attached_packages.html">check_attached_packages</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Attached packages: sessioncheck</span></span></code></pre></div>
+<p>The warning notes that in addition to the base R packages (which are
+always ignored), the <strong>sessioncheck</strong> package has been
+attached. To see this a little more explicitly, we can coerce the output
+to a data frame:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/check_attached_packages.html">check_attached_packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Attached packages: sessioncheck</span></span>
+<span><span class="co">#&gt;      type       entity status</span></span>
+<span><span class="co">#&gt; 1 package sessioncheck   TRUE</span></span>
+<span><span class="co">#&gt; 2 package        stats  FALSE</span></span>
+<span><span class="co">#&gt; 3 package     graphics  FALSE</span></span>
+<span><span class="co">#&gt; 4 package    grDevices  FALSE</span></span>
+<span><span class="co">#&gt; 5 package        utils  FALSE</span></span>
+<span><span class="co">#&gt; 6 package     datasets  FALSE</span></span>
+<span><span class="co">#&gt; 7 package      methods  FALSE</span></span>
+<span><span class="co">#&gt; 8 package         base  FALSE</span></span></code></pre></div>
+<p>In this output, we can see that there are several base R packages
+that have been attached to the search path, but are listed with
+<code>status = FALSE</code> and therefore do not trigger a warning.
+However, because <strong>sessioncheck</strong> itself has been attached
+via the call to <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> earlier in this document, it too
+is detected, and so triggers the warning.</p>
+<p>The user can customize which packages should be permitted, using the
+<code>allow_attached_packages</code> argument. For example, we could
+choose to whitelist <strong>sessioncheck</strong>, as illustrated in the
+example below:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_attached_packages.html">check_attached_packages</a></span><span class="op">(</span>allow_attached_packages <span class="op">=</span> <span class="st">"sessioncheck"</span><span class="op">)</span></span></code></pre></div>
+<p>Having done so, the warning is no longer triggered.</p>
 </div>
 <div class="section level3">
 <h3 id="check-other-attached-environments">Check other attached environments<a class="anchor" aria-label="anchor" href="#check-other-attached-environments"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_attached_environments.html">check_attached_environments</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>The <code><a href="../reference/check_attached_environments.html">check_attached_environments()</a></code> function is
+complementary to <code><a href="../reference/check_attached_packages.html">check_attached_packages()</a></code>. Both functions
+inspect the state of the R search path, but they look for different
+things:</p>
+<ul>
+<li>
+<code><a href="../reference/check_attached_packages.html">check_attached_packages()</a></code> looks for package
+environments in the search path, usually added via
+<code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> or <code><a href="https://rdrr.io/r/base/library.html" class="external-link">require()</a></code>. It ignores non-package
+environments.</li>
+<li>
+<code><a href="../reference/check_attached_environments.html">check_attached_environments()</a></code> looks for non-package
+environments in the search path, usually added via
+<code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code>. It ignores package environments.</li>
+</ul>
+<p>As with the other check functions, when called in a clean R session
+<code><a href="../reference/check_attached_environments.html">check_attached_environments()</a></code> does nothing:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_attached_environments.html">check_attached_environments</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>This does not mean that no environments have been detected. Coercing
+the result to a data frame shows that various package environments have
+been detected (and ignored), the global environment has been detected
+(and ignored), and two “special” environments have been detected and
+ignored:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/check_attached_environments.html">check_attached_environments</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;          type               entity status</span></span>
+<span><span class="co">#&gt; 1  attachment           .GlobalEnv  FALSE</span></span>
+<span><span class="co">#&gt; 2  attachment package:sessioncheck  FALSE</span></span>
+<span><span class="co">#&gt; 3  attachment        package:stats  FALSE</span></span>
+<span><span class="co">#&gt; 4  attachment     package:graphics  FALSE</span></span>
+<span><span class="co">#&gt; 5  attachment    package:grDevices  FALSE</span></span>
+<span><span class="co">#&gt; 6  attachment        package:utils  FALSE</span></span>
+<span><span class="co">#&gt; 7  attachment     package:datasets  FALSE</span></span>
+<span><span class="co">#&gt; 8  attachment      package:methods  FALSE</span></span>
+<span><span class="co">#&gt; 9  attachment            Autoloads  FALSE</span></span>
+<span><span class="co">#&gt; 10 attachment          tools:callr  FALSE</span></span>
+<span><span class="co">#&gt; 11 attachment         package:base  FALSE</span></span></code></pre></div>
+<p>At present, there are four environments (besides packages and the
+global environment) that are whitelisted by default, namely
+<code>"tools:rstudio"</code>, <code>"tools:positron"</code>,
+<code>"tools:callr"</code>, and <code>"Autoloads"</code>. If the user
+would prefer to have these trigger an action, the
+<code>allowed_attached_environments</code> argument can be used to
+manually specify the names of allowed non-package environments:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_attached_environments.html">check_attached_environments</a></span><span class="op">(</span>allow_attached_environments <span class="op">=</span> <span class="st">"Autoloads"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Attached environments: tools:callr</span></span></code></pre></div>
+<p>The warning is now triggered because <code>"Autoloads"</code> is
+whitelisted, but <code>"tools:callr"</code> is not.</p>
 </div>
 <div class="section level3">
 <h3 id="check-loaded-namespaces">Check loaded namespaces<a class="anchor" aria-label="anchor" href="#check-loaded-namespaces"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_loaded_namespaces.html">check_loaded_namespaces</a></span><span class="op">(</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_loaded_namespaces.html">check_loaded_namespaces</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Loaded namespaces: digest, desc, R6, fastmap, and 19 more</span></span></code></pre></div>
+<p>To understand this result, it is important to recall that the current
+document is rendered using <a href="https://pkgdown.r-lib.org/" class="external-link"><strong>pkgdown</strong></a>, with the
+consequence that <strong>pkgdown</strong> and its dependencies appear as
+loaded namespaces even though none of them have been attached to the
+search path. To see this in a little more detail, we can coerce the
+result to a data frame:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/check_loaded_namespaces.html">check_loaded_namespaces</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;         type       entity status</span></span>
+<span><span class="co">#&gt; 1  namespace       digest   TRUE</span></span>
+<span><span class="co">#&gt; 2  namespace      methods  FALSE</span></span>
+<span><span class="co">#&gt; 3  namespace         desc   TRUE</span></span>
+<span><span class="co">#&gt; 4  namespace           R6   TRUE</span></span>
+<span><span class="co">#&gt; 5  namespace      fastmap   TRUE</span></span>
+<span><span class="co">#&gt; 6  namespace         xfun   TRUE</span></span>
+<span><span class="co">#&gt; 7  namespace       cachem   TRUE</span></span>
+<span><span class="co">#&gt; 8  namespace sessioncheck  FALSE</span></span>
+<span><span class="co">#&gt; 9  namespace        knitr   TRUE</span></span>
+<span><span class="co">#&gt; 10 namespace    htmltools   TRUE</span></span>
+<span><span class="co">#&gt; 11 namespace    rmarkdown   TRUE</span></span>
+<span><span class="co">#&gt; 12 namespace    lifecycle   TRUE</span></span>
+<span><span class="co">#&gt; 13 namespace        utils  FALSE</span></span>
+<span><span class="co">#&gt; 14 namespace          cli   TRUE</span></span>
+<span><span class="co">#&gt; 15 namespace         sass   TRUE</span></span>
+<span><span class="co">#&gt; 16 namespace      pkgdown   TRUE</span></span>
+<span><span class="co">#&gt; 17 namespace     graphics  FALSE</span></span>
+<span><span class="co">#&gt; 18 namespace  textshaping   TRUE</span></span>
+<span><span class="co">#&gt; 19 namespace    jquerylib   TRUE</span></span>
+<span><span class="co">#&gt; 20 namespace    grDevices  FALSE</span></span>
+<span><span class="co">#&gt; 21 namespace  systemfonts   TRUE</span></span>
+<span><span class="co">#&gt; 22 namespace        stats  FALSE</span></span>
+<span><span class="co">#&gt; 23 namespace     compiler  FALSE</span></span>
+<span><span class="co">#&gt; 24 namespace         base  FALSE</span></span>
+<span><span class="co">#&gt; 25 namespace        tools  FALSE</span></span>
+<span><span class="co">#&gt; 26 namespace         ragg   TRUE</span></span>
+<span><span class="co">#&gt; 27 namespace        bslib   TRUE</span></span>
+<span><span class="co">#&gt; 28 namespace     evaluate   TRUE</span></span>
+<span><span class="co">#&gt; 29 namespace         yaml   TRUE</span></span>
+<span><span class="co">#&gt; 30 namespace     jsonlite   TRUE</span></span>
+<span><span class="co">#&gt; 31 namespace        rlang   TRUE</span></span>
+<span><span class="co">#&gt; 32 namespace           fs   TRUE</span></span>
+<span><span class="co">#&gt; 33 namespace     datasets  FALSE</span></span></code></pre></div>
+<p>Notice that namespaces associated with base R are listed (e.g.,
+<code>"base"</code>, “<code>stats</code>”, etc) but always have
+<code>status = FALSE</code>: these namespaces will never trigger a
+warning/error/message. Similarly the <code>"sessioncheck"</code>
+namespace never triggers an action, since the namespace must be loaded
+in order for the package to be used. All other packages that are
+involved in rendering this document are listed with
+<code>status = TRUE</code>.</p>
+<p>To permit those namespaces to be loaded without triggering an action,
+use the <code>allow_loaded_namespaces</code> argument:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_loaded_namespaces.html">check_loaded_namespaces</a></span><span class="op">(</span></span>
+<span>  allow_loaded_namespaces <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"digest"</span>, <span class="st">"desc"</span>, <span class="st">"R6"</span>, <span class="st">"fastmap"</span>, <span class="st">"xfun"</span>, <span class="st">"cachem"</span>,</span>
+<span>    <span class="st">"knitr"</span>, <span class="st">"htmltools"</span>, <span class="st">"rmarkdown"</span>, <span class="st">"lifecycle"</span>, <span class="st">"cli"</span>,</span>
+<span>    <span class="st">"sass"</span>, <span class="st">"pkgdown"</span>, <span class="st">"textshaping"</span>, <span class="st">"jquerylib"</span>, </span>
+<span>    <span class="st">"systemfonts"</span>, <span class="st">"ragg"</span>, <span class="st">"bslib"</span>, <span class="st">"evaluate"</span>, <span class="st">"yaml"</span>,</span>
+<span>    <span class="st">"jsonlite"</span>, <span class="st">"rlang"</span>, <span class="st">"fs"</span>, <span class="st">"htmlwidgets"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Having whitelisted these namespaces, the check now passes and the
+warning is no longer triggered.</p>
 </div>
 <div class="section level3">
 <h3 id="check-session-runtime">Check session runtime<a class="anchor" aria-label="anchor" href="#check-session-runtime"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_sessiontime.html">check_sessiontime</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Another heuristic that can sometimes be useful when checking the R
+session is to examine how long the current R session has been running. A
+long-running R session does not mean anything in and of itself (the
+session does not magically become contaminated if it sits idle for a
+long time), but in everyday workflow the session runtime can be an
+indicator that previous actions have taken place in the R session, and
+in some circumstances it may be useful check this.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_sessiontime.html">check_sessiontime</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>The behavior of this check can be customized using the
+<code>max_sessiontime</code> argument, which specifies the maximum
+length of time (in seconds) that the R session can be running before an
+action is triggered. If no value is supplied, it defaults to 300
+seconds. The customization is illustrated below:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_sessiontime.html">check_sessiontime</a></span><span class="op">(</span>max_sessiontime <span class="op">=</span> <span class="fl">.0001</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Session runtime: 1.695 sec elapsed</span></span></code></pre></div>
+<p>Note that this check is not one of the default checks performed by
+the <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> function.</p>
 </div>
 <div class="section level3">
-<h3 id="check-required-options">Check required options<a class="anchor" aria-label="anchor" href="#check-required-options"></a>
+<h3 id="other-checks">Other checks<a class="anchor" aria-label="anchor" href="#other-checks"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_required_options.html">check_required_options</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="check-required-locale">Check required locale<a class="anchor" aria-label="anchor" href="#check-required-locale"></a>
-</h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_required_locale.html">check_required_locale</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="check-required-environment-variables">Check required environment variables<a class="anchor" aria-label="anchor" href="#check-required-environment-variables"></a>
-</h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/check_required_sysenv.html">check_required_sysenv</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>There are three other check functions supplied by
+<strong>sessioncheck</strong>, which can be used to examine the session
+options, the locale settings, and the system environment variables.
+However, all three of these are somewhat limited in their capabilities.
+They can be used as a way to require a specific value for an option, a
+locale setting, or an environment variable, and not much else. By
+default, all three of these checks do nothing: the user must manually
+specify the precise check that should be performed.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_required_options.html">check_required_options</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/check_required_locale.html">check_required_locale</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/check_required_sysenv.html">check_required_sysenv</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Please see the documentation for the individual functions for
+information on how these checks work.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -76,9 +76,9 @@ contaminated R environment: creating objects in the global environment
 and attaching packages or environments:
 
 ``` r
-library(sessioncheck)                     # trigger check_packages
-my_data = data.frame(T = FALSE, F = TRUE) # trigger check_globalenv
-attach(my_data)                           # trigger check_attachments
+library(sessioncheck)                     # trigger check_attached_packages
+my_data = data.frame(T = FALSE, F = TRUE) # trigger check_globalenv_objects
+attach(my_data)                           # trigger check_attached_environments
 #> The following objects are masked from package:base:
 #> 
 #>     F, T
@@ -107,14 +107,14 @@ example above, here’s a quick risk assessment
   do a lot, much more so than software engineers – you can quickly build
   up a lot of “detritus”, bits and pieces and objects left behind from
   code you tried out previously, and over time it becomes a big problem.
-  The user should definitely be informed, because there are serious risk
-  shere.
+  The user should definitely be informed, because there are serious
+  risks here.
 
 - **Attaching a (malicious!) environment to the search path**. Attaching
   data sets using [`attach()`](https://rdrr.io/r/base/attach.html) has
-  been considered an extremely high-risk behaviour in R for a long time.
+  been considered an extremely high-risk behavior in R for a long time.
   It creates chaos in the R session and the potential for horrific
-  outcomes is very high. The example I construced above is deliberately
+  outcomes is very high. The example I constructed above is deliberately
   malicious, just to highlight how bad it can be. If your script
   executes in an environment when `attach(my_data)` has previously been
   executed, you can no longer rely on R to make sensible judgements
@@ -164,9 +164,7 @@ sessioncheck::sessioncheck("error")
 If this code were placed at the top of the user script, that script
 would simply refuse to run in this contaminated environment. It would
 produce an error that indicates which checks were performed, and lists
-specific issues that were detected in each test. Not only that, because
-this is an error (rather than a warning) it supplies a prompt to the
-user that it may be necessary to restart R.
+specific issues that were detected in each test.
 
 By way of comparison, consider what would happen if the traditional
 `rm(list=ls())` approach were employed. Executing this code will fix
@@ -187,7 +185,7 @@ T
 ```
 
 Even though `rm(list = ls())` has been invoked, the R session is not
-safe, and it will corrupt the behaviour of any script that executes in
+safe, and it will corrupt the behavior of any script that executes in
 this session. Importantly, notice that because
 [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
 is stricter than the [`rm()`](https://rdrr.io/r/base/rm.html) approach,
@@ -206,12 +204,13 @@ Under normal circumstances the thing that the user – a human being –
 would likely do next is restart the R session, and all of these problems
 would go away. That is the intended way to use **sessioncheck**. It is
 designed primarily for analysts who design their code in a
-human-in-the-loop fashion. It is explicitly *not* recommended for
+human-in-the-loop fashion. It is explicitly **not** recommended for
 production code or any other situation where R code is executed without
 direct human oversight.
 
 Nevertheless, because the author of this vignette is also the person who
-created the contaminated R session, she also knows how to reverse it:
+created the contaminated R session, she also knows how to reverse it in
+an automated fashion:
 
 ``` r
 detach("my_data")
@@ -219,6 +218,6 @@ detach("package:sessioncheck")
 sessioncheck::sessioncheck("error")
 ```
 
-In general though, the job of cleaning the session or restarting it
+In general though, the job of cleaning the session or restarting R
 should be reserved for the human analyst. Tools such as **sessioncheck**
 should not attempt to do so.

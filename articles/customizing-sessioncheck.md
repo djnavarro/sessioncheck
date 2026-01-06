@@ -126,4 +126,4 @@ sessioncheck::sessioncheck()
 For more information on the specifics of each check, please see the
 documentation of the relevant check function or the article on
 [individual
-check](https://sessioncheck.djnavarro.net/articles/individual-checks.html).
+checks](https://sessioncheck.djnavarro.net/articles/individual-checks.html).
