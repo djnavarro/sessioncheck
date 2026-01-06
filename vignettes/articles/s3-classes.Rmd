@@ -1,0 +1,72 @@
+---
+title: "S3 classes and methods"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(sessioncheck)
+```
+
+The **sessioncheck** package is designed to be lightweight, and has no dependencies. It defines two S3 classes: the `sessioncheck()` function returns an object of class `sessioncheck_sessioncheck` and the individual check functions return objects of class `sessioncheck_status`. 
+
+```{r}
+pkg_status <- check_attached_packages(action = "none")
+obj_status <- check_globalenv_objects(action = "none") 
+session_check <- sessioncheck(action = "none")
+
+class(pkg_status)
+class(obj_status)
+class(session_check)
+```
+
+Both classes have a `format()` method and a `print()` method, and both are coercible to data frames via `as.data.frame()`. A brief discussion of these classes and methods is provided here.
+
+## sessioncheck_status objects
+
+Internally, a `sessioncheck_status` object is a named list with two components:
+
+- The `status` component is a named logical vector where names correspond to detected entities, and values that indicate whether an action is triggered by that entity. It is intended to be roughly analogous to an "exit status": `FALSE` corresponds to exit status zero and no actions are triggered, `TRUE` is a non-zero exist status and actions can be taken.
+- The `type` component is a string indicating which check function create the status object.
+
+This is illustrated below:
+```{r}
+unclass(pkg_status)
+```
+
+The `format()` and `print()` methods for a `sessioncheck_status` object produce the text displayed to the user in any message, warning, or error:
+
+```{r}
+print(pkg_status)
+```
+
+As a convenience, an `as.data.frame()` method is also supplied:
+
+```{r}
+as.data.frame(pkg_status)
+```
+
+## sessioncheck_sessioncheck objects
+
+Because the `sessioncheck()` function can call multiple checks, the data structure it returns is slightly different. As illustrated below it is a named list of `sessioncheck_status` objects:
+
+```{r}
+lapply(session_check, unclass)
+```
+
+As before, the `format()` and `print()` methods are used to construct the text to be displayed to the user:
+
+```{r}
+print(session_check)
+```
+
+Similarly, there is an `as.data.frame()` method provided as a convenience:
+
+```{r}
+as.data.frame(session_check)
+```

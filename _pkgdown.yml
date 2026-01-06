@@ -32,3 +32,4 @@ articles:
       - articles/why-check-the-r-session
       - articles/customizing-sessioncheck
       - articles/individual-checks
+      - articles/s3-classes
