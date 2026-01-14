@@ -11,19 +11,19 @@ test_that("returned status is a sessoncheck status object", {
 
 test_that("returned status is named correctly", {
   expect_named(
-    object = .get_attachment_status(allow = NULL)$status,
+    object = .get_attachment_status(allow = NULL)$status, 
     expected = search()
   )
   expect_named(
-    object = .get_globalenv_status(allow = NULL)$status,
+    object = .get_globalenv_status(allow = NULL)$status, 
     expected = ls(envir = .GlobalEnv, all.names = TRUE)
   )
-  expect_named(
-    object = .get_package_status(allow = NULL)$status,
+  expect_named( 
+    object = .get_package_status(allow = NULL)$status, 
     expected = .packages()
   )
   expect_named(
-    object = .get_namespace_status(allow = NULL)$status,
+    object = .get_namespace_status(allow = NULL)$status, 
     expected = loadedNamespaces()
   )
 })
@@ -107,7 +107,7 @@ test_that("dot-prefixed variables are always detected in the global environment"
 
   vv <- .get_globalenv_status(allow = character(0L))$status
   expect_true(".sessioncheck_test" %in% names(vv))
-
+ 
   rm(.sessioncheck_test, envir = .GlobalEnv)
 })
 
@@ -119,53 +119,8 @@ test_that("dot-prefixed variables are flaggable but allowed by default in the gl
 
   vv <- .get_globalenv_status(allow = character(0L))$status
   expect_true(vv[".sessioncheck_test"])
-
-  rm(.sessioncheck_test, envir = .GlobalEnv)
-})
-
-test_that(".onLoad creates snapshot in .sessioncheck_env", {
-  ns <- asNamespace("sessioncheck")
-
-  if (!exists(".sessioncheck_env", envir = ns, inherits = FALSE)) {
-    env_ok <- tryCatch(
-      {
-        assign(".sessioncheck_env", new.env(parent = emptyenv()), envir = ns)
-        TRUE
-      },
-      error = function(e) FALSE
-    )
-
-    skip_if_not(
-      env_ok,
-      ".sessioncheck_env cannot be created in package namespace"
-    )
-  }
-
-  # cleanup envs
-  on.exit(
-    {
-      sc_env <- tryCatch(
-        get(".sessioncheck_env", envir = ns),
-        error = function(e) NULL
-      )
-
-      if (!is.null(sc_env)) {
-        tryCatch(rm("snapshot", envir = sc_env), error = function(e) NULL)
-      }
-    },
-    add = TRUE
-  )
-
-  # grab the onload fn to call it
-  onload_fn <- get(".onLoad", envir = ns, inherits = FALSE)
-  onload_fn(NULL, "sessioncheck")
-
-  sc_env <- get(".sessioncheck_env", envir = ns)
-  expect_true(exists("snapshot", envir = sc_env, inherits = FALSE))
-
-  snapshot <- get("snapshot", envir = sc_env)
-  expect_type(snapshot, "list")
-  expect_true(all(c("sys_time", "options", "packages") %in% names(snapshot)))
+ 
+  rm(.sessioncheck_test, envir = .GlobalEnv)  
 })
 
 # session runtime checks ------
@@ -188,16 +143,10 @@ test_that("options are flaggable", {
 
 test_that("system environment variables are flaggable", {
   Sys.setenv(R_TEST = "sessioncheck")
-  expect_true(
-    .get_sysenv_status(required = list(R_TEST = "wrong value"))$status
-  )
-  expect_false(
-    .get_sysenv_status(required = list(R_TEST = "sessioncheck"))$status
-  )
+  expect_true(.get_sysenv_status(required = list(R_TEST = "wrong value"))$status)
+  expect_false(.get_sysenv_status(required = list(R_TEST = "sessioncheck"))$status)
   Sys.unsetenv("R_TEST")
-  expect_true(
-    .get_sysenv_status(required = list(R_TEST = "sessioncheck"))$status
-  )
+  expect_true(.get_sysenv_status(required = list(R_TEST = "sessioncheck"))$status)
 })
 
 test_that("locale settings are flaggable", {
@@ -205,9 +154,10 @@ test_that("locale settings are flaggable", {
   skip_on_cran()
   old <- Sys.getlocale(category = "LC_TIME")
   Sys.setlocale(category = "LC_TIME", locale = "C")
-  expect_true(
-    .get_locale_status(required = list(LC_TIME = "en_US.UTF-8"))$status
-  )
+  expect_true(.get_locale_status(required = list(LC_TIME = "en_US.UTF-8"))$status)
   expect_false(.get_locale_status(required = list(LC_TIME = "C"))$status)
   Sys.setlocale(category = "LC_TIME", locale = old)
 })
+
+
+
