@@ -123,6 +123,51 @@ test_that("dot-prefixed variables are flaggable but allowed by default in the gl
   rm(.sessioncheck_test, envir = .GlobalEnv)  
 })
 
+test_that(".onLoad creates snapshot in .sessioncheck_env", {
+  ns <- asNamespace("sessioncheck")
+
+  if (!exists(".sessioncheck_env", envir = ns, inherits = FALSE)) {
+    env_ok <- tryCatch(
+      {
+        assign(".sessioncheck_env", new.env(parent = emptyenv()), envir = ns)
+        TRUE
+      },
+      error = function(e) FALSE
+    )
+
+    skip_if_not(
+      env_ok,
+      ".sessioncheck_env cannot be created in package namespace"
+    )
+  }
+
+  # cleanup envs
+  on.exit(
+    {
+      sc_env <- tryCatch(
+        get(".sessioncheck_env", envir = ns),
+        error = function(e) NULL
+      )
+
+      if (!is.null(sc_env)) {
+        tryCatch(rm("snapshot", envir = sc_env), error = function(e) NULL)
+      }
+    },
+    add = TRUE
+  )
+
+  # grab the onload fn to call it
+  onload_fn <- get(".onLoad", envir = ns, inherits = FALSE)
+  onload_fn(NULL, "sessioncheck")
+
+  sc_env <- get(".sessioncheck_env", envir = ns)
+  expect_true(exists("snapshot", envir = sc_env, inherits = FALSE))
+
+  snapshot <- get("snapshot", envir = sc_env)
+  expect_type(snapshot, "list")
+  expect_true(all(c("sys_time", "options", "packages") %in% names(snapshot)))
+})
+
 # session runtime checks ------
 
 test_that("session time elapsed is flaggable", {
