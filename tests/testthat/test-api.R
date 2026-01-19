@@ -43,3 +43,24 @@ test_that("sessioncheck() respects user options", {
   expect_equal(ss, ii)
   options(opts)
 })
+
+test_that("sessioncheck() returns a warning if args$action is NULL (the default)", {
+  expect_warning(sessioncheck())
+})
+
+test_that("sessioncheck `checks` argument returns expected results", {
+  checks_to_test <- c("sessiontime", "required_options", "required_locale", "required_sysenv")
+
+  mock_proc_time <- function() c(user = 0, system = 0, elapsed = 86753.09) #sessiontime
+  local_mocked_bindings(proc.time = mock_proc_time, .package = "base") #sessiontime
+  options(print.max = 9000L) #required_options
+  mock_get_locale <- function() "LC_COLLATE=Spanish_United States.utf8;LC_CTYPE=Spanish_United States.utf8;LC_MONETARY=Spanish_United States.utf8;LC_NUMERIC=C;LC_TIME=Spanish_United States.utf8" #required_locale
+  local_mocked_bindings(Sys.getlocale, .package = "base") #required_locale
+  
+  res <- sessioncheck(checks = checks_to_test)
+
+  # TO DO: Add other checks and investigate locale setting console messaging
+  expect_true(any(grepl("86753.09 sec elapsed", names(res$sessiontime$status))))
+
+
+})
