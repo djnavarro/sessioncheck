@@ -63,7 +63,6 @@ test_that("sessioncheck `checks` argument returns expected results", {
   opts_res <- c("print.max" = TRUE)
 
   #required_locale - Issue -not- expected
-  # Pick up here -> debug to track locale movement thru fx
   local_mocked_bindings(.get_locale_status = function(required_locale) "LC_TIME=Spanish_United States.utf8")
   locale_check <- list(LC_TIME = "Spanish_United States.utf8")
   locale_res <- "LC_TIME=Spanish_United States.utf8"
