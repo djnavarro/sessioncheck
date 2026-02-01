@@ -55,6 +55,7 @@ test_that("sessioncheck `checks` argument returns expected results", {
   mock_sessiontime_status <- list(status = c("Session runtime: 86753.09 sec elapsed" = TRUE), type = "sessiontime")
   class(mock_sessiontime_status) <- "sessioncheck_status"
   local_mocked_bindings(.get_sessiontime_status = function(max_sessiontime) mock_sessiontime_status)
+  sessiontime_res <- c("Session runtime: 86753.09 sec elapsed" = TRUE)
 
   #requiredoptions - Issue expected
   options(print.max = 9000L)
@@ -63,10 +64,9 @@ test_that("sessioncheck `checks` argument returns expected results", {
 
   #required_locale - Issue -not- expected
   # Pick up here -> debug to track locale movement thru fx
-  mock_get_locale <- "LC_TIME=Spanish_United States.utf8"
   local_mocked_bindings(.get_locale_status = function(required_locale) "LC_TIME=Spanish_United States.utf8")
   locale_check <- list(LC_TIME = "Spanish_United States.utf8")
-  locale_res <- c("LC_TIME" = FALSE)
+  locale_res <- "LC_TIME=Spanish_United States.utf8"
 
   #required_sysenv - Issue expected
   mandatory_object <- "I should be here"
@@ -81,9 +81,9 @@ test_that("sessioncheck `checks` argument returns expected results", {
     required_sysenv = sysenv_check 
   )
 
-  expect_equal(names(res$sessiontime$status), "Session runtime: 86753.09 sec elapsed")
+  expect_equal(res$sessiontime$status, sessiontime_res)
   expect_equal(res$options$status, opts_res)
-  expect_equal(res$locale$status, locale_res)
+  expect_equal(res$locale, locale_res)
   expect_equal(res$sysenv$status, sysenv_res)
 }
 )
