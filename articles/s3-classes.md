@@ -139,7 +139,7 @@ print(session_check)
 #> Session check results:
 #> - Objects in global environment: obj_status, pkg_status
 #> - Attached packages: sessioncheck
-#> - Attached environments: [no issues]
+#> - Attached environments: [no issues detected]
 ```
 
 Similarly, there is an

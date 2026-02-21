@@ -114,10 +114,11 @@ issues.</p>
 <p>The principle that underpins <strong>sessioncheck</strong> is that
 scripts should not attempt a “clean up” of the environment. The “state”
 of an R session is complicated, and so if your script detects evidence
-that the pre-existing R state isn’t “clean”, the thing it should do is
-produce an error – it is the users responsibility to ensure a clean
-session. The script itself doesn’t have the power to make that happen,
-and it shouldn’t try.</p>
+that the pre-existing R state isn’t “clean”, it should notify the human
+user that there might be a problem. It is the <em>users</em>
+responsibility to ensure that the session is clean. A script doesn’t
+have the power to make that happen, and it shouldn’t try. The best it
+can possibly do is call your attention to the issue.</p>
 <p>If you accept this as the core principle, then the thing you want to
 do – within that little snippet of code you insert at the top of the
 script – is to have your script look at the state of the R session, and
@@ -132,19 +133,20 @@ guaranteed that this approach is strictly superior to using
 <code>rm(list = ls())</code>.</p>
 <p>The core idea is very simple. In the typical case, you wouldn’t load
 the package with <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code>. Instead, you would put this as
-the very line of their R script:</p>
+the very line of your R script:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span></code></pre></div>
 <p>When executed in a clean R session this function does nothing, and
 the script continues to run as it normally would. However, if the
 session is “contaminated” – for some specific interpretation of what
 that means to call the session “contaminated” – it will produce an
-error, prevent the script from running, and prompt the user to consider
-restarting the R session.</p>
-<p>To illustrate what happens in a contaminated R session, I’ll do two
+error, prevent the script from running, and prompt the human user to
+consider restarting the R session.</p>
+<p>To illustrate what happens in a contaminated R session, I’ll do a few
 things that most R users would agree fit the definition of a
-contaminated R environment: creating objects in the global environment
-and attaching packages or environments:</p>
+“contaminated” R environment: creating objects in the global
+environment, and attaching packages and environments to the search
+path.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/sessioncheck" class="external-link">sessioncheck</a></span><span class="op">)</span>                     <span class="co"># trigger check_attached_packages</span></span>
 <span><span class="va">my_data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>T <span class="op">=</span> <span class="cn">FALSE</span>, F <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co"># trigger check_globalenv_objects</span></span>
@@ -152,38 +154,41 @@ and attaching packages or environments:</p>
 <span><span class="co">#&gt; The following objects are masked from package:base:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     F, T</span></span></code></pre></div>
-<p>These prior actions vary considerably in their riskiness. For the
-example above, here’s a quick risk assessment</p>
+<p>These actions vary considerably in their riskiness. For the example
+above, here’s a quick risk assessment:</p>
 <ul>
-<li><p><strong>Attaching packages</strong>. Yes, it’s possible that
-attaching the <strong>sessioncheck</strong> package with
-<code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> might cause problems, but I’ve tried to design it
-safely so it likely won’t be a problem. Nevertheless, it is still
-something where the script should notify the user. By design, the
-typical use case for this package is to call
-<code><a href="../reference/sessioncheck.html">sessioncheck::sessioncheck()</a></code>. In the normal course of
-events you wouldn’t be writing <code><a href="https://github.com/djnavarro/sessioncheck" class="external-link">library(sessioncheck)</a></code> in
-your script, so yes, the user should probably be informed, as an act of
-politeness.</p></li>
-<li><p><strong>Adding to the global environment</strong>. Adding the
-<code>my_data</code> data frame as a variable in the global environment
-is not in itself a bad thing, but in practice when you’re running the
-same script over and over in an interactive context – which is a thing
-that data analysts have to do a lot, much more so than software
-engineers – you can quickly build up a lot of “detritus”, bits and
-pieces and objects left behind from code you tried out previously, and
-over time it becomes a big problem. The user should definitely be
-informed, because there are serious risks here.</p></li>
+<li><p><strong>Attaching packages</strong>. It’s possible that attaching
+the <strong>sessioncheck</strong> package with <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code>
+might cause problems, but the risk varies a lot depending on what the
+package does. I’ve tried to design <strong>sessioncheck</strong> safely,
+so most likely this specific command won’t be a problem. But that won’t
+always be true, and therefore your script should notify you about any
+unexpected packages that it detects. In any case, for the most part you
+wouldn’t bother attaching this package. The typical use case for this
+package is to call <code><a href="../reference/sessioncheck.html">sessioncheck::sessioncheck()</a></code> once, at
+the top of the script. In the normal course of events you wouldn’t be
+writing <code><a href="https://github.com/djnavarro/sessioncheck" class="external-link">library(sessioncheck)</a></code> in your script, so yes, the
+user should probably be informed. It’s just politeness!</p></li>
+<li><p><strong>Adding objects to the global environment</strong>. Adding
+the <code>my_data</code> data frame as a variable in the global
+environment is not in itself a bad thing, but in practice when you’re
+running the same script over and over in an interactive context – which
+is a thing that data analysts have to do a lot, much more so than
+software engineers – you can quickly build up a lot of “detritus”, bits
+and pieces and objects left behind from code you tried out previously.
+Over time it becomes a big problem, because it’s harder for you to
+reason about what’s going on in your data. The user should definitely be
+informed, because there are real risks here.</p></li>
 <li>
 <p><strong>Attaching a (malicious!) environment to the search
 path</strong>. Attaching data sets using <code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code> has been
 considered an extremely high-risk behavior in R for a long time. It
 creates chaos in the R session and the potential for horrific outcomes
 is very high. The example I constructed above is deliberately malicious,
-just to highlight how bad it can be. If your script executes in an
-environment when <code>attach(my_data)</code> has previously been
-executed, you can no longer rely on R to make sensible judgements about
-arithmetic:</p>
+in an attempt to highlight just how bad <code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code> can be. If
+your script executes in an environment when <code>attach(my_data)</code>
+has previously been executed, you can no longer rely on R to make
+sensible judgements about arithmetic:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">(</span><span class="fl">2</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">5</span><span class="op">)</span> <span class="op">==</span> <span class="cn">T</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
@@ -231,16 +236,16 @@ environment:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="cn">T</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
-<p>Even though <code>rm(list = ls())</code> has been invoked, the R
-session is not safe, and it will corrupt the behavior of any script that
-executes in this session. Importantly, notice that because
+<p>Even though <code>rm(list = ls())</code> has been invoked, <em>the R
+session is not safe</em>, and it will corrupt the behavior of any script
+that executes in this session. Importantly, notice that because
 <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> is stricter than the <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code>
 approach, it still produces an error:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Session check results:</span></span>
-<span><span class="co">#&gt; - Objects in global environment: [no issues]</span></span>
+<span><span class="co">#&gt; - Objects in global environment: [no issues detected]</span></span>
 <span><span class="co">#&gt; - Attached packages: sessioncheck</span></span>
 <span><span class="co">#&gt; - Attached environments: my_data</span></span></code></pre></div>
 <p>Under normal circumstances the thing that the user – a human being –

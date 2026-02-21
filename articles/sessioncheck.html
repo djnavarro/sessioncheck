@@ -158,8 +158,8 @@ default behavior:</p>
 <span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Session check results:</span></span>
 <span><span class="co">#&gt; - Objects in global environment: visible_1, visible_2</span></span>
-<span><span class="co">#&gt; - Attached packages: [no issues]</span></span>
-<span><span class="co">#&gt; - Attached environments: [no issues]</span></span></code></pre></div>
+<span><span class="co">#&gt; - Attached packages: [no issues detected]</span></span>
+<span><span class="co">#&gt; - Attached environments: [no issues detected]</span></span></code></pre></div>
 <p>The first line of this output indicates that the script has detected
 <code>visible_1</code> and <code>visible_2</code> in the global
 environment, and issues a warning to suggest that the R session may be
@@ -171,8 +171,8 @@ clean:</p>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Session check results:</span></span>
 <span><span class="co">#&gt; - Objects in global environment: visible_1, visible_2</span></span>
-<span><span class="co">#&gt; - Attached packages: [no issues]</span></span>
-<span><span class="co">#&gt; - Attached environments: [no issues]</span></span></code></pre></div>
+<span><span class="co">#&gt; - Attached packages: [no issues detected]</span></span>
+<span><span class="co">#&gt; - Attached environments: [no issues detected]</span></span></code></pre></div>
 <p>By default, <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> runs three checks, and
 reports the results if any of the checks do not pass. The first one is
 the global environment check discussed above. The second one checks for

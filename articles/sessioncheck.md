@@ -95,8 +95,8 @@ visible_2 <- "so will this"
 sessioncheck::sessioncheck()
 #> Warning: Session check results:
 #> - Objects in global environment: visible_1, visible_2
-#> - Attached packages: [no issues]
-#> - Attached environments: [no issues]
+#> - Attached packages: [no issues detected]
+#> - Attached environments: [no issues detected]
 ```
 
 The first line of this output indicates that the script has detected
@@ -110,8 +110,8 @@ sessioncheck::sessioncheck(action = "error")
 #> Error:
 #> ! Session check results:
 #> - Objects in global environment: visible_1, visible_2
-#> - Attached packages: [no issues]
-#> - Attached environments: [no issues]
+#> - Attached packages: [no issues detected]
+#> - Attached environments: [no issues detected]
 ```
 
 By default,
