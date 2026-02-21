@@ -1,6 +1,6 @@
 Package: sessioncheck
 Title: Checks Session Status
-Version: 0.0.0.9000
+Version: 0.1
 Authors@R: 
     person("Danielle", "Navarro", , "djnavarro@protonmail.com", role = c("aut", "cre", "cph"))
 Description:
