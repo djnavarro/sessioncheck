@@ -8,5 +8,5 @@
 ^pkgdown$
 ^\.github$
 ^codecov\.yml$
-^vignettes/articles$
+^vignettes$
 ^cran-comments\.md$
