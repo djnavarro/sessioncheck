@@ -10,3 +10,4 @@
 ^codecov\.yml$
 ^vignettes$
 ^cran-comments\.md$
+^CRAN-SUBMISSION$
