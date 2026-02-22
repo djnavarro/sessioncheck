@@ -309,7 +309,7 @@ illustrated below:
 
 ``` r
 check_sessiontime(max_sessiontime = .0001)
-#> Warning: Session runtime: 1.695 sec elapsed
+#> Warning: Session runtime: 1.697 sec elapsed
 ```
 
 Note that this check is not one of the default checks performed by the
