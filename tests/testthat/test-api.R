@@ -43,3 +43,47 @@ test_that("sessioncheck() respects user options", {
   expect_equal(ss, ii)
   options(opts)
 })
+
+test_that("sessioncheck() returns a warning if args$action is NULL (the default)", {
+  expect_warning(sessioncheck())
+})
+
+test_that("sessioncheck `checks` argument returns expected results", {
+  checks_to_test <- c("sessiontime", "required_options", "required_locale", "required_sysenv")
+
+  #sessiontime - Specified time expected
+  mock_sessiontime_status <- list(status = c("Session runtime: 86753.09 sec elapsed" = TRUE), type = "sessiontime")
+  class(mock_sessiontime_status) <- "sessioncheck_status"
+  local_mocked_bindings(.get_sessiontime_status = function(max_sessiontime) mock_sessiontime_status)
+  sessiontime_res <- c("Session runtime: 86753.09 sec elapsed" = TRUE)
+
+  #requiredoptions - Issue expected
+  options(print.max = 9000L)
+  opts_check <- list(print.max = 500)
+  opts_res <- c("print.max" = TRUE)
+
+  #required_locale - Issue -not- expected
+  local_mocked_bindings(.get_locale_status = function(required_locale) "LC_TIME=Spanish_United States.utf8")
+  locale_check <- list(LC_TIME = "Spanish_United States.utf8")
+  locale_res <- "LC_TIME=Spanish_United States.utf8"
+
+  #required_sysenv - Issue expected
+  mandatory_object <- "I should be here"
+  sysenv_check <- list(mandatory_object = "I should also be here")
+  sysenv_res <- c("mandatory_object" = TRUE)
+
+  res <- sessioncheck(
+    action = "none",
+    checks = checks_to_test,
+    required_options = opts_check,
+    required_locale = locale_check,
+    required_sysenv = sysenv_check 
+  )
+
+  expect_equal(res$sessiontime$status, sessiontime_res)
+  expect_equal(res$options$status, opts_res)
+  expect_equal(res$locale, locale_res)
+  expect_equal(res$sysenv$status, sysenv_res)
+}
+)
+
