@@ -5,9 +5,9 @@ articles:
   articles/customizing-sessioncheck: customizing-sessioncheck.html
   articles/individual-checks: individual-checks.html
   articles/s3-classes: s3-classes.html
-  sessioncheck: sessioncheck.html
+  articles/sessioncheck: sessioncheck.html
   articles/why-check-the-r-session: why-check-the-r-session.html
-last_built: 2026-02-22T00:31Z
+last_built: 2026-02-22T01:17Z
 urls:
   reference: https://sessioncheck.djnavarro.net/reference
   article: https://sessioncheck.djnavarro.net/articles
