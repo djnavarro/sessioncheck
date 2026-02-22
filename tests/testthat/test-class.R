@@ -4,7 +4,14 @@ test_that("constructors work for valid input", {
 })
 
 gg <- new_status(status = c(x = TRUE), type = "globalenv")  
-ss <- new_sessioncheck(gg)
+nm <- new_status(status = c(x = TRUE), type = "namespace") 
+pac <- new_status(status = c(x = TRUE), type = "package")
+att <- new_status(status = c(x = TRUE), type = "attachment")
+st <- new_status(status = c(x = TRUE), type = "sessiontime")
+opt <- new_status(status = c(x = TRUE), type = "options")
+syse <- new_status(status = c(x = TRUE), type = "sysenv")
+loc <- new_status(status = c(x = TRUE), type = "locale")
+ss <- new_sessioncheck(gg, nm, pac, att, st, opt, syse, loc)
 
 test_that("constructors return objects with expected structure", {
   expect_s3_class(gg, "sessioncheck_status")
@@ -14,6 +21,13 @@ test_that("constructors return objects with expected structure", {
 
 test_that("print methods return formatted objects", {
   expect_equal(capture.output(print(gg)), format(gg))
+  expect_equal(capture.output(print(nm)), format(nm))
+  expect_equal(capture.output(print(pac)), format(pac))
+  expect_equal(capture.output(print(att)), format(att))
+  expect_equal(capture.output(print(st)), format(st))
+  expect_equal(capture.output(print(opt)), format(opt))
+  expect_equal(capture.output(print(syse)), format(syse))
+  expect_equal(capture.output(print(loc)), format(loc))
 })
 
 test_that("print methods invisibly return original objects", {
