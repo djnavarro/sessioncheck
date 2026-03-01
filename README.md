@@ -10,6 +10,8 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![Codecov test
 coverage](https://codecov.io/gh/djnavarro/sessioncheck/graph/badge.svg)](https://app.codecov.io/gh/djnavarro/sessioncheck)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/sessioncheck)](https://CRAN.R-project.org/package=sessioncheck)
 <!-- badges: end -->
 
 The goal of **sessioncheck** is to provide simple tools that can be
