@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/djnavarro/sessioncheck/blob/v0.1/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/djnavarro/sessioncheck/blob/main/DESCRIPTION)
 
 Navarro D (2026). *sessioncheck: Checks Session Status*. R package
 version 0.1, <https://github.com/djnavarro/sessioncheck>.
