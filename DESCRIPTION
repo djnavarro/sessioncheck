@@ -1,8 +1,10 @@
 Package: sessioncheck
 Title: Checks Session Status
-Version: 0.1
-Authors@R: 
-    person("Danielle", "Navarro", , "djnavarro@protonmail.com", role = c("aut", "cre", "cph"))
+Version: 0.1.0.9000
+Authors@R: c(
+              person("Danielle", "Navarro", , "djnavarro@protonmail.com", role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0001-7648-6578")),
+              person("Meghan", "Harris", , "meghanha01@gmail.com", role = c("ctb"), comment = c(ORCID = "0000-0003-3922-8101"))
+            )
 Description:
     Provides tools to check variables contained in the user environment, and
     inspect the currently loaded package namespaces. The intended use is to
@@ -11,7 +13,7 @@ Description:
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 URL: https://github.com/djnavarro/sessioncheck, https://sessioncheck.djnavarro.net/
 BugReports: https://github.com/djnavarro/sessioncheck/issues
 Suggests: 
