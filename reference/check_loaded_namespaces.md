@@ -49,6 +49,6 @@ namespace must be loaded in order to call the function.
 
 ``` r
 check_loaded_namespaces(action = "message")
-#> Loaded namespaces: jsonlite, xml2, jquerylib, textshaping, and 39 more
+#> Loaded namespaces: jsonlite, xml2, jquerylib, textshaping, and 40 more
  
 ```
