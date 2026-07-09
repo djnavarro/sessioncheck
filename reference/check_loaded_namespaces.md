@@ -28,11 +28,12 @@ Invisibly returns an object of class `sessioncheck_status`.
 
 ## Details
 
-(packages that have been loaded but not attached). Regardless of the
-value of `allow_loaded_namespaces`, R packages that have "base" priority
-(e.g., **base**, **utils**, and **grDevices**) do not trigger an action,
-nor does the **sessioncheck** package itself, since the package
-namespace must be loaded in order to call the function.
+This checker inspects the list of loaded namespaces (packages that have
+been loaded but not attached). Regardless of the value of
+`allow_loaded_namespaces`, R packages that have "base" priority (e.g.,
+**base**, **utils**, and **grDevices**) do not trigger an action, nor
+does the **sessioncheck** package itself, since the package namespace
+must be loaded in order to call the function.
 
 ## See also
 

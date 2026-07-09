@@ -78,7 +78,8 @@ are "allowed", and will not trigger an action if loaded via namespace.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>(packages that have been loaded but not attached). Regardless of the value of
+    <p>This checker inspects the list of loaded namespaces
+(packages that have been loaded but not attached). Regardless of the value of
 <code>allow_loaded_namespaces</code>, R packages that have "base" priority (e.g., <strong>base</strong>, <strong>utils</strong>, and
 <strong>grDevices</strong>) do not trigger an action, nor does the <strong>sessioncheck</strong> package itself,
 since the package namespace must be loaded in order to call the function.</p>
