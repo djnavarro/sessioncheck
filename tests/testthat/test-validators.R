@@ -37,3 +37,18 @@ test_that("valid `tol` arguments are permitted", {
   expect_no_error(.validate_tol(tol = 123L))
   expect_no_error(.validate_tol(tol = Inf))
 })
+
+test_that("invalid `required` arguments are detected", {
+  expect_error(.validate_required(required = "a"))         # not a list
+  expect_error(.validate_required(required = 1L))          # not a list
+  expect_error(.validate_required(required = list(1L)))    # unnamed
+  expect_error(.validate_required(required = list("a")))   # unnamed
+  expect_error(.validate_required(required = list(a = 1L, 2L)))  # partially unnamed (empty name)
+})
+
+test_that("valid `required` arguments are permitted", {
+  expect_no_error(.validate_required(required = NULL))
+  expect_no_error(.validate_required(required = list()))
+  expect_no_error(.validate_required(required = list(a = 1L)))
+  expect_no_error(.validate_required(required = list(a = 1L, b = "x")))
+})
