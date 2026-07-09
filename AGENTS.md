@@ -131,6 +131,10 @@ pkgdown::build_site()
 
 Snapshot tests live in `tests/testthat/_snaps/`. Update them with `testthat::snapshot_review()` or `devtools::test()` after confirming changes are intentional.
 
+### Git and GitHub
+
+**Always ask the user for confirmation before making a `git commit` or `git push`, and before opening or modifying a pull request.** Prepare the changes (edit files, run tests, stage with `git add`) and then pause to show the user what will be committed and ask whether to proceed. Do not commit or push autonomously, even when a task description implies it or the changes are small.
+
 ## Testing Patterns
 
 - **Framework**: testthat edition 3.
