@@ -22,6 +22,7 @@ of them has a second argument that can be used to customize the behavior
 of the check.
 
 ``` r
+
 library(sessioncheck)
 ```
 
@@ -43,12 +44,14 @@ environment is considered clean and nothing happens when
 is called:
 
 ``` r
+
 check_globalenv_objects()
 ```
 
 If we add variables to the global environment, the warning is triggered:
 
 ``` r
+
 visible_1 <- "this will get detected"
 visible_2 <- "so will this"
 .hidden_1 <- "but this will not"
@@ -73,6 +76,7 @@ detect all variables in the global environment regardless of their name,
 set `allow_globalenv_objects = ""`:
 
 ``` r
+
 check_globalenv_objects(allow_globalenv_objects = "")
 #> Warning: Objects in global environment: .hidden_1, .Random.seed, visible_1,
 #> visible_2
@@ -83,6 +87,7 @@ This time the check detects the `.hidden_1` variable and the
 convert the result to a data frame:
 
 ``` r
+
 as.data.frame(check_globalenv_objects(action = "none"))
 #>        type       entity status
 #> 1 globalenv    .hidden_1  FALSE
@@ -107,6 +112,7 @@ The role of
 is to inspect the search path to see which packages have been attached:
 
 ``` r
+
 check_attached_packages()
 #> Warning: Attached packages: sessioncheck
 ```
@@ -116,6 +122,7 @@ always ignored), the **sessioncheck** package has been attached. To see
 this a little more explicitly, we can coerce the output to a data frame:
 
 ``` r
+
 as.data.frame(check_attached_packages())
 #> Warning: Attached packages: sessioncheck
 #>      type       entity status
@@ -141,6 +148,7 @@ The user can customize which packages should be permitted, using the
 whitelist **sessioncheck**, as illustrated in the example below:
 
 ``` r
+
 check_attached_packages(allow_attached_packages = "sessioncheck")
 ```
 
@@ -170,6 +178,7 @@ As with the other check functions, when called in a clean R session
 does nothing:
 
 ``` r
+
 check_attached_environments()
 ```
 
@@ -179,6 +188,7 @@ detected (and ignored), the global environment has been detected (and
 ignored), and two “special” environments have been detected and ignored:
 
 ``` r
+
 as.data.frame(check_attached_environments())
 #>          type               entity status
 #> 1  attachment           .GlobalEnv  FALSE
@@ -202,6 +212,7 @@ would prefer to have these trigger an action, the
 the names of allowed non-package environments:
 
 ``` r
+
 check_attached_environments(allow_attached_environments = "Autoloads")
 #> Warning: Attached environments: tools:callr
 ```
@@ -212,8 +223,9 @@ The warning is now triggered because `"Autoloads"` is whitelisted, but
 ### Check loaded namespaces
 
 ``` r
+
 check_loaded_namespaces()
-#> Warning: Loaded namespaces: digest, desc, R6, fastmap, and 19 more
+#> Warning: Loaded namespaces: digest, desc, R6, fastmap, and 20 more
 ```
 
 To understand this result, it is important to recall that the current
@@ -224,6 +236,7 @@ search path. To see this in a little more detail, we can coerce the
 result to a data frame:
 
 ``` r
+
 as.data.frame(check_loaded_namespaces(action = "none"))
 #>         type       entity status
 #> 1  namespace       digest   TRUE
@@ -255,10 +268,11 @@ as.data.frame(check_loaded_namespaces(action = "none"))
 #> 27 namespace        bslib   TRUE
 #> 28 namespace     evaluate   TRUE
 #> 29 namespace         yaml   TRUE
-#> 30 namespace     jsonlite   TRUE
-#> 31 namespace        rlang   TRUE
-#> 32 namespace           fs   TRUE
-#> 33 namespace     datasets  FALSE
+#> 30 namespace         otel   TRUE
+#> 31 namespace     jsonlite   TRUE
+#> 32 namespace        rlang   TRUE
+#> 33 namespace           fs   TRUE
+#> 34 namespace     datasets  FALSE
 ```
 
 Notice that namespaces associated with base R are listed (e.g.,
@@ -273,6 +287,7 @@ To permit those namespaces to be loaded without triggering an action,
 use the `allow_loaded_namespaces` argument:
 
 ``` r
+
 check_loaded_namespaces(
   allow_loaded_namespaces = c(
     "digest", "desc", "R6", "fastmap", "xfun", "cachem",
@@ -282,6 +297,7 @@ check_loaded_namespaces(
     "jsonlite", "rlang", "fs", "htmlwidgets"
   )
 )
+#> Warning: Loaded namespaces: otel
 ```
 
 Having whitelisted these namespaces, the check now passes and the
@@ -298,6 +314,7 @@ indicator that previous actions have taken place in the R session, and
 in some circumstances it may be useful check this.
 
 ``` r
+
 check_sessiontime()
 ```
 
@@ -308,8 +325,9 @@ is supplied, it defaults to 300 seconds. The customization is
 illustrated below:
 
 ``` r
+
 check_sessiontime(max_sessiontime = .0001)
-#> Warning: Session runtime: 1.755 sec elapsed
+#> Warning: Session runtime: 1.767 sec elapsed
 ```
 
 Note that this check is not one of the default checks performed by the
@@ -328,6 +346,7 @@ checks do nothing: the user must manually specify the precise check that
 should be performed.
 
 ``` r
+
 check_required_options()
 check_required_locale()
 check_required_sysenv()

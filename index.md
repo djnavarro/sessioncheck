@@ -13,6 +13,7 @@ You can install the development version of sessioncheck from
 [GitHub](https://github.com/) with:
 
 ``` r
+
 # install.packages("pak")
 pak::pak("djnavarro/sessioncheck")
 ```
@@ -24,6 +25,7 @@ it with [`library()`](https://rdrr.io/r/base/library.html). Instead, a
 single line of code like this would be added at the top of the script:
 
 ``` r
+
 sessioncheck::sessioncheck()
 ```
 

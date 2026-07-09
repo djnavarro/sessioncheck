@@ -6,6 +6,7 @@ detects signs that the script is not being executed in a clean R
 session:
 
 ``` r
+
 # include this as the first line of a script
 # as a safer alternative to using rm(list=ls())
 sessioncheck::sessioncheck()
@@ -76,6 +77,7 @@ considered “clean”. When
 is called in a clean state, no message is printed:
 
 ``` r
+
 sessioncheck::sessioncheck()
 ```
 
@@ -88,6 +90,7 @@ but for the purposes of this article we’ll just look at the default
 behavior:
 
 ``` r
+
 visible_1 <- "this will get detected"
 visible_2 <- "so will this"
 .hidden_1 <- "but this will not"
@@ -106,6 +109,7 @@ upgraded to an error if so desired, to ensure that the script will
 refuse to run if the R session is not deemed to be clean:
 
 ``` r
+
 sessioncheck::sessioncheck(action = "error")
 #> Error:
 #> ! Session check results:
@@ -127,6 +131,7 @@ inadvertently calling the
 illustrated in the following example:
 
 ``` r
+
 require(knitr) # non-base packages are detected
 #> Loading required package: knitr
 require(stats) # base R packages are ignored

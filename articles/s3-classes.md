@@ -1,6 +1,7 @@
 # S3 classes and methods
 
 ``` r
+
 library(sessioncheck)
 ```
 
@@ -12,6 +13,7 @@ individual check functions return objects of class
 `sessioncheck_status`.
 
 ``` r
+
 pkg_status <- check_attached_packages(action = "none")
 obj_status <- check_globalenv_objects(action = "none") 
 session_check <- sessioncheck(action = "none")
@@ -47,6 +49,7 @@ components:
 This is illustrated below:
 
 ``` r
+
 unclass(pkg_status)
 #> $status
 #> sessioncheck        stats     graphics    grDevices        utils     datasets 
@@ -64,6 +67,7 @@ The [`format()`](https://rdrr.io/r/base/format.html) and
 any message, warning, or error:
 
 ``` r
+
 print(pkg_status)
 #> Attached packages: sessioncheck
 ```
@@ -73,6 +77,7 @@ As a convenience, an
 also supplied:
 
 ``` r
+
 as.data.frame(pkg_status)
 #>      type       entity status
 #> 1 package sessioncheck   TRUE
@@ -94,6 +99,7 @@ slightly different. As illustrated below it is a named list of
 `sessioncheck_status` objects:
 
 ``` r
+
 lapply(session_check, unclass)
 #> $globalenv
 #> $globalenv$status
@@ -135,6 +141,7 @@ As before, the [`format()`](https://rdrr.io/r/base/format.html) and
 construct the text to be displayed to the user:
 
 ``` r
+
 print(session_check)
 #> Session check results:
 #> - Objects in global environment: obj_status, pkg_status
@@ -147,6 +154,7 @@ Similarly, there is an
 provided as a convenience:
 
 ``` r
+
 as.data.frame(session_check)
 #>          type               entity status
 #> 1   globalenv         .Random.seed  FALSE

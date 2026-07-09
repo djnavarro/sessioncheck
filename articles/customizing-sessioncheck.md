@@ -10,6 +10,7 @@ and via the `checks` argument, which specifies which checks should be
 performed. The default behaviour corresponds to this:
 
 ``` r
+
 sessioncheck::sessioncheck(
   action = "warn",
   checks = c(
@@ -53,12 +54,13 @@ Several other options can be specified:
 For example, this checks the loaded namespaces only:
 
 ``` r
+
 sessioncheck::sessioncheck(
   action = "warn",
   checks = "loaded_namespaces"
 )
 #> Warning: Session check results:
-#> - Loaded namespaces: digest, desc, R6, fastmap, and 19 more
+#> - Loaded namespaces: digest, desc, R6, fastmap, and 20 more
 ```
 
 The individual checks can themselves be customized. Each check function
@@ -67,6 +69,7 @@ can be passed to the check function via `...`. For example, you can do
 this:
 
 ``` r
+
 sessioncheck::sessioncheck(
   action = "warn",
   checks = c("loaded_namespaces", "required_options"),
@@ -74,7 +77,7 @@ sessioncheck::sessioncheck(
   required_options = list(scipen = 0L, max.print = 50L)
 )
 #> Warning: Session check results:
-#> - Loaded namespaces: digest, desc, R6, fastmap, and 17 more
+#> - Loaded namespaces: digest, desc, R6, fastmap, and 18 more
 #> - Unexpected options: max.print
 ```
 
@@ -102,6 +105,7 @@ be specified via [`options()`](https://rdrr.io/r/base/options.html). For
 example, you could include something like this in the `.Rprofile`:
 
 ``` r
+
 options(
   sessioncheck = list(
     action = "message",
@@ -117,9 +121,10 @@ When called,
 will now use these values:
 
 ``` r
+
 sessioncheck::sessioncheck()
 #> Session check results:
-#> - Loaded namespaces: digest, desc, R6, fastmap, and 17 more
+#> - Loaded namespaces: digest, desc, R6, fastmap, and 18 more
 #> - Unexpected options: max.print
 ```
 

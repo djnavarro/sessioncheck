@@ -1,5 +1,5 @@
-pandoc: 3.1.11
-pkgdown: 2.2.0
+pandoc: 3.8.3
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   articles/customizing-sessioncheck: customizing-sessioncheck.html
@@ -7,7 +7,7 @@ articles:
   articles/s3-classes: s3-classes.html
   articles/sessioncheck: sessioncheck.html
   articles/why-check-the-r-session: why-check-the-r-session.html
-last_built: 2026-03-21T20:59Z
+last_built: 2026-07-09T23:07Z
 urls:
   reference: https://sessioncheck.djnavarro.net/reference
   article: https://sessioncheck.djnavarro.net/articles

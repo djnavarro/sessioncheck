@@ -61,6 +61,7 @@ package with [`library()`](https://rdrr.io/r/base/library.html).
 Instead, you would put this as the very line of your R script:
 
 ``` r
+
 sessioncheck::sessioncheck("error")
 ```
 
@@ -77,6 +78,7 @@ things that most R users would agree fit the definition of a
 environment, and attaching packages and environments to the search path.
 
 ``` r
+
 library(sessioncheck)                     # trigger check_attached_packages
 my_data = data.frame(T = FALSE, F = TRUE) # trigger check_globalenv_objects
 attach(my_data)                           # trigger check_attached_environments
@@ -128,6 +130,7 @@ above, here’s a quick risk assessment:
   judgements about arithmetic:
 
   ``` r
+
   (2 + 2 == 5) == T
   #> [1] TRUE
   ```
@@ -138,6 +141,7 @@ above, here’s a quick risk assessment:
   no longer rely on the shorthand that assumes `T == TRUE`. Indeed:
 
   ``` r
+
   T == TRUE
   #> [1] FALSE
   ```
@@ -145,6 +149,7 @@ above, here’s a quick risk assessment:
   and in fact:
 
   ``` r
+
   T
   #> [1] FALSE
   ```
@@ -160,6 +165,7 @@ what happens when
 is called in a contaminated environment:
 
 ``` r
+
 sessioncheck::sessioncheck("error")
 #> Error:
 #> ! Session check results:
@@ -178,6 +184,7 @@ By way of comparison, consider what would happen if the traditional
 only one of the three problems:
 
 ``` r
+
 rm(list = ls())
 ```
 
@@ -187,6 +194,7 @@ mean `TRUE` will now break, because the
 malicious environment:
 
 ``` r
+
 T
 #> [1] FALSE
 ```
@@ -199,6 +207,7 @@ is stricter than the [`rm()`](https://rdrr.io/r/base/rm.html) approach,
 it still produces an error:
 
 ``` r
+
 sessioncheck::sessioncheck("error")
 #> Error:
 #> ! Session check results:
@@ -220,6 +229,7 @@ created the contaminated R session, she also knows how to reverse it in
 an automated fashion:
 
 ``` r
+
 detach("my_data")
 detach("package:sessioncheck")
 sessioncheck::sessioncheck("error")
