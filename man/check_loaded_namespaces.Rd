@@ -21,6 +21,7 @@ Individual session check function that inspects the loaded namespaces.
 Session checkers can produce errors, warnings, or messages if requested.
 }
 \details{
+This checker inspects the list of loaded namespaces
 (packages that have been loaded but not attached). Regardless of the value of
 \code{allow_loaded_namespaces}, R packages that have "base" priority (e.g., \strong{base}, \strong{utils}, and
 \strong{grDevices}) do not trigger an action, nor does the \strong{sessioncheck} package itself,

@@ -40,7 +40,7 @@ sessioncheck <- function(
   ...
 ) {
   args <- .parse_args(action = action, checks = checks, ...)
-  .validate_action(action, allow_null = TRUE)
+  .validate_action(args$action, allow_null = TRUE)
   if (is.null(args$action)) args$action <- "warn"
   if (is.null(args$checks)) args$checks <- c("globalenv_objects", "attached_packages", "attached_environments")
 
@@ -115,7 +115,7 @@ check_attached_packages <- function(action = "warn", allow_attached_packages = N
 #' check_loaded_namespaces(action = "message")
 #'  
 #' @details
-# 'This checker inspects the list of loaded namespaces 
+#' This checker inspects the list of loaded namespaces 
 #' (packages that have been loaded but not attached). Regardless of the value of 
 #' `allow_loaded_namespaces`, R packages that have "base" priority (e.g., **base**, **utils**, and 
 #' **grDevices**) do not trigger an action, nor does the **sessioncheck** package itself,

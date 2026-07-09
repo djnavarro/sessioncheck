@@ -36,7 +36,7 @@ format.sessioncheck_status <- function(x, ...) {
   if (x$type == "sessiontime") prefix <- "Session runtime:"
   if (x$type == "options")     prefix <- "Unexpected options:"
   if (x$type == "sysenv")      prefix <- "Unexpected system environment variables:"
-  if (x$type == "locale")      prefix <- "Unexpected locale setttings:"
+  if (x$type == "locale")      prefix <- "Unexpected locale settings:"
   .message_text(prefix, x$status)
 }
 

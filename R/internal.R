@@ -25,6 +25,12 @@
 
 .validate_required <- function(required) {
   stopifnot("`required` must be a list or NULL" = is.list(required) | is.null(required))
+  if (!is.null(required) && length(required) > 0L) {
+    stopifnot(
+      "`required` must be a named list" = 
+        !is.null(names(required)) && !any(names(required) == "")
+    )
+  }
 }
 
 # status checkers: packages and namespaces ------
