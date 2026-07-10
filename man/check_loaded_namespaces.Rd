@@ -33,7 +33,6 @@ check_loaded_namespaces(action = "message")
 }
 \seealso{
 \code{\link[=check_attached_packages]{check_attached_packages()}},
-\code{\link[=check_loaded_namespaces]{check_loaded_namespaces()}},
 \code{\link[=check_globalenv_objects]{check_globalenv_objects()}},
 \code{\link[=check_attached_environments]{check_attached_environments()}},
 \code{\link[=check_sessiontime]{check_sessiontime()}},

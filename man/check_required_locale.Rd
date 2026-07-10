@@ -21,7 +21,7 @@ Individual session check function that inspects the locale settings.
 Session checkers can produce errors, warnings, or messages if requested.
 }
 \examples{
-check_required_locale(action = "message", required = list(LC_TIME = "en_US.UTF-8"))
+check_required_locale(action = "message", required_locale = list(LC_TIME = "en_US.UTF-8"))
 
 }
 \seealso{
@@ -31,6 +31,5 @@ check_required_locale(action = "message", required = list(LC_TIME = "en_US.UTF-8
 \code{\link[=check_attached_environments]{check_attached_environments()}},
 \code{\link[=check_sessiontime]{check_sessiontime()}},
 \code{\link[=check_required_options]{check_required_options()}},
-\code{\link[=check_required_locale]{check_required_locale()}},
 \code{\link[=check_required_sysenv]{check_required_sysenv()}}
 }
