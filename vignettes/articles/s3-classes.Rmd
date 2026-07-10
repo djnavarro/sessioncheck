@@ -32,7 +32,7 @@ Both classes have a `format()` method and a `print()` method, and both are coerc
 Internally, a `sessioncheck_status` object is a named list with two components:
 
 - The `status` component is a named logical vector where names correspond to detected entities, and values that indicate whether an action is triggered by that entity. It is intended to be roughly analogous to an "exit status": `FALSE` corresponds to exit status zero and no actions are triggered, `TRUE` is a non-zero exist status and actions can be taken.
-- The `type` component is a string indicating which check function create the status object.
+- The `type` component is a string indicating which check function created the status object.
 
 This is illustrated below:
 ```{r}

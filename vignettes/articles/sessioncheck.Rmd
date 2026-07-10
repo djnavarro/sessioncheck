@@ -26,9 +26,9 @@ The intended user for **sessioncheck** is a beginner or intermediate level R use
 
 A common practice when writing R scripts is to include a snippet of code like `rm(list = ls())` at the top of the script. The reason people do this is for reproducibility purposes, to ensure that the script is run in the context of a "clean" R session.
 
-Unfortunately, while the goal is a good one the solution is not. 
+Unfortunately, while the goal is a good one, the solution is not. 
 
-The problem with the "traditional" approach is that the only thing it does is remove objects from the global environment. If your goal is to ensure that the R session is clean, this isn't sufficient. The reason it's not enough is that the state of an R session is defined by a *lot* of different things, and the objects in the global environment form a very small part of that state. Yes, using `rm()` to clear the global environment will "clean" this specific aspect to the R session state, but it has no effect on any of the other things. What's worse, the `rm()` approach can create false confidence: if users rely on `rm()` as an "automated" method for cleaning the session state, they may end up executing scripts in a profoundly irreproducible way, never noticing that something bad has happened. This is, to put it mildly, not ideal.
+The problem with the "traditional" approach is that the only thing it does is remove objects from the global environment. If your goal is to ensure that the R session is clean, this isn't sufficient. The reason it's not enough is that the state of an R session is defined by a *lot* of different things, and the objects in the global environment form a very small part of that state. Yes, using `rm()` to clear the global environment will "clean" this specific aspect of the R session state, but it has no effect on any of the other things. What's worse, the `rm()` approach can create false confidence: if users rely on `rm()` as an "automated" method for cleaning the session state, they may end up executing scripts in a profoundly irreproducible way, never noticing that something bad has happened. This is, to put it mildly, not ideal.
 
 Because of this, a better practice is to **restart the R session** immediately before running the script. By running the script in a fresh R session, you're much less likely to encounter these issues. By extension, the reason for including a call to `sessioncheck()` at the top of a script is not to try to clean the R session (which is very hard to automate). Instead, what it does is **prompt the user** to take appropriate action if potential issues are detected. For additional background, see the article on [why session checking is useful](https://sessioncheck.djnavarro.net/articles/why-check-the-r-session.html).
 
@@ -60,7 +60,7 @@ The first line of this output indicates that the script has detected `visible_1`
 sessioncheck::sessioncheck(action = "error")
 ```
 
-By default, `sessioncheck()` runs three checks, and reports the results if any of the checks do not pass. The first one is the global environment check discussed above. The second one checks for packages that have been attached to the search path, usually via `library()` or `require()`. The third one checks for other environments that have may have been attached, perhaps by inadvertently calling the `attach()` function. This is illustrated in the following example:
+By default, `sessioncheck()` runs three checks, and reports the results if any of the checks do not pass. The first one is the global environment check discussed above. The second one checks for packages that have been attached to the search path, usually via `library()` or `require()`. The third one checks for other environments that may have been attached, perhaps by inadvertently calling the `attach()` function. This is illustrated in the following example:
 
 ```{r}
 require(knitr) # non-base packages are detected

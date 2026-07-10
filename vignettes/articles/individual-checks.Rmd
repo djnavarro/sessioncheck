@@ -9,7 +9,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-The **sessioncheck** package is built on several functions that each check one specific aspect to the R session: the `sessioncheck()` function itself merely aggregates the results of individual check functions. Currently available checks are:
+The **sessioncheck** package is built on several functions that each check one specific aspect of the R session: the `sessioncheck()` function itself merely aggregates the results of individual check functions. Currently available checks are:
 
 - `check_globalenv_objects()`
 - `check_attached_packages()`
@@ -114,7 +114,7 @@ This does not mean that no environments have been detected. Coercing the result 
 as.data.frame(check_attached_environments())
 ```
 
-At present, there are four environments (besides packages and the global environment) that are whitelisted by default, namely `"tools:rstudio"`, `"tools:positron"`, `"tools:callr"`, and `"Autoloads"`. If the user would prefer to have these trigger an action, the `allowed_attached_environments` argument can be used to manually specify the names of allowed non-package environments:
+At present, there are four environments (besides packages and the global environment) that are whitelisted by default, namely `"tools:rstudio"`, `"tools:positron"`, `"tools:callr"`, and `"Autoloads"`. If the user would prefer to have these trigger an action, the `allow_attached_environments` argument can be used to manually specify the names of allowed non-package environments:
 
 ```{r}
 check_attached_environments(allow_attached_environments = "Autoloads")
