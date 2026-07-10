@@ -41,6 +41,7 @@ sessioncheck <- function(
 ) {
   args <- .parse_args(action = action, checks = checks, ...)
   .validate_action(args$action, allow_null = TRUE)
+  .validate_checks(args$checks)
   if (is.null(args$action)) args$action <- "warn"
   if (is.null(args$checks)) args$checks <- c("globalenv_objects", "attached_packages", "attached_environments")
 

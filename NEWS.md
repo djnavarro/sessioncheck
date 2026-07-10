@@ -23,6 +23,21 @@
   `required_*` arguments now require a named list when non-empty, and passing an
   unnamed list is an error.
 
+- Fixed a latent bug in the internal `.action()` helper where passing a `status`
+  object of an unexpected class left the variable `is_ok` undefined, causing an
+  uninformative `object 'is_ok' not found` error. The function now uses `else if`
+  branching and raises an explicit "unexpected status class" error for unrecognised
+  inputs.
+
+- Fixed `sessioncheck()` to validate the `checks` argument. Previously, unrecognised
+  check names (e.g. from a typo) were silently ignored; they now produce an error
+  listing the valid check names.
+
+- Fixed a misleading mock in the `sessioncheck()` test suite: the mock for
+  `.get_locale_status()` was returning a bare string instead of a
+  `sessioncheck_status` object, making the associated assertion meaningless. The
+  mock now returns a properly-constructed status object.
+
 # sessioncheck 0.1.0
 
 Initial CRAN release. The package provides tools for checking whether an R session
