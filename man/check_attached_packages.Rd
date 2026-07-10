@@ -23,8 +23,8 @@ Session checkers can produce errors, warnings, or messages if requested.
 \details{
 This checker inspects the list of packages that have been
 attached to the search path (e.g., via \code{library()}). Regardless of the value of
-\code{allow}, R packages that have "base" priority (e.g., \strong{base}, \strong{utils}, and
-\strong{grDevices}) do not trigger an action. When \code{allow = NULL} these are the only
+\code{allow_attached_packages}, R packages that have "base" priority (e.g., \strong{base}, \strong{utils}, and
+\strong{grDevices}) do not trigger an action. When \code{allow_attached_packages = NULL} these are the only
 packages that will not trigger actions.
 }
 \examples{
@@ -32,7 +32,6 @@ check_attached_packages(action = "message")
  
 }
 \seealso{
-\code{\link[=check_attached_packages]{check_attached_packages()}},
 \code{\link[=check_loaded_namespaces]{check_loaded_namespaces()}},
 \code{\link[=check_globalenv_objects]{check_globalenv_objects()}},
 \code{\link[=check_attached_environments]{check_attached_environments()}},

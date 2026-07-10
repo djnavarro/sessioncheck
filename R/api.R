@@ -76,12 +76,11 @@ sessioncheck <- function(
 #' @details
 #' This checker inspects the list of packages that have been
 #' attached to the search path (e.g., via `library()`). Regardless of the value of 
-#' `allow`, R packages that have "base" priority (e.g., **base**, **utils**, and 
-#' **grDevices**) do not trigger an action. When `allow = NULL` these are the only
+#' `allow_attached_packages`, R packages that have "base" priority (e.g., **base**, **utils**, and 
+#' **grDevices**) do not trigger an action. When `allow_attached_packages = NULL` these are the only
 #' packages that will not trigger actions. 
 #' 
 #' @seealso 
-#' [check_attached_packages()], 
 #' [check_loaded_namespaces()],
 #' [check_globalenv_objects()],
 #' [check_attached_environments()],
@@ -123,8 +122,7 @@ check_attached_packages <- function(action = "warn", allow_attached_packages = N
 #' since the package namespace must be loaded in order to call the function.
 #' 
 #' @seealso 
-#' [check_attached_packages()], 
-#' [check_loaded_namespaces()],
+#' [check_attached_packages()],
 #' [check_globalenv_objects()],
 #' [check_attached_environments()],
 #' [check_sessiontime()],
@@ -164,9 +162,8 @@ check_loaded_namespaces <- function(action = "warn", allow_loaded_namespaces = N
 #' For example, `.Random.seed` and `.Last.value` do not trigger actions by default.
 #' 
 #' @seealso 
-#' [check_attached_packages()], 
+#' [check_attached_packages()],
 #' [check_loaded_namespaces()],
-#' [check_globalenv_objects()],
 #' [check_attached_environments()],
 #' [check_sessiontime()],
 #' [check_required_options()],
@@ -206,10 +203,9 @@ check_globalenv_objects <- function(action = "warn", allow_globalenv_objects = N
 #' never trigger actions.
 #' 
 #' @seealso 
-#' [check_attached_packages()], 
+#' [check_attached_packages()],
 #' [check_loaded_namespaces()],
 #' [check_globalenv_objects()],
-#' [check_attached_environments()],
 #' [check_sessiontime()],
 #' [check_required_options()],
 #' [check_required_locale()],
@@ -240,11 +236,10 @@ check_attached_environments <- function(action = "warn", allow_attached_environm
 #' check_sessiontime(action = "message")
 #' 
 #' @seealso 
-#' [check_attached_packages()], 
+#' [check_attached_packages()],
 #' [check_loaded_namespaces()],
 #' [check_globalenv_objects()],
 #' [check_attached_environments()],
-#' [check_sessiontime()],
 #' [check_required_options()],
 #' [check_required_locale()],
 #' [check_required_sysenv()]
@@ -274,12 +269,11 @@ check_sessiontime <- function(action = "warn", max_sessiontime = NULL) {
 #' check_required_options(action = "message", required_options = list(scipen = 0L, max.print = 50L))
 #' 
 #' @seealso 
-#' [check_attached_packages()], 
+#' [check_attached_packages()],
 #' [check_loaded_namespaces()],
 #' [check_globalenv_objects()],
 #' [check_attached_environments()],
 #' [check_sessiontime()],
-#' [check_required_options()],
 #' [check_required_locale()],
 #' [check_required_sysenv()]
 #' 
@@ -305,16 +299,15 @@ check_required_options <- function(action = "warn", required_options = NULL) {
 #' @returns Invisibly returns an object of class `sessioncheck_status`. 
 #'  
 #' @examples
-#' check_required_locale(action = "message", required = list(LC_TIME = "en_US.UTF-8"))
+#' check_required_locale(action = "message", required_locale = list(LC_TIME = "en_US.UTF-8"))
 #' 
 #' @seealso 
-#' [check_attached_packages()], 
+#' [check_attached_packages()],
 #' [check_loaded_namespaces()],
 #' [check_globalenv_objects()],
 #' [check_attached_environments()],
 #' [check_sessiontime()],
 #' [check_required_options()],
-#' [check_required_locale()],
 #' [check_required_sysenv()]
 #' 
 #' @export
@@ -343,14 +336,13 @@ check_required_locale <- function(action = "warn", required_locale = NULL) {
 #' check_required_sysenv(action = "message", required_sysenv = list(R_TEST = "value"))
 #' 
 #' @seealso 
-#' [check_attached_packages()], 
+#' [check_attached_packages()],
 #' [check_loaded_namespaces()],
 #' [check_globalenv_objects()],
 #' [check_attached_environments()],
 #' [check_sessiontime()],
 #' [check_required_options()],
-#' [check_required_locale()],
-#' [check_required_sysenv()]
+#' [check_required_locale()]
 #' 
 #' @export
 check_required_sysenv <- function(action = "warn", required_sysenv = NULL) {
