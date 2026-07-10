@@ -1,13 +1,13 @@
 # Customizing sessioncheck() behavior
 
-This article discusses how to customise the checks that are performed
+This article discusses how to customize the checks that are performed
 when
 [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
 is called. The easiest way to alter its behavior is via the `action`
 argument, which specifies what action should be taken if an issue is
 detected (allowed values: `"warn"`, `"error"`, `"message"`, `"none"`),
 and via the `checks` argument, which specifies which checks should be
-performed. The default behaviour corresponds to this:
+performed. The default behavior corresponds to this:
 
 ``` r
 

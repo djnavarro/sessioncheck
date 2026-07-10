@@ -102,7 +102,7 @@ by <code>rm(list = ls())</code>
 </li>
 </ul>
 <p>This is by no means an exhaustive list, but it’s enough to illustrate
-the many different factors that can can affect how your script executes:
+the many different factors that can affect how your script executes:
 <code>rm(list = ls())</code> does not protect you against any of them.
 Jenny Bryan provides a good discussion of the <a href="https://www.tidyverse.org/blog/2017/12/workflow-vs-script/" class="external-link">problems
 with the “object nuking” approach</a> on the tidyverse blog.</p>
@@ -117,7 +117,7 @@ issues.</p>
 scripts should not attempt a “clean up” of the environment. The “state”
 of an R session is complicated, and so if your script detects evidence
 that the pre-existing R state isn’t “clean”, it should notify the human
-user that there might be a problem. It is the <em>users</em>
+user that there might be a problem. It is the <em>user’s</em>
 responsibility to ensure that the session is clean. A script doesn’t
 have the power to make that happen, and it shouldn’t try. The best it
 can possibly do is call your attention to the issue.</p>
@@ -188,9 +188,9 @@ considered an extremely high-risk behavior in R for a long time. It
 creates chaos in the R session and the potential for horrific outcomes
 is very high. The example I constructed above is deliberately malicious,
 in an attempt to highlight just how bad <code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code> can be. If
-your script executes in an environment when <code>attach(my_data)</code>
-has previously been executed, you can no longer rely on R to make
-sensible judgements about arithmetic:</p>
+your script executes in an environment where
+<code>attach(my_data)</code> has previously been executed, you can no
+longer rely on R to make sensible judgments about arithmetic:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">(</span><span class="fl">2</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">5</span><span class="op">)</span> <span class="op">==</span> <span class="cn">T</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>

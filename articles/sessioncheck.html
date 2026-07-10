@@ -102,7 +102,7 @@ investment to learn and deploy.</p>
 code like <code>rm(list = ls())</code> at the top of the script. The
 reason people do this is for reproducibility purposes, to ensure that
 the script is run in the context of a “clean” R session.</p>
-<p>Unfortunately, while the goal is a good one the solution is not.</p>
+<p>Unfortunately, while the goal is a good one, the solution is not.</p>
 <p>The problem with the “traditional” approach is that the only thing it
 does is remove objects from the global environment. If your goal is to
 ensure that the R session is clean, this isn’t sufficient. The reason
@@ -110,7 +110,7 @@ it’s not enough is that the state of an R session is defined by a
 <em>lot</em> of different things, and the objects in the global
 environment form a very small part of that state. Yes, using
 <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code> to clear the global environment will “clean” this
-specific aspect to the R session state, but it has no effect on any of
+specific aspect of the R session state, but it has no effect on any of
 the other things. What’s worse, the <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code> approach can
 create false confidence: if users rely on <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code> as an
 “automated” method for cleaning the session state, they may end up
@@ -180,7 +180,7 @@ reports the results if any of the checks do not pass. The first one is
 the global environment check discussed above. The second one checks for
 packages that have been attached to the search path, usually via
 <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> or <code><a href="https://rdrr.io/r/base/library.html" class="external-link">require()</a></code>. The third one checks
-for other environments that have may have been attached, perhaps by
+for other environments that may have been attached, perhaps by
 inadvertently calling the <code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code> function. This is
 illustrated in the following example:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">

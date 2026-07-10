@@ -79,7 +79,7 @@
     
     
 <p>The <strong>sessioncheck</strong> package is built on several
-functions that each check one specific aspect to the R session: the
+functions that each check one specific aspect of the R session: the
 <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> function itself merely aggregates the
 results of individual check functions. Currently available checks
 are:</p>
@@ -248,7 +248,7 @@ global environment) that are whitelisted by default, namely
 <code>"tools:rstudio"</code>, <code>"tools:positron"</code>,
 <code>"tools:callr"</code>, and <code>"Autoloads"</code>. If the user
 would prefer to have these trigger an action, the
-<code>allowed_attached_environments</code> argument can be used to
+<code>allow_attached_environments</code> argument can be used to
 manually specify the names of allowed non-package environments:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_attached_environments.html">check_attached_environments</a></span><span class="op">(</span>allow_attached_environments <span class="op">=</span> <span class="st">"Autoloads"</span><span class="op">)</span></span>
@@ -348,7 +348,7 @@ action is triggered. If no value is supplied, it defaults to 300
 seconds. The customization is illustrated below:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_sessiontime.html">check_sessiontime</a></span><span class="op">(</span>max_sessiontime <span class="op">=</span> <span class="fl">.0001</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Session runtime: 1.65 sec elapsed</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: Session runtime: 1.659 sec elapsed</span></span></code></pre></div>
 <p>Note that this check is not one of the default checks performed by
 the <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> function.</p>
 </div>

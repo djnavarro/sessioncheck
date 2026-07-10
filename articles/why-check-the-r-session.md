@@ -23,7 +23,7 @@ approach doesn’t provide any degree of safety from any of the following:
   affect R code execution and are ignored by `rm(list = ls())`
 
 This is by no means an exhaustive list, but it’s enough to illustrate
-the many different factors that can can affect how your script executes:
+the many different factors that can affect how your script executes:
 `rm(list = ls())` does not protect you against any of them. Jenny Bryan
 provides a good discussion of the [problems with the “object nuking”
 approach](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/) on
@@ -39,7 +39,7 @@ The principle that underpins **sessioncheck** is that scripts should not
 attempt a “clean up” of the environment. The “state” of an R session is
 complicated, and so if your script detects evidence that the
 pre-existing R state isn’t “clean”, it should notify the human user that
-there might be a problem. It is the *users* responsibility to ensure
+there might be a problem. It is the *user’s* responsibility to ensure
 that the session is clean. A script doesn’t have the power to make that
 happen, and it shouldn’t try. The best it can possibly do is call your
 attention to the issue.
@@ -125,9 +125,9 @@ above, here’s a quick risk assessment:
   outcomes is very high. The example I constructed above is deliberately
   malicious, in an attempt to highlight just how bad
   [`attach()`](https://rdrr.io/r/base/attach.html) can be. If your
-  script executes in an environment when `attach(my_data)` has
+  script executes in an environment where `attach(my_data)` has
   previously been executed, you can no longer rely on R to make sensible
-  judgements about arithmetic:
+  judgments about arithmetic:
 
   ``` r
 

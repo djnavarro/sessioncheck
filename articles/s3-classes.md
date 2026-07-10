@@ -44,7 +44,7 @@ components:
   and no actions are triggered, `TRUE` is a non-zero exist status and
   actions can be taken.
 - The `type` component is a string indicating which check function
-  create the status object.
+  created the status object.
 
 This is illustrated below:
 

@@ -27,7 +27,7 @@ like `rm(list = ls())` at the top of the script. The reason people do
 this is for reproducibility purposes, to ensure that the script is run
 in the context of a “clean” R session.
 
-Unfortunately, while the goal is a good one the solution is not.
+Unfortunately, while the goal is a good one, the solution is not.
 
 The problem with the “traditional” approach is that the only thing it
 does is remove objects from the global environment. If your goal is to
@@ -36,7 +36,7 @@ it’s not enough is that the state of an R session is defined by a *lot*
 of different things, and the objects in the global environment form a
 very small part of that state. Yes, using
 [`rm()`](https://rdrr.io/r/base/rm.html) to clear the global environment
-will “clean” this specific aspect to the R session state, but it has no
+will “clean” this specific aspect of the R session state, but it has no
 effect on any of the other things. What’s worse, the
 [`rm()`](https://rdrr.io/r/base/rm.html) approach can create false
 confidence: if users rely on [`rm()`](https://rdrr.io/r/base/rm.html) as
@@ -125,7 +125,7 @@ pass. The first one is the global environment check discussed above. The
 second one checks for packages that have been attached to the search
 path, usually via [`library()`](https://rdrr.io/r/base/library.html) or
 [`require()`](https://rdrr.io/r/base/library.html). The third one checks
-for other environments that have may have been attached, perhaps by
+for other environments that may have been attached, perhaps by
 inadvertently calling the
 [`attach()`](https://rdrr.io/r/base/attach.html) function. This is
 illustrated in the following example:

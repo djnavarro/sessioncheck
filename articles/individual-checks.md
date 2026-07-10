@@ -1,7 +1,7 @@
 # Individual session check functions
 
 The **sessioncheck** package is built on several functions that each
-check one specific aspect to the R session: the
+check one specific aspect of the R session: the
 [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
 function itself merely aggregates the results of individual check
 functions. Currently available checks are:
@@ -208,7 +208,7 @@ At present, there are four environments (besides packages and the global
 environment) that are whitelisted by default, namely `"tools:rstudio"`,
 `"tools:positron"`, `"tools:callr"`, and `"Autoloads"`. If the user
 would prefer to have these trigger an action, the
-`allowed_attached_environments` argument can be used to manually specify
+`allow_attached_environments` argument can be used to manually specify
 the names of allowed non-package environments:
 
 ``` r
@@ -327,7 +327,7 @@ illustrated below:
 ``` r
 
 check_sessiontime(max_sessiontime = .0001)
-#> Warning: Session runtime: 1.65 sec elapsed
+#> Warning: Session runtime: 1.659 sec elapsed
 ```
 
 Note that this check is not one of the default checks performed by the
