@@ -34,7 +34,6 @@ Invisibly returns an object of class `sessioncheck_status`.
 [`check_globalenv_objects()`](https://sessioncheck.djnavarro.net/reference/check_globalenv_objects.md),
 [`check_attached_environments()`](https://sessioncheck.djnavarro.net/reference/check_attached_environments.md),
 [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md),
-`check_required_options()`,
 [`check_required_locale()`](https://sessioncheck.djnavarro.net/reference/check_required_locale.md),
 [`check_required_sysenv()`](https://sessioncheck.djnavarro.net/reference/check_required_sysenv.md)
 

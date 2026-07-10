@@ -58,6 +58,13 @@
 <li><p>Fixed <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> to validate the <code>checks</code> argument. Previously, unrecognised check names (e.g. from a typo) were silently ignored; they now produce an error listing the valid check names.</p></li>
 <li><p>Fixed a misleading mock in the <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> test suite: the mock for <code>.get_locale_status()</code> was returning a bare string instead of a <code>sessioncheck_status</code> object, making the associated assertion meaningless. The mock now returns a properly-constructed status object.</p></li>
 </ul></div>
+<div class="section level3">
+<h3 id="documentation-development-version">Documentation<a class="anchor" aria-label="anchor" href="#documentation-development-version"></a></h3>
+<ul><li><p>Updated the <code>DESCRIPTION</code> to accurately reflect the full scope of the package. The previous description mentioned only the global environment and loaded namespaces; it now covers all eight check types (global environment, attached packages, loaded namespaces, attached environments, session run time, R options, locale settings, and system environment variables).</p></li>
+<li><p>Fixed the <code>@details</code> section of <code><a href="../reference/check_attached_packages.html">check_attached_packages()</a></code>, which referred to the parameter as <code>allow</code> rather than its correct name <code>allow_attached_packages</code>.</p></li>
+<li><p>Fixed the <code>@examples</code> block of <code><a href="../reference/check_required_locale.html">check_required_locale()</a></code>, which passed <code>required = list(...)</code> instead of <code>required_locale = list(...)</code>. The call worked only through R’s partial argument matching, which is fragile and misleading in documentation.</p></li>
+<li><p>Removed self-referential links from the <code>@seealso</code> section of each check function. Each function previously listed itself among the “see also” links.</p></li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="sessioncheck-010">sessioncheck 0.1.0<a class="anchor" aria-label="anchor" href="#sessioncheck-010"></a></h2>

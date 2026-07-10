@@ -31,14 +31,13 @@ Invisibly returns an object of class `sessioncheck_status`.
 This checker inspects the list of packages that have been attached to
 the search path (e.g., via
 [`library()`](https://rdrr.io/r/base/library.html)). Regardless of the
-value of `allow`, R packages that have "base" priority (e.g., **base**,
-**utils**, and **grDevices**) do not trigger an action. When
-`allow = NULL` these are the only packages that will not trigger
-actions.
+value of `allow_attached_packages`, R packages that have "base" priority
+(e.g., **base**, **utils**, and **grDevices**) do not trigger an action.
+When `allow_attached_packages = NULL` these are the only packages that
+will not trigger actions.
 
 ## See also
 
-`check_attached_packages()`,
 [`check_loaded_namespaces()`](https://sessioncheck.djnavarro.net/reference/check_loaded_namespaces.md),
 [`check_globalenv_objects()`](https://sessioncheck.djnavarro.net/reference/check_globalenv_objects.md),
 [`check_attached_environments()`](https://sessioncheck.djnavarro.net/reference/check_attached_environments.md),

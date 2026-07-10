@@ -39,7 +39,6 @@ will not trigger an action if the name starts with a dot. For example,
 
 [`check_attached_packages()`](https://sessioncheck.djnavarro.net/reference/check_attached_packages.md),
 [`check_loaded_namespaces()`](https://sessioncheck.djnavarro.net/reference/check_loaded_namespaces.md),
-`check_globalenv_objects()`,
 [`check_attached_environments()`](https://sessioncheck.djnavarro.net/reference/check_attached_environments.md),
 [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md),
 [`check_required_options()`](https://sessioncheck.djnavarro.net/reference/check_required_options.md),

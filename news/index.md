@@ -53,6 +53,31 @@
   associated assertion meaningless. The mock now returns a
   properly-constructed status object.
 
+### Documentation
+
+- Updated the `DESCRIPTION` to accurately reflect the full scope of the
+  package. The previous description mentioned only the global
+  environment and loaded namespaces; it now covers all eight check types
+  (global environment, attached packages, loaded namespaces, attached
+  environments, session run time, R options, locale settings, and system
+  environment variables).
+
+- Fixed the `@details` section of
+  [`check_attached_packages()`](https://sessioncheck.djnavarro.net/reference/check_attached_packages.md),
+  which referred to the parameter as `allow` rather than its correct
+  name `allow_attached_packages`.
+
+- Fixed the `@examples` block of
+  [`check_required_locale()`](https://sessioncheck.djnavarro.net/reference/check_required_locale.md),
+  which passed `required = list(...)` instead of
+  `required_locale = list(...)`. The call worked only through R’s
+  partial argument matching, which is fragile and misleading in
+  documentation.
+
+- Removed self-referential links from the `@seealso` section of each
+  check function. Each function previously listed itself among the “see
+  also” links.
+
 ## sessioncheck 0.1.0
 
 Initial CRAN release. The package provides tools for checking whether an

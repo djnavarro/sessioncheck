@@ -81,14 +81,13 @@ are "allowed", and will not trigger an action if attached to the search path.</p
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This checker inspects the list of packages that have been
 attached to the search path (e.g., via <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code>). Regardless of the value of
-<code>allow</code>, R packages that have "base" priority (e.g., <strong>base</strong>, <strong>utils</strong>, and
-<strong>grDevices</strong>) do not trigger an action. When <code>allow = NULL</code> these are the only
+<code>allow_attached_packages</code>, R packages that have "base" priority (e.g., <strong>base</strong>, <strong>utils</strong>, and
+<strong>grDevices</strong>) do not trigger an action. When <code>allow_attached_packages = NULL</code> these are the only
 packages that will not trigger actions.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code>check_attached_packages()</code>,
-<code><a href="check_loaded_namespaces.html">check_loaded_namespaces()</a></code>,
+    <div class="dont-index"><p><code><a href="check_loaded_namespaces.html">check_loaded_namespaces()</a></code>,
 <code><a href="check_globalenv_objects.html">check_globalenv_objects()</a></code>,
 <code><a href="check_attached_environments.html">check_attached_environments()</a></code>,
 <code><a href="check_sessiontime.html">check_sessiontime()</a></code>,

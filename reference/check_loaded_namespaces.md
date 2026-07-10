@@ -38,7 +38,6 @@ must be loaded in order to call the function.
 ## See also
 
 [`check_attached_packages()`](https://sessioncheck.djnavarro.net/reference/check_attached_packages.md),
-`check_loaded_namespaces()`,
 [`check_globalenv_objects()`](https://sessioncheck.djnavarro.net/reference/check_globalenv_objects.md),
 [`check_attached_environments()`](https://sessioncheck.djnavarro.net/reference/check_attached_environments.md),
 [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md),

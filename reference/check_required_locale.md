@@ -35,12 +35,11 @@ Invisibly returns an object of class `sessioncheck_status`.
 [`check_attached_environments()`](https://sessioncheck.djnavarro.net/reference/check_attached_environments.md),
 [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md),
 [`check_required_options()`](https://sessioncheck.djnavarro.net/reference/check_required_options.md),
-`check_required_locale()`,
 [`check_required_sysenv()`](https://sessioncheck.djnavarro.net/reference/check_required_sysenv.md)
 
 ## Examples
 
 ``` r
-check_required_locale(action = "message", required = list(LC_TIME = "en_US.UTF-8"))
+check_required_locale(action = "message", required_locale = list(LC_TIME = "en_US.UTF-8"))
 #> Unexpected locale settings: LC_TIME
 ```
