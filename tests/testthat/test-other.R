@@ -4,6 +4,11 @@ status_false <- new_status(status = c(x = FALSE), type = "globalenv")
 sessioncheck_true  <- new_sessioncheck(status_true)
 sessioncheck_false <- new_sessioncheck(status_false)
 
+test_that(".action() errors on unexpected status class", {
+  bad_status <- structure(list(), class = "not_a_status")
+  expect_error(.action("warn", bad_status), regexp = "unexpected status class")
+})
+
 test_that(".action() produces the requested action for status objects", {
   # action occurs if status is TRUE and action is requested
   expect_error(.action(action = "error", status = status_true))

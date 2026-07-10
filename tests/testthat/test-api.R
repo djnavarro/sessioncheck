@@ -63,9 +63,9 @@ test_that("sessioncheck `checks` argument returns expected results", {
   opts_res <- c("print.max" = TRUE)
 
   #required_locale - Issue -not- expected
-  local_mocked_bindings(.get_locale_status = function(required_locale) "LC_TIME=Spanish_United States.utf8")
+  mock_locale_status <- new_status(status = c(LC_TIME = FALSE), type = "locale")
+  local_mocked_bindings(.get_locale_status = function(required_locale) mock_locale_status)
   locale_check <- list(LC_TIME = "Spanish_United States.utf8")
-  locale_res <- "LC_TIME=Spanish_United States.utf8"
 
   #required_sysenv - Issue expected
   mandatory_object <- "I should be here"
@@ -82,7 +82,7 @@ test_that("sessioncheck `checks` argument returns expected results", {
 
   expect_equal(res$sessiontime$status, sessiontime_res)
   expect_equal(res$options$status, opts_res)
-  expect_equal(res$locale, locale_res)
+  expect_equal(res$locale, mock_locale_status)
   expect_equal(res$sysenv$status, sysenv_res)
 }
 )

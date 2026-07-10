@@ -38,6 +38,23 @@ test_that("valid `tol` arguments are permitted", {
   expect_no_error(.validate_tol(tol = Inf))
 })
 
+test_that("invalid `checks` arguments are detected", {
+  expect_error(.validate_checks(checks = 1L))
+  expect_error(.validate_checks(checks = "typo_check"))
+  expect_error(.validate_checks(checks = c("globalenv_objects", "typo_check")))
+})
+
+test_that("valid `checks` arguments are permitted", {
+  expect_no_error(.validate_checks(checks = NULL))
+  expect_no_error(.validate_checks(checks = "globalenv_objects"))
+  expect_no_error(.validate_checks(checks = c("globalenv_objects", "attached_packages")))
+  expect_no_error(.validate_checks(checks = c(
+    "globalenv_objects", "attached_packages", "loaded_namespaces",
+    "attached_environments", "sessiontime", "required_options",
+    "required_locale", "required_sysenv"
+  )))
+})
+
 test_that("invalid `required` arguments are detected", {
   expect_error(.validate_required(required = "a"))         # not a list
   expect_error(.validate_required(required = 1L))          # not a list

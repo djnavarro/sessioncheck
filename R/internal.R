@@ -23,6 +23,19 @@
   stopifnot("`settings` must be a list or NULL" = is.list(settings) | is.null(settings))
 }
 
+.validate_checks <- function(checks) {
+  if (is.null(checks)) return(invisible(NULL))
+  valid <- c(
+    "globalenv_objects", "attached_packages", "loaded_namespaces",
+    "attached_environments", "sessiontime", "required_options",
+    "required_locale", "required_sysenv"
+  )
+  stopifnot(
+    "`checks` must be a character vector" = is.character(checks),
+    "`checks` must contain valid check names" = all(checks %in% valid)
+  )
+}
+
 .validate_required <- function(required) {
   stopifnot("`required` must be a list or NULL" = is.list(required) | is.null(required))
   if (!is.null(required) && length(required) > 0L) {
@@ -132,10 +145,12 @@
 
 .action <- function(action, status) {
   if (action == "none") return(invisible(status)) 
-  if (inherits(status, "sessioncheck_status")) is_ok <- !any(status$status)
-  if (inherits(status, "sessioncheck_sessioncheck")) {
-    is_ok <- vapply(status, function(s) !any(s$status), logical(1L))
-    is_ok <- all(is_ok)
+  if (inherits(status, "sessioncheck_status")) {
+    is_ok <- !any(status$status)
+  } else if (inherits(status, "sessioncheck_sessioncheck")) {
+    is_ok <- all(vapply(status, function(s) !any(s$status), logical(1L)))
+  } else {
+    stop("unexpected status class: ", paste(class(status), collapse = ", "), call. = FALSE)
   }
   if (is_ok) return(invisible(status))
   msg <- format(status)
