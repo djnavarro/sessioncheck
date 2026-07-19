@@ -49,6 +49,6 @@ must be loaded in order to call the function.
 
 ``` r
 check_loaded_namespaces(action = "message")
-#> Loaded namespaces: jsonlite, brio, xml2, jquerylib, and 43 more
+#> Loaded namespaces: jsonlite, brio, xml2, jquerylib, and 42 more
  
 ```
