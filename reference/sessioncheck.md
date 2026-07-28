@@ -14,7 +14,7 @@ sessioncheck(action = NULL, checks = NULL, ...)
 
 - action:
 
-  Behaviour to take if the status is not clean. Possible values are
+  Behavior to take if the status is not clean. Possible values are
   "error", "warn", "message", and "none". If the user does not specify
   an action the default to set `action = "warn"`.
 
@@ -35,7 +35,7 @@ Invisibly returns an object of class `sessioncheck_sessioncheck`.
 ## Details
 
 `sessioncheck()` allows the user to apply multiple session checks in a
-single function. The following arguments are recognised via `...`:
+single function. The following arguments are recognized via `...`:
 
 - `allow_globalenv_objects` is passed to
   [`check_globalenv_objects()`](https://sessioncheck.djnavarro.net/reference/check_globalenv_objects.md)

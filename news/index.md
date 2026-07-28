@@ -22,7 +22,7 @@
   error.
 
 - Fixed a typo in the formatted output for locale check results:
-  “Unexpected locale setttings:” is now “Unexpected locale settings:”.
+  “Unexpected locale settings:” is now “Unexpected locale settings:”.
 
 - Fixed a silent failure in
   [`check_required_options()`](https://sessioncheck.djnavarro.net/reference/check_required_options.md),
@@ -38,11 +38,11 @@
   `status` object of an unexpected class left the variable `is_ok`
   undefined, causing an uninformative `object 'is_ok' not found` error.
   The function now uses `else if` branching and raises an explicit
-  “unexpected status class” error for unrecognised inputs.
+  “unexpected status class” error for unrecognized inputs.
 
 - Fixed
   [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
-  to validate the `checks` argument. Previously, unrecognised check
+  to validate the `checks` argument. Previously, unrecognized check
   names (e.g. from a typo) were silently ignored; they now produce an
   error listing the valid check names.
 
@@ -106,5 +106,5 @@ R session is in a clean state. The main user-facing functions are:
 
 All check functions accept an `action` argument (`"warn"`, `"error"`,
 `"message"`, or `"none"`) and return an invisible `sessioncheck_status`
-object. Default behaviour and allowlists can be configured project-wide
+object. Default behavior and allowlists can be configured project-wide
 via `options(sessioncheck = list(...))`.

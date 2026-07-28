@@ -14,7 +14,7 @@ check_required_sysenv(action = "warn", required_sysenv = NULL)
 
 - action:
 
-  Behaviour to take if the status is not clean. Possible values are
+  Behavior to take if the status is not clean. Possible values are
   "error", "warn", "message", and "none". The default is
   `action = "warn"`.
 

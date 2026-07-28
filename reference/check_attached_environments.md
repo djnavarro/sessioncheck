@@ -17,7 +17,7 @@ check_attached_environments(
 
 - action:
 
-  Behaviour to take if the status is not clean. Possible values are
+  Behavior to take if the status is not clean. Possible values are
   "error", "warn", "message", and "none". The default is
   `action = "warn"`.
 
@@ -36,7 +36,7 @@ This checker inspects all environments on the search path. This includes
 attached packages, anything added using
 [`attach()`](https://rdrr.io/r/base/attach.html), and the global
 environment. When `allow_attached_environments = NULL`, package
-environents do not trigger an action, nor do "tools:rstudio",
+environments do not trigger an action, nor do "tools:rstudio",
 "tools:positron", "tools:callr", or "Autoloads". The global environment
 and the package environment for the **base** package never trigger
 actions.
