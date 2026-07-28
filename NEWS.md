@@ -1,4 +1,4 @@
-# sessioncheck (development version)
+# sessioncheck 0.1.1
 
 ## Bug fixes
 
@@ -37,6 +37,12 @@
   `.get_locale_status()` was returning a bare string instead of a
   `sessioncheck_status` object, making the associated assertion meaningless. The
   mock now returns a properly-constructed status object.
+
+## Testing
+
+- Added `spelling` to `Suggests` and added a spell-check test
+  (`tests/testthat/test-spelling.R`) so that `spelling::spell_check_package()`
+  runs automatically with `devtools::test()`. The test is skipped on CRAN.
 
 ## Documentation
 
