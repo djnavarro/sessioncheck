@@ -10,7 +10,7 @@ check_attached_environments(
 )
 }
 \arguments{
-\item{action}{Behaviour to take if the status is not clean. Possible values are
+\item{action}{Behavior to take if the status is not clean. Possible values are
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
 \item{allow_attached_environments}{Character vector containing names of environments
@@ -26,7 +26,7 @@ environments. Session checkers can produce errors, warnings, or messages if requ
 \details{
 This checker inspects all environments on the search path. This includes attached
 packages, anything added using \code{attach()}, and the global environment. When
-\code{allow_attached_environments = NULL}, package environents do not trigger an
+\code{allow_attached_environments = NULL}, package environments do not trigger an
 action, nor do "tools:rstudio", "tools:positron", "tools:callr", or "Autoloads".
 The global environment and the package environment for the \strong{base} package
 never trigger actions.

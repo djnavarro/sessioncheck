@@ -7,7 +7,7 @@
 check_required_options(action = "warn", required_options = NULL)
 }
 \arguments{
-\item{action}{Behaviour to take if the status is not clean. Possible values are
+\item{action}{Behavior to take if the status is not clean. Possible values are
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
 \item{required_options}{A named list of required options. If any of these options are

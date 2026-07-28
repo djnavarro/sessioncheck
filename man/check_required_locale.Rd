@@ -7,7 +7,7 @@
 check_required_locale(action = "warn", required_locale = NULL)
 }
 \arguments{
-\item{action}{Behaviour to take if the status is not clean. Possible values are
+\item{action}{Behavior to take if the status is not clean. Possible values are
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
 \item{required_locale}{A named list of required locale settings. If any of these

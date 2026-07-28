@@ -7,7 +7,7 @@
 check_loaded_namespaces(action = "warn", allow_loaded_namespaces = NULL)
 }
 \arguments{
-\item{action}{Behaviour to take if the status is not clean. Possible values are
+\item{action}{Behavior to take if the status is not clean. Possible values are
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
 \item{allow_loaded_namespaces}{Character vector containing names of packages that

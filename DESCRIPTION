@@ -15,6 +15,7 @@ Description:
     informed decision.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Language: en-US
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/djnavarro/sessioncheck, https://sessioncheck.djnavarro.net/
 BugReports: https://github.com/djnavarro/sessioncheck/issues

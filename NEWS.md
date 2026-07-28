@@ -15,7 +15,7 @@
   clear "invalid action" error.
 
 - Fixed a typo in the formatted output for locale check results: "Unexpected locale
-  setttings:" is now "Unexpected locale settings:".
+  settings:" is now "Unexpected locale settings:".
 
 - Fixed a silent failure in `check_required_options()`, `check_required_locale()`,
   and `check_required_sysenv()` where an unnamed `required_*` list (e.g.,
@@ -26,10 +26,10 @@
 - Fixed a latent bug in the internal `.action()` helper where passing a `status`
   object of an unexpected class left the variable `is_ok` undefined, causing an
   uninformative `object 'is_ok' not found` error. The function now uses `else if`
-  branching and raises an explicit "unexpected status class" error for unrecognised
+  branching and raises an explicit "unexpected status class" error for unrecognized
   inputs.
 
-- Fixed `sessioncheck()` to validate the `checks` argument. Previously, unrecognised
+- Fixed `sessioncheck()` to validate the `checks` argument. Previously, unrecognized
   check names (e.g. from a typo) were silently ignored; they now produce an error
   listing the valid check names.
 
@@ -76,5 +76,5 @@ is in a clean state. The main user-facing functions are:
   single call.
 
 All check functions accept an `action` argument (`"warn"`, `"error"`, `"message"`,
-or `"none"`) and return an invisible `sessioncheck_status` object. Default behaviour
+or `"none"`) and return an invisible `sessioncheck_status` object. Default behavior
 and allowlists can be configured project-wide via `options(sessioncheck = list(...))`.

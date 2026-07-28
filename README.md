@@ -41,11 +41,11 @@ added at the top of the script:
 sessioncheck::sessioncheck()
 ```
 
-The default behaviour is to check for objects in the global environment
+The default behavior is to check for objects in the global environment
 and to check packages and environments attached to the search path and
 produce a warning if issues are detected. This can be converted to an
 error if a stricter check is required, and additional checks can be
 added if desired. For details on how the checks work and how they can be
-customised see the [get
+customized see the [get
 started](https://sessioncheck.djnavarro.net/articles/sessioncheck.html)
 page.

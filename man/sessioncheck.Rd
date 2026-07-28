@@ -7,7 +7,7 @@
 sessioncheck(action = NULL, checks = NULL, ...)
 }
 \arguments{
-\item{action}{Behaviour to take if the status is not clean. Possible values are
+\item{action}{Behavior to take if the status is not clean. Possible values are
 "error", "warn", "message", and "none". If the user does not specify an action
 the default to set \code{action = "warn"}.}
 
@@ -27,7 +27,7 @@ errors, warnings, or messages if requested.
 }
 \details{
 \code{sessioncheck()} allows the user to apply multiple session checks in a single function.
-The following arguments are recognised via \code{...}:
+The following arguments are recognized via \code{...}:
 \itemize{
 \item \code{allow_globalenv_objects} is passed to \code{check_globalenv_objects()}
 \item \code{allow_attached_packages} is passed to \code{check_attached_packages()}

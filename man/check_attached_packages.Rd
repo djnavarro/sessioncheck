@@ -7,7 +7,7 @@
 check_attached_packages(action = "warn", allow_attached_packages = NULL)
 }
 \arguments{
-\item{action}{Behaviour to take if the status is not clean. Possible values are
+\item{action}{Behavior to take if the status is not clean. Possible values are
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
 \item{allow_attached_packages}{Character vector containing names of packages that
