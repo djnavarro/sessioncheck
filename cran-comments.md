@@ -1,8 +1,16 @@
 ## Summary
 
-This is a new package designed to allow users to easily detect signs that an R script is not being executed in a clean session. The intent is to be a drop-in replacement for the common practice of using `rm(list=ls())` at the top of the script, allowing users to make informed choices about whether to restart the R session.
+Patch release (0.1.1). Changes since 0.1.0:
 
-Tests run on github, Rhub, and win-builder generally did not produce errors or warnings, and only the new release note. The one case where Rhub failures appeared is noted below, and is innocuous as far as I can tell. 
+- Seven bug fixes: argument validation in `sessioncheck()`, silent failures in
+  `check_required_options()` / `check_required_locale()` / `check_required_sysenv()`
+  with unnamed lists, latent bug in the internal `.action()` helper, unrecognized
+  check names silently ignored, misleading test mock, and minor output formatting.
+- Documentation corrections: wrong parameter name in `check_attached_packages()`
+  help page, self-referential `@seealso` links, broken `@details` in
+  `check_loaded_namespaces()`, wrong argument in `check_required_locale()` example.
+- Spelling and language fixes: added `Language: en-US` to DESCRIPTION, created
+  `inst/WORDLIST`, corrected non-US spellings throughout.
 
 Thank you for your consideration.
 
@@ -12,33 +20,31 @@ Danielle Navarro
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+0 errors | 0 warnings | 0 notes
 
-* This is a new release.
+## Platforms tested
 
-## Rhub platforms tested
+**Local**
 
-Checked on all 31 platforms currently available via Rhub. Passes on 30 with no warnings or errors:
+- R 4.6.1 on Ubuntu 24.04.4 LTS (x86_64)
 
-https://github.com/djnavarro/sessioncheck/actions/runs/22267933955
+**GitHub Actions (R CMD check)**
 
- [1] "linux"          "m1-san"         "macos"          "macos-arm64"   
- [5] "windows"        "atlas"          "c23"            "clang-asan"    
- [9] "clang-ubsan"    "clang16"        "clang17"        "clang18"       
-[13] "clang19"        "clang20"        "donttest"       "gcc-asan"      
-[17] "gcc13"          "gcc14"          "gcc15"          "intel"         
-[21] "lto"            "mkl"            "nold"           "noremap"       
-[25] "nosuggests"     "rchk"           "ubuntu-clang"   "ubuntu-gcc12"  
-[29] "ubuntu-next"    "ubuntu-release" "valgrind" 
+- R 4.6.1 on macOS Tahoe 26.4 (ARM64)
+- R 4.6.1 on Ubuntu 24.04.4 LTS (x86_64)
+- R 4.6.1 on Windows Server 2022 (x86_64)
+- R 4.5.3 (oldrel-1) on Ubuntu 24.04.4 LTS (x86_64)
+- R-devel (r90185) on Ubuntu 24.04.4 LTS (x86_64)
 
-The one failure is "rchk", and as far as I can tell it is innocuous:
+**R-hub**
 
-https://github.com/djnavarro/sessioncheck/actions/runs/22267933955/job/64417470871
+- R-devel on Ubuntu 24.04.4 LTS (linux)
+- R-devel on macOS Tahoe 26.4 (macos-arm64)
+- R-devel on Windows Server 2022 (windows)
+- R 4.6.1 RC on Ubuntu 24.04.4 LTS (ubuntu-next)
+- R-devel on Fedora Linux 42, without suggested packages (nosuggests)
+- R-devel on Ubuntu 22.04.5 LTS, with `\donttest{}` examples run (donttest)
 
-## Win-builder platforms tested
+**win-builder**
 
-R-release: https://win-builder.r-project.org/66J95sB0M5d3/
-
-R CMD check logs look okay. The R-devel win-builder did not send an email after three attempts, but as the R-devel checks passed on GitHub I am reasonably confident in this.
-
-
+- R-devel (r90304 ucrt) on Windows Server 2022 x64 (build 20348)
