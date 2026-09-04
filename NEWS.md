@@ -1,3 +1,16 @@
+# sessioncheck (development version)
+
+## New features
+
+- Added `sessionstate()`, a companion to `sessioncheck()` intended for use at
+  the *end* of a script as an audit log. It reports platform details (R
+  version, OS, matrix products, locale, timezone), selected machine
+  information from `Sys.info()`, session timing, and an inventory of
+  attached and loaded-namespace packages (including GitHub remote tracking,
+  similar to `sessioninfo::session_info()`). Returns an object of class
+  `sessioncheck_sessionstate` with `format()`, `print()`, and
+  `as.data.frame()` methods.
+
 # sessioncheck 0.1.1
 
 ## Bug fixes

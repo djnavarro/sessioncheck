@@ -4,20 +4,27 @@
 \alias{display_methods}
 \alias{format.sessioncheck_status}
 \alias{format.sessioncheck_sessioncheck}
+\alias{format.sessioncheck_sessionstate}
 \alias{print.sessioncheck_status}
 \alias{print.sessioncheck_sessioncheck}
+\alias{print.sessioncheck_sessionstate}
 \title{Format and print sessioncheck objects}
 \usage{
 \method{format}{sessioncheck_status}(x, ...)
 
 \method{format}{sessioncheck_sessioncheck}(x, ...)
 
+\method{format}{sessioncheck_sessionstate}(x, ...)
+
 \method{print}{sessioncheck_status}(x, ...)
 
 \method{print}{sessioncheck_sessioncheck}(x, ...)
+
+\method{print}{sessioncheck_sessionstate}(x, ...)
 }
 \arguments{
-\item{x}{An object of class \code{sessioncheck_status} or \code{sessioncheck_sessioncheck}}
+\item{x}{An object of class \code{sessioncheck_status}, \code{sessioncheck_sessioncheck},
+or \code{sessioncheck_sessionstate}}
 
 \item{...}{Ignored}
 }

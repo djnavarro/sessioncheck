@@ -4,14 +4,18 @@
 \alias{coercion_methods}
 \alias{as.data.frame.sessioncheck_status}
 \alias{as.data.frame.sessioncheck_sessioncheck}
+\alias{as.data.frame.sessioncheck_sessionstate}
 \title{Coerce session check object to a data frame}
 \usage{
 \method{as.data.frame}{sessioncheck_status}(x, row.names = NULL, optional = FALSE, ...)
 
 \method{as.data.frame}{sessioncheck_sessioncheck}(x, row.names = NULL, optional = FALSE, ...)
+
+\method{as.data.frame}{sessioncheck_sessionstate}(x, row.names = NULL, optional = FALSE, ...)
 }
 \arguments{
-\item{x}{An object of class \code{sessioncheck_status} or \code{sessioncheck_sessioncheck}}
+\item{x}{An object of class \code{sessioncheck_status}, \code{sessioncheck_sessioncheck},
+or \code{sessioncheck_sessionstate}}
 
 \item{row.names}{Ignored}
 

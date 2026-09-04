@@ -45,6 +45,98 @@
   lc
 }
 
+# sessionstate helpers ------
+
+.get_platform_info <- function() {
+  lc <- .get_locale_list()
+  os <- tryCatch(utils::osVersion, error = function(e) NA_character_)
+  if (is.null(os) || is.na(os) || !nzchar(os)) {
+    os <- paste(Sys.info()[["sysname"]], Sys.info()[["release"]])
+  }
+  ui <- .get_ui()
+  blas <- unname(extSoftVersion()[["BLAS"]])
+  lapack <- La_library()
+  list(
+    version  = R.version.string,
+    os       = os,
+    system   = paste(R.version$system),
+    ui       = ui,
+    language = Sys.getenv("LANGUAGE", unset = NA_character_),
+    collate  = lc[["LC_COLLATE"]],
+    ctype    = lc[["LC_CTYPE"]],
+    tz       = Sys.timezone(),
+    date     = as.character(Sys.Date()),
+    blas     = blas,
+    lapack   = lapack
+  )
+}
+
+.get_ui <- function() {
+  if (nzchar(Sys.getenv("POSITRON"))) return("Positron")
+  if (nzchar(Sys.getenv("RSTUDIO"))) return("RStudio")
+  if (!is.na(Sys.getenv("R_GUI_APP_VERSION", unset = NA_character_))) return("R.app")
+  if (!interactive()) return("non-interactive")
+  "unknown"
+}
+
+.get_machine_info <- function() {
+  info <- Sys.info()
+  list(
+    nodename = unname(info[["nodename"]]),
+    user     = unname(info[["user"]])
+  )
+}
+
+.get_timing_info <- function() {
+  pt <- proc.time()
+  list(
+    captured_at = Sys.time(),
+    elapsed_sec = unname(pt[["elapsed"]])
+  )
+}
+
+.get_package_source <- function(pkg) {
+  desc <- tryCatch(utils::packageDescription(pkg), error = function(e) NA)
+  if (identical(desc, NA) || !is.list(desc)) return("unknown")
+  if (identical(desc$Priority, "base")) return("base")
+  remote_type <- desc$RemoteType
+  if (!is.null(remote_type) && identical(remote_type, "standard")) remote_type <- NULL
+  if (!is.null(remote_type) && nzchar(remote_type)) {
+    if (identical(remote_type, "github")) {
+      sha <- desc$RemoteSha
+      sha7 <- if (!is.null(sha) && nzchar(sha)) substr(sha, 1L, 7L) else "unknown"
+      return(sprintf("Github (%s/%s@%s)", desc$RemoteUsername, desc$RemoteRepo, sha7))
+    }
+    ref <- desc$RemoteSha
+    ref <- if (!is.null(ref) && nzchar(ref)) substr(ref, 1L, 7L) else desc$RemoteRef
+    return(sprintf("%s (%s)", remote_type, if (is.null(ref)) "unknown" else ref))
+  }
+  if (!is.null(desc$Repository) && nzchar(desc$Repository)) {
+    built <- desc$Built
+    rver <- if (!is.null(built)) sub("^R ([0-9.]+);.*$", "\\1", built) else NA_character_
+    if (is.na(rver) || identical(rver, built)) rver <- paste(getRversion())
+    return(sprintf("CRAN (R %s)", rver))
+  }
+  "local"
+}
+
+.get_package_inventory <- function() {
+  pkgs <- sort(union(.packages(), loadedNamespaces()))
+  attached_set <- .packages()
+  df <- data.frame(
+    package  = pkgs,
+    attached = pkgs %in% attached_set,
+    version  = vapply(pkgs, function(p) {
+      v <- utils::packageDescription(p)$Version
+      if (is.null(v)) NA_character_ else v
+    }, character(1L)),
+    source   = vapply(pkgs, .get_package_source, character(1L)),
+    stringsAsFactors = FALSE
+  )
+  rownames(df) <- NULL
+  df
+}
+
 .parse_args <- function(...) {
   args <- list(...)
   opts_args <- getOption("sessioncheck")

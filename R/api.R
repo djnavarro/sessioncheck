@@ -1,4 +1,45 @@
 
+#' @title Report the current state of the R session
+#'
+#' @description
+#' `sessionstate()` captures a point-in-time, human-readable snapshot of the R
+#' session: platform details, selected machine information, session timing,
+#' and an inventory of attached and loaded-namespace packages (including
+#' remote source tracking for packages installed from GitHub). It is intended
+#' as a companion to [sessioncheck()]: where `sessioncheck()` is typically
+#' called at the *start* of a script to check for a clean session,
+#' `sessionstate()` is intended to be called at the *end* of a script to
+#' produce an audit log of the environment the script actually ran in.
+#'
+#' @returns An object of class `sessioncheck_sessionstate`, a list with
+#' elements `platform`, `machine`, `timing`, and `packages`.
+#'
+#' @details
+#' The `machine` element includes the node name and user reported by
+#' [Sys.info()]. Because this can reveal a hostname or local username, be
+#' mindful about where `sessionstate()` output is stored or shared.
+#'
+#' The `packages` element covers every package that is either attached to
+#' the search path or loaded via namespace (i.e., `union(.packages(),
+#' loadedNamespaces())`), with a `source` column classifying each package as
+#' `"base"`, `"CRAN (R x.y.z)"`, `"Github (user/repo@sha)"`, another remote
+#' type, or `"local"` when no remote metadata is available.
+#'
+#' @examples
+#' sessionstate()
+#'
+#' @seealso [sessioncheck()]
+#'
+#' @export
+sessionstate <- function() {
+  new_sessionstate(
+    platform = .get_platform_info(),
+    machine  = .get_machine_info(),
+    timing   = .get_timing_info(),
+    packages = .get_package_inventory()
+  )
+}
+
 #' @title Checks the overall status of the R session
 #' 
 #' @description
