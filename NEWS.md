@@ -11,6 +11,30 @@
   `sessioncheck_sessionstate` with `format()`, `print()`, and
   `as.data.frame()` methods.
 
+- Improved the robustness of the package `source` classification used by
+  `sessionstate()`. It now distinguishes r-universe installs and other
+  named repositories from CRAN (rather than mislabeling every non-empty
+  `Repository` field as `"CRAN"`), detects Bioconductor packages via the
+  `biocViews` DESCRIPTION field (independent of how they were installed),
+  and formats GitLab, Bitbucket, and generic git/SVN/URL remotes (e.g.
+  Codeberg or self-hosted Gitea via `remotes::install_git()`) using the
+  same `user/repo@sha` style as GitHub, falling back to the remote URL
+  when there is no user/repo pair to show.
+
+- Fixed `source` reporting for packages installed via `pak::local_install()`
+  or `pak::pkg_install("local::<path>")`, which record the install path
+  only in `RemotePkgRef` (with a `"local::"` prefix) rather than
+  `RemoteUrl`; these previously showed up as an uninformative
+  `"local (unknown)"`.
+
+- Fixed `source` reporting for packages installed via
+  `remotes::install_bioc()`. Verified against a real install that this
+  records `RemoteType` as `"bioc_git2r"` or `"bioc_xgit"` (depending on
+  whether the `git2r` package is available) along with `RemoteRepo` and
+  `RemoteMirror`, but no `RemoteUsername` or `RemoteUrl`; these previously
+  fell through to a raw, unlabeled `"bioc_xgit (sha)"`-style string and now
+  correctly report as `"Bioconductor (repo@sha)"`.
+
 # sessioncheck 0.1.1
 
 ## Bug fixes

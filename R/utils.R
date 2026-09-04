@@ -95,28 +95,108 @@
   )
 }
 
+.get_built_rversion <- function(desc) {
+  built <- desc$Built
+  rver <- if (!is.null(built)) sub("^R ([0-9.]+);.*$", "\\1", built) else NA_character_
+  if (is.na(rver) || identical(rver, built)) rver <- paste(getRversion())
+  rver
+}
+
+# labels for known remotes::install_*() RemoteType values; anything else
+# falls back to using the RemoteType string itself as the label
+.remote_type_labels <- c(
+  github     = "Github",
+  gitlab     = "GitLab",
+  bitbucket  = "Bitbucket",
+  git        = "Git",
+  svn        = "SVN",
+  url        = "URL",
+  local      = "local",
+  # remotes::install_bioc() uses git2r when available, and falls back to a
+  # plain git executable ("xgit") otherwise; both report RemoteRepo (the
+  # package name) and RemoteMirror, but no RemoteUsername
+  bioc_git2r = "Bioconductor",
+  bioc_xgit  = "Bioconductor"
+)
+
+.get_remote_ref <- function(desc) {
+  sha <- desc$RemoteSha
+  if (!is.null(sha) && nzchar(sha)) return(substr(sha, 1L, 7L))
+  ref <- desc$RemoteRef
+  if (!is.null(ref) && nzchar(ref)) return(ref)
+  "unknown"
+}
+
+.format_remote_source <- function(remote_type, desc) {
+  label <- if (remote_type %in% names(.remote_type_labels)) {
+    .remote_type_labels[[remote_type]]
+  } else {
+    remote_type
+  }
+  ref <- .get_remote_ref(desc)
+  user <- desc$RemoteUsername
+  repo <- desc$RemoteRepo
+  # host-based remotes (Github, GitLab, Bitbucket, ...) report user/repo@ref
+  if (!is.null(user) && nzchar(user) && !is.null(repo) && nzchar(repo)) {
+    return(sprintf("%s (%s/%s@%s)", label, user, repo, ref))
+  }
+  # remotes::install_bioc()'s bioc_git2r/bioc_xgit remotes set RemoteRepo
+  # (the package name) and RemoteMirror, but no RemoteUsername
+  if (!is.null(repo) && nzchar(repo)) {
+    return(sprintf("%s (%s@%s)", label, repo, ref))
+  }
+  # generic git/svn/url/local remotes (e.g. Codeberg, self-hosted Gitea,
+  # remotes::install_git()/install_local() with an arbitrary URL or path)
+  # report the URL/path instead, since there is no user/repo pair to show
+  url <- desc$RemoteUrl
+  if (!is.null(url) && nzchar(url)) {
+    return(sprintf("%s (%s@%s)", label, url, ref))
+  }
+  # pak's local installs (e.g. pak::local_install(), pak::pkg_install()
+  # with a "local::<path>" spec) do not set RemoteUrl at all; the path is
+  # only recorded in RemotePkgRef, with a "local::" prefix to strip
+  pkg_ref <- desc$RemotePkgRef
+  if (!is.null(pkg_ref) && nzchar(pkg_ref)) {
+    path <- sub("^local::", "", pkg_ref)
+    return(sprintf("%s (%s)", label, path))
+  }
+  sprintf("%s (%s)", label, ref)
+}
+
 .get_package_source <- function(pkg) {
   desc <- tryCatch(utils::packageDescription(pkg), error = function(e) NA)
   if (identical(desc, NA) || !is.list(desc)) return("unknown")
   if (identical(desc$Priority, "base")) return("base")
+
+  # pak/renv mark ordinary (non-remote) installs with RemoteType = "standard";
+  # treat that the same as no RemoteType at all
   remote_type <- desc$RemoteType
   if (!is.null(remote_type) && identical(remote_type, "standard")) remote_type <- NULL
   if (!is.null(remote_type) && nzchar(remote_type)) {
-    if (identical(remote_type, "github")) {
-      sha <- desc$RemoteSha
-      sha7 <- if (!is.null(sha) && nzchar(sha)) substr(sha, 1L, 7L) else "unknown"
-      return(sprintf("Github (%s/%s@%s)", desc$RemoteUsername, desc$RemoteRepo, sha7))
+    return(.format_remote_source(remote_type, desc))
+  }
+
+  # biocViews is a mandatory field in every Bioconductor package's
+  # DESCRIPTION, so it is a more reliable signal than Repository, which
+  # BiocManager-installed packages do not consistently set
+  if (!is.null(desc$biocViews) && nzchar(desc$biocViews)) {
+    return(sprintf("Bioconductor (R %s)", .get_built_rversion(desc)))
+  }
+
+  repo <- desc$Repository
+  if (!is.null(repo) && nzchar(repo)) {
+    if (identical(repo, "CRAN")) {
+      return(sprintf("CRAN (R %s)", .get_built_rversion(desc)))
     }
-    ref <- desc$RemoteSha
-    ref <- if (!is.null(ref) && nzchar(ref)) substr(ref, 1L, 7L) else desc$RemoteRef
-    return(sprintf("%s (%s)", remote_type, if (is.null(ref)) "unknown" else ref))
+    if (grepl("r-universe", repo, ignore.case = TRUE)) {
+      return(sprintf("r-universe (R %s)", .get_built_rversion(desc)))
+    }
+    # any other named repository (e.g. an RSPM mirror, an internal package
+    # manager repo, etc.) - report the repository name rather than
+    # mislabeling it as "CRAN"
+    return(sprintf("%s (R %s)", repo, .get_built_rversion(desc)))
   }
-  if (!is.null(desc$Repository) && nzchar(desc$Repository)) {
-    built <- desc$Built
-    rver <- if (!is.null(built)) sub("^R ([0-9.]+);.*$", "\\1", built) else NA_character_
-    if (is.na(rver) || identical(rver, built)) rver <- paste(getRversion())
-    return(sprintf("CRAN (R %s)", rver))
-  }
+
   "local"
 }
 
