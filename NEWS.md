@@ -44,6 +44,16 @@
   (which have no install metadata at all) now report as `"load_all()"`
   instead of the misleading `"local"`.
 
+- Added version-mismatch detection to `sessionstate()`'s package inventory,
+  following the same audit against `sessioninfo`'s internals. The `version`
+  column is renamed to `ondisk_version` (the version recorded in the
+  installed package's `DESCRIPTION`), and two new columns are added:
+  `loaded_version` (the version of the namespace actually loaded into
+  memory) and `version_mismatch` (`TRUE` when the two disagree, e.g.
+  because the package was updated on disk after this session loaded it).
+  This is a breaking change for any code reading the `version` column by
+  name from `as.data.frame(sessionstate())`.
+
 - Simplified `ui` detection in `sessionstate()`'s platform info to use the
   base R `.Platform$GUI` signal (falling back to `"non-interactive"` first,
   via `interactive()`, for batch/render execution) instead of hand-rolled

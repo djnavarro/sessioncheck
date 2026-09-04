@@ -21,7 +21,12 @@
 #'
 #' The `packages` element covers every package that is either attached to
 #' the search path or loaded via namespace (i.e., `union(.packages(),
-#' loadedNamespaces())`), with a `source` column classifying each package as
+#' loadedNamespaces())`). It has columns `package`, `attached`,
+#' `ondisk_version` (the version recorded in the installed package's
+#' `DESCRIPTION` file), `loaded_version` (the version of the namespace
+#' actually loaded into memory), `version_mismatch` (`TRUE` when the two
+#' disagree, e.g. because the package was updated on disk after this
+#' session loaded it), and `source`, which classifies each package as
 #' `"base"`, `"CRAN (R x.y.z)"`, `"Github (user/repo@sha)"`, another remote
 #' type, or `"local"` when no remote metadata is available.
 #'

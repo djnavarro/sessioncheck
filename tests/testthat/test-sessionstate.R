@@ -12,10 +12,17 @@ test_that("as.data.frame.sessioncheck_sessionstate() returns the package invento
   x <- sessionstate()
   df <- as.data.frame(x)
   expect_s3_class(df, "data.frame")
-  expect_named(df, c("package", "attached", "version", "source"))
+  expect_named(
+    df,
+    c("package", "attached", "ondisk_version", "loaded_version", "version_mismatch", "source")
+  )
   expect_true("base" %in% df$package)
   expect_true("sessioncheck" %in% df$package)
   expect_true(is.logical(df$attached))
+  expect_true(is.logical(df$version_mismatch))
+  # sessioncheck itself is loaded via devtools::load_all() during testing,
+  # so its on-disk/loaded versions should agree in this session
+  expect_false(any(df$version_mismatch, na.rm = TRUE))
 })
 
 test_that("format.sessioncheck_sessionstate() produces a single string with expected sections", {
@@ -37,13 +44,13 @@ test_that("print.sessioncheck_sessionstate() prints and returns its input invisi
 })
 
 test_that(".get_ui() reports 'non-interactive' regardless of .Platform$GUI when not interactive", {
-  local_mocked_bindings(interactive = function() FALSE, .package = "base")
+  local_mocked_bindings(.is_interactive = function() FALSE)
   local_mocked_bindings(.get_platform_gui = function() "Positron")
   expect_identical(.get_ui(), "non-interactive")
 })
 
 test_that(".get_ui() reports .Platform$GUI when interactive", {
-  local_mocked_bindings(interactive = function() TRUE, .package = "base")
+  local_mocked_bindings(.is_interactive = function() TRUE)
   local_mocked_bindings(.get_platform_gui = function() "Positron")
   expect_identical(.get_ui(), "Positron")
 
@@ -52,9 +59,51 @@ test_that(".get_ui() reports .Platform$GUI when interactive", {
 })
 
 test_that(".get_ui() falls back to 'unknown' when .Platform$GUI is empty", {
-  local_mocked_bindings(interactive = function() TRUE, .package = "base")
+  local_mocked_bindings(.is_interactive = function() TRUE)
   local_mocked_bindings(.get_platform_gui = function() "")
   expect_identical(.get_ui(), "unknown")
+})
+
+test_that(".get_loaded_version() returns NA for a namespace that isn't loaded", {
+  local_mocked_bindings(isNamespaceLoaded = function(pkg) FALSE, .package = "base")
+  expect_identical(.get_loaded_version("somepkg"), NA_character_)
+})
+
+test_that(".get_loaded_version() returns the loaded namespace version", {
+  local_mocked_bindings(isNamespaceLoaded = function(pkg) TRUE, .package = "base")
+  local_mocked_bindings(
+    getNamespaceVersion = function(pkg) {
+      structure("1.2.3", names = pkg)
+    },
+    .package = "base"
+  )
+  expect_identical(.get_loaded_version("somepkg"), "1.2.3")
+})
+
+test_that(".get_package_inventory() flags a version_mismatch when on-disk and loaded versions differ", {
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) list(Version = "2.0.0"),
+    .package = "utils"
+  )
+  local_mocked_bindings(.get_loaded_version = function(pkg) "1.0.0")
+  local_mocked_bindings(.get_package_source = function(pkg) "local")
+
+  df <- .get_package_inventory()
+  expect_true(all(df$ondisk_version == "2.0.0"))
+  expect_true(all(df$loaded_version == "1.0.0"))
+  expect_true(all(df$version_mismatch))
+})
+
+test_that(".get_package_inventory() does not flag a version_mismatch when versions agree", {
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) list(Version = "1.0.0"),
+    .package = "utils"
+  )
+  local_mocked_bindings(.get_loaded_version = function(pkg) "1.0.0")
+  local_mocked_bindings(.get_package_source = function(pkg) "local")
+
+  df <- .get_package_inventory()
+  expect_false(any(df$version_mismatch))
 })
 
 test_that(".get_package_source() classifies base packages", {

@@ -76,7 +76,7 @@
   # execution (e.g. Quarto/R Markdown rendering, Rscript); .Platform$GUI
   # cannot make that distinction, since it reflects the compiled/configured
   # frontend regardless of how the current call was invoked
-  if (!interactive()) return("non-interactive")
+  if (!.is_interactive()) return("non-interactive")
   # .Platform$GUI is a base R signal that already reports "Positron" and
   # "RStudio" in those IDEs (verified for Positron; documented for RStudio),
   # plus other frontends (e.g. "AQUA" for R.app, "Rgui" on Windows) that a
@@ -86,6 +86,14 @@
   if (!is.null(gui) && nzchar(gui)) return(gui)
   "unknown"
 }
+
+# interactive() is a primitive; mocking it directly via
+# local_mocked_bindings(.package = "base") works under devtools::test() but
+# not against a byte-compiled installed package (as built during R CMD
+# check). Wrapping it in an ordinary closure in our own namespace, like
+# .get_platform_gui() and .is_load_all_package() below, keeps it reliably
+# mockable in both contexts.
+.is_interactive <- function() interactive()
 
 .get_platform_gui <- function() .Platform$GUI
 
@@ -233,17 +241,34 @@
   isNamespaceLoaded(pkg) && !is.null(asNamespace(pkg)$.__DEVTOOLS__)
 }
 
+# the version of the namespace actually loaded into memory, which can
+# differ from the on-disk DESCRIPTION version if the package was updated
+# on disk after this session loaded it
+.get_loaded_version <- function(pkg) {
+  if (!isNamespaceLoaded(pkg)) return(NA_character_)
+  v <- tryCatch(getNamespaceVersion(pkg), error = function(e) NA_character_)
+  if (is.null(v) || is.na(v)) NA_character_ else unname(v)
+}
+
 .get_package_inventory <- function() {
   pkgs <- sort(union(.packages(), loadedNamespaces()))
   attached_set <- .packages()
+  ondisk_version <- vapply(pkgs, function(p) {
+    v <- utils::packageDescription(p)$Version
+    if (is.null(v)) NA_character_ else v
+  }, character(1L))
+  loaded_version <- vapply(pkgs, .get_loaded_version, character(1L))
   df <- data.frame(
-    package  = pkgs,
-    attached = pkgs %in% attached_set,
-    version  = vapply(pkgs, function(p) {
-      v <- utils::packageDescription(p)$Version
-      if (is.null(v)) NA_character_ else v
-    }, character(1L)),
-    source   = vapply(pkgs, .get_package_source, character(1L)),
+    package         = pkgs,
+    attached        = pkgs %in% attached_set,
+    ondisk_version  = ondisk_version,
+    loaded_version  = loaded_version,
+    # every package here is attached or loaded by construction, so
+    # loaded_version should essentially never be NA; if it is, that's a
+    # signal worth surfacing rather than masking with a FALSE mismatch
+    version_mismatch = !is.na(ondisk_version) & !is.na(loaded_version) &
+      ondisk_version != loaded_version,
+    source          = vapply(pkgs, .get_package_source, character(1L)),
     stringsAsFactors = FALSE
   )
   rownames(df) <- NULL

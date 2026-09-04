@@ -26,7 +26,12 @@ The \code{machine} element includes the node name and user reported by
 mindful about where \code{sessionstate()} output is stored or shared.
 
 The \code{packages} element covers every package that is either attached to
-the search path or loaded via namespace (i.e., \code{union(.packages(), loadedNamespaces())}), with a \code{source} column classifying each package as
+the search path or loaded via namespace (i.e., \code{union(.packages(), loadedNamespaces())}). It has columns \code{package}, \code{attached},
+\code{ondisk_version} (the version recorded in the installed package's
+\code{DESCRIPTION} file), \code{loaded_version} (the version of the namespace
+actually loaded into memory), \code{version_mismatch} (\code{TRUE} when the two
+disagree, e.g. because the package was updated on disk after this
+session loaded it), and \code{source}, which classifies each package as
 \code{"base"}, \code{"CRAN (R x.y.z)"}, \code{"Github (user/repo@sha)"}, another remote
 type, or \code{"local"} when no remote metadata is available.
 }
