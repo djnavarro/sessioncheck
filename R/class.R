@@ -34,8 +34,9 @@ new_sessionstate <- function(platform, machine, timing, packages, globalenv, att
 #' @param platform For `sessioncheck_sessionstate` objects, an optional character
 #' vector selecting which platform fields to display (from `"version"`, `"os"`,
 #' `"system"`, `"ui"`, `"language"`, `"collate"`, `"ctype"`, `"tz"`, `"date"`,
-#' `"blas"`, `"lapack"`). Defaults to showing all fields. Ignored for other
-#' classes. See Details for how the default is resolved.
+#' `"blas"`, `"lapack"`, `"pandoc"`, `"quarto"`). Defaults to showing all
+#' fields. Ignored for other classes. See Details for how the default is
+#' resolved.
 #' @param machine For `sessioncheck_sessionstate` objects, an optional character
 #' vector selecting which machine fields to display (from `"nodename"`, `"user"`).
 #' Defaults to showing all fields. Ignored for other classes. See Details for
@@ -129,17 +130,24 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL,
     tz       = sprintf(" tz              %s", p$tz),
     date     = sprintf(" date            %s", p$date),
     blas     = sprintf("   BLAS:   %s", p$blas),
-    lapack   = sprintf("   LAPACK: %s", p$lapack)
+    lapack   = sprintf("   LAPACK: %s", p$lapack),
+    pandoc   = sprintf("   pandoc: %s", if (is.na(p$pandoc)) "(not found)" else p$pandoc),
+    quarto   = sprintf("   quarto: %s", if (is.na(p$quarto)) "(not found)" else p$quarto)
   )
   platform <- .resolve_field_selection(platform, "sessionstate_platform", NULL)
   platform_fields <- .select_fields(names(platform_all), platform, "platform")
-  # keep the "matrix products" subheading only when blas/lapack are shown,
-  # and always immediately above them (their canonical position)
+  # keep the "matrix products"/"document products" subheadings only when
+  # their respective fields are shown, and always immediately above them
+  # (their canonical position)
   matrix_fields <- intersect(c("blas", "lapack"), platform_fields)
-  regular_fields <- setdiff(platform_fields, matrix_fields)
+  doc_fields <- intersect(c("pandoc", "quarto"), platform_fields)
+  regular_fields <- setdiff(platform_fields, c(matrix_fields, doc_fields))
   platform_lines <- c("Platform:", platform_all[regular_fields])
   if (length(matrix_fields) > 0L) {
     platform_lines <- c(platform_lines, " matrix products", platform_all[matrix_fields])
+  }
+  if (length(doc_fields) > 0L) {
+    platform_lines <- c(platform_lines, " document products", platform_all[doc_fields])
   }
 
   machine_all <- c(

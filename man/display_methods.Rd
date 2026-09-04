@@ -51,8 +51,9 @@ or \code{sessioncheck_sessionstate}}
 \item{platform}{For \code{sessioncheck_sessionstate} objects, an optional character
 vector selecting which platform fields to display (from \code{"version"}, \code{"os"},
 \code{"system"}, \code{"ui"}, \code{"language"}, \code{"collate"}, \code{"ctype"}, \code{"tz"}, \code{"date"},
-\code{"blas"}, \code{"lapack"}). Defaults to showing all fields. Ignored for other
-classes. See Details for how the default is resolved.}
+\code{"blas"}, \code{"lapack"}, \code{"pandoc"}, \code{"quarto"}). Defaults to showing all
+fields. Ignored for other classes. See Details for how the default is
+resolved.}
 
 \item{machine}{For \code{sessioncheck_sessionstate} objects, an optional character
 vector selecting which machine fields to display (from \code{"nodename"}, \code{"user"}).

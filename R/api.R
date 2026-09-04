@@ -47,6 +47,18 @@
 #' only the largest few (see below); the captured object itself always holds
 #' every object.
 #'
+#' The `platform` element's `pandoc` and `quarto` fields record the versions
+#' of those two document-rendering tools, if found (`NA` otherwise). Both
+#' checks prefer the IDE-provided location over whatever happens to be on
+#' `PATH` (`RSTUDIO_PANDOC` for pandoc, `QUARTO_PATH` for quarto), since
+#' RStudio/Positron bundle their own copies that may differ from a
+#' separately installed one. Deliberately not tracked: other system
+#' dependencies (e.g. LaTeX, Hugo, spatial libraries) are package-specific
+#' rather than session-wide, and tracking them well would mean tracking
+#' many of them; `pandoc`/`quarto` are included because they, like
+#' BLAS/LAPACK, are already tracked by [utils::sessionInfo()] or
+#' [sessioninfo::session_info()].
+#'
 #' The `attachments` element is a data frame with one row per entry on the
 #' search path (as returned by [search()]), with columns `name` and `type`
 #' (`"package"` or `"other"`). This surfaces non-package attachments (e.g.

@@ -52,6 +52,18 @@ long-running script can accumulate many objects, the default display shows
 only the largest few (see below); the captured object itself always holds
 every object.
 
+The \code{platform} element's \code{pandoc} and \code{quarto} fields record the versions
+of those two document-rendering tools, if found (\code{NA} otherwise). Both
+checks prefer the IDE-provided location over whatever happens to be on
+\code{PATH} (\code{RSTUDIO_PANDOC} for pandoc, \code{QUARTO_PATH} for quarto), since
+RStudio/Positron bundle their own copies that may differ from a
+separately installed one. Deliberately not tracked: other system
+dependencies (e.g. LaTeX, Hugo, spatial libraries) are package-specific
+rather than session-wide, and tracking them well would mean tracking
+many of them; \code{pandoc}/\code{quarto} are included because they, like
+BLAS/LAPACK, are already tracked by \code{\link[utils:sessionInfo]{utils::sessionInfo()}} or
+\code{\link[sessioninfo:session_info]{sessioninfo::session_info()}}.
+
 The \code{attachments} element is a data frame with one row per entry on the
 search path (as returned by \code{\link[=search]{search()}}), with columns \code{name} and \code{type}
 (\code{"package"} or \code{"other"}). This surfaces non-package attachments (e.g.

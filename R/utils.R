@@ -67,8 +67,43 @@
     tz       = Sys.timezone(),
     date     = as.character(Sys.Date()),
     blas     = blas,
-    lapack   = lapack
+    lapack   = lapack,
+    pandoc   = .get_pandoc_version(),
+    quarto   = .get_quarto_version()
   )
+}
+
+# resolves the pandoc binary the way rmarkdown does: RStudio/Positron bundle
+# their own pandoc and expose its directory via RSTUDIO_PANDOC, which takes
+# priority over whatever "pandoc" happens to be on PATH (which may be a
+# different, unrelated install, as observed while developing this)
+.get_pandoc_version <- function() {
+  dir <- Sys.getenv("RSTUDIO_PANDOC", unset = "")
+  exe <- if (.Platform$OS.type == "windows") "pandoc.exe" else "pandoc"
+  path <- if (nzchar(dir)) file.path(dir, exe) else unname(Sys.which("pandoc"))
+  .run_version_command(path, "--version")
+}
+
+# mirrors quarto::quarto_path(): QUARTO_PATH, if set, takes priority over
+# PATH (kept dependency-free by not importing the quarto package)
+.get_quarto_version <- function() {
+  path <- Sys.getenv("QUARTO_PATH", unset = "")
+  if (!nzchar(path)) path <- unname(Sys.which("quarto"))
+  .run_version_command(path, "--version")
+}
+
+.run_version_command <- function(path, ...) {
+  if (!nzchar(path) || !file.exists(path)) return(NA_character_)
+  out <- tryCatch(
+    system2(path, ..., stdout = TRUE, stderr = FALSE),
+    error = function(e) character(0),
+    warning = function(w) character(0)
+  )
+  if (length(out) == 0L || !nzchar(out[[1L]])) return(NA_character_)
+  # pandoc's first line is "pandoc 3.10 ..."; quarto's is just "1.5.55" --
+  # stripping a single leading word (if any) handles both
+  ver <- trimws(sub("^\\S+\\s+(?=[0-9])", "", out[[1L]], perl = TRUE))
+  if (!nzchar(ver)) NA_character_ else ver
 }
 
 .get_ui <- function() {

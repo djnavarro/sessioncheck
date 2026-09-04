@@ -99,6 +99,105 @@ test_that("format.sessioncheck_sessionstate() defaults platform/machine/timing t
   expect_match(txt, "captured at", fixed = TRUE)
 })
 
+test_that(".run_version_command() returns NA when the path is empty or missing", {
+  expect_identical(.run_version_command("", "--version"), NA_character_)
+  expect_identical(.run_version_command("/no/such/binary", "--version"), NA_character_)
+})
+
+test_that(".run_version_command() strips a leading word from pandoc-style output", {
+  local_mocked_bindings(file.exists = function(...) TRUE, .package = "base")
+  local_mocked_bindings(
+    system2 = function(...) c("pandoc 3.10", "Features: +server"),
+    .package = "base"
+  )
+  expect_identical(.run_version_command(tempfile(), "--version"), "3.10")
+})
+
+test_that(".run_version_command() leaves bare version-number output unchanged", {
+  local_mocked_bindings(file.exists = function(...) TRUE, .package = "base")
+  local_mocked_bindings(system2 = function(...) "1.5.55", .package = "base")
+  expect_identical(.run_version_command(tempfile(), "--version"), "1.5.55")
+})
+
+test_that(".run_version_command() returns NA when the command errors or warns", {
+  local_mocked_bindings(file.exists = function(...) TRUE, .package = "base")
+  local_mocked_bindings(system2 = function(...) stop("nope"), .package = "base")
+  expect_identical(.run_version_command(tempfile(), "--version"), NA_character_)
+  local_mocked_bindings(system2 = function(...) { warning("nope"); "" }, .package = "base")
+  expect_identical(.run_version_command(tempfile(), "--version"), NA_character_)
+})
+
+test_that(".get_pandoc_version() prefers RSTUDIO_PANDOC over PATH", {
+  old <- Sys.getenv("RSTUDIO_PANDOC", unset = NA)
+  Sys.setenv(RSTUDIO_PANDOC = tempdir())
+  on.exit(
+    if (is.na(old)) Sys.unsetenv("RSTUDIO_PANDOC") else Sys.setenv(RSTUDIO_PANDOC = old),
+    add = TRUE
+  )
+  local_mocked_bindings(.run_version_command = function(path, ...) path)
+  expected <- file.path(
+    tempdir(), if (.Platform$OS.type == "windows") "pandoc.exe" else "pandoc"
+  )
+  expect_identical(.get_pandoc_version(), expected)
+})
+
+test_that(".get_pandoc_version() falls back to PATH when RSTUDIO_PANDOC is unset", {
+  old <- Sys.getenv("RSTUDIO_PANDOC", unset = NA)
+  Sys.setenv(RSTUDIO_PANDOC = "")
+  on.exit(
+    if (is.na(old)) Sys.unsetenv("RSTUDIO_PANDOC") else Sys.setenv(RSTUDIO_PANDOC = old),
+    add = TRUE
+  )
+  local_mocked_bindings(Sys.which = function(x) c(pandoc = "/usr/bin/pandoc"), .package = "base")
+  local_mocked_bindings(.run_version_command = function(path, ...) path)
+  expect_identical(.get_pandoc_version(), "/usr/bin/pandoc")
+})
+
+test_that(".get_quarto_version() prefers QUARTO_PATH over PATH", {
+  old <- Sys.getenv("QUARTO_PATH", unset = NA)
+  Sys.setenv(QUARTO_PATH = "/some/quarto")
+  on.exit(
+    if (is.na(old)) Sys.unsetenv("QUARTO_PATH") else Sys.setenv(QUARTO_PATH = old),
+    add = TRUE
+  )
+  local_mocked_bindings(.run_version_command = function(path, ...) path)
+  expect_identical(.get_quarto_version(), "/some/quarto")
+})
+
+test_that(".get_quarto_version() falls back to PATH when QUARTO_PATH is unset", {
+  old <- Sys.getenv("QUARTO_PATH", unset = NA)
+  Sys.setenv(QUARTO_PATH = "")
+  on.exit(
+    if (is.na(old)) Sys.unsetenv("QUARTO_PATH") else Sys.setenv(QUARTO_PATH = old),
+    add = TRUE
+  )
+  local_mocked_bindings(Sys.which = function(x) c(quarto = "/usr/bin/quarto"), .package = "base")
+  local_mocked_bindings(.run_version_command = function(path, ...) path)
+  expect_identical(.get_quarto_version(), "/usr/bin/quarto")
+})
+
+test_that(".get_platform_info() includes pandoc and quarto fields", {
+  info <- .get_platform_info()
+  expect_true(all(c("pandoc", "quarto") %in% names(info)))
+})
+
+test_that("format.sessioncheck_sessionstate() shows the document products heading only when pandoc/quarto are requested", {
+  x <- sessionstate()
+  txt_with <- format(x, platform = c("version", "pandoc"))
+  txt_without <- format(x, platform = "version")
+  expect_match(txt_with, "document products", fixed = TRUE)
+  expect_no_match(txt_without, "document products", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() reports '(not found)' when pandoc/quarto are unavailable", {
+  local_mocked_bindings(.get_pandoc_version = function() NA_character_)
+  local_mocked_bindings(.get_quarto_version = function() NA_character_)
+  x <- sessionstate()
+  txt <- format(x, platform = c("version", "pandoc", "quarto"))
+  expect_match(txt, "pandoc: \\(not found\\)", fixed = FALSE)
+  expect_match(txt, "quarto: \\(not found\\)", fixed = FALSE)
+})
+
 test_that("format.sessioncheck_sessionstate() defaults globalenv to every column but only the 10 largest rows", {
   for (i in 1:15) assign(paste0("sc_test_genv_", i), i, envir = .GlobalEnv)
   on.exit(rm(list = paste0("sc_test_genv_", 1:15), envir = .GlobalEnv), add = TRUE)
