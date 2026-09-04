@@ -78,6 +78,17 @@
   all_names[all_names %in% requested]
 }
 
+# formats raw byte counts (as captured by .get_globalenv_info()) into
+# human-readable units for display, reusing base R's object_size formatting
+# rather than hand-rolling KB/MB thresholds
+.format_object_size <- function(bytes) {
+  vapply(
+    bytes,
+    function(b) format(structure(b, class = "object_size"), units = "auto"),
+    character(1L)
+  )
+}
+
 # status checkers: packages and namespaces ------
 
 .get_namespace_status <- function(allow) {

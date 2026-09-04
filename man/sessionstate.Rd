@@ -8,15 +8,17 @@ sessionstate()
 }
 \value{
 An object of class \code{sessioncheck_sessionstate}, a list with
-elements \code{platform}, \code{machine}, \code{timing}, and \code{packages}.
+elements \code{platform}, \code{machine}, \code{timing}, \code{packages}, \code{globalenv}, and
+\code{attachments}.
 }
 \description{
 \code{sessionstate()} captures a point-in-time, human-readable snapshot of the R
 session: platform details, selected machine information, session timing,
-and an inventory of attached and loaded-namespace packages (including
-remote source tracking for packages installed from GitHub). It is intended
-as a companion to \code{\link[=sessioncheck]{sessioncheck()}}: where \code{sessioncheck()} is typically
-called at the \emph{start} of a script to check for a clean session,
+an inventory of attached and loaded-namespace packages (including remote
+source tracking for packages installed from GitHub), the contents of the
+global environment, and the non-package entries on the search path. It is
+intended as a companion to \code{\link[=sessioncheck]{sessioncheck()}}: where \code{sessioncheck()} is
+typically called at the \emph{start} of a script to check for a clean session,
 \code{sessionstate()} is intended to be called at the \emph{end} of a script to
 produce an audit log of the environment the script actually ran in.
 }
@@ -42,13 +44,31 @@ when the namespace is loaded but no longer found on disk at all), and
 \code{"Github (user/repo@sha)"}, another remote type, or \code{"local"} when no
 remote metadata is available.
 
-\code{sessionstate()} itself always captures every field. To display only a
-subset when printing, pass \code{platform}/\code{machine}/\code{timing}/\code{packages}
-arguments to \code{print()} or \code{format()} on the result, or set defaults via
-\code{options(sessioncheck = list(sessionstate_packages = ...))} (see
-\link{display_methods} for the full precedence rules and option names); the
-underlying object is unaffected, so \code{as.data.frame()} always returns the
-full package inventory.
+The \code{globalenv} element is a data frame with one row per object in
+\code{.GlobalEnv} (including dot-prefixed objects), with columns \code{name},
+\code{class}, and \code{size} (in bytes, as reported by \code{\link[utils:object.size]{utils::object.size()}}). Only
+object names, classes, and sizes are captured, never values. Because a
+long-running script can accumulate many objects, the default display shows
+only the largest few (see below); the captured object itself always holds
+every object.
+
+The \code{attachments} element is a data frame with one row per entry on the
+search path (as returned by \code{\link[=search]{search()}}), with columns \code{name} and \code{type}
+(\code{"package"} or \code{"other"}). This surfaces non-package attachments (e.g.
+\code{tools:rstudio}, or environments added via \code{\link[=attach]{attach()}}) that aren't
+reflected in \code{packages}.
+
+\code{sessionstate()} itself always captures every field in full (\code{globalenv}
+is never truncated at capture time). To display only a subset when
+printing, pass \code{platform}/\code{machine}/\code{timing}/\code{packages}/\code{globalenv}/
+\code{attachments} arguments to \code{print()} or \code{format()} on the result, or set
+defaults via \code{options(sessioncheck = list(sessionstate_packages = ...))}
+(see \link{display_methods} for the full precedence rules and option names).
+The \code{globalenv_n} argument separately controls how many rows of
+\code{globalenv} are shown (largest objects first), independent of which
+columns are selected. None of this affects the underlying object, so
+\code{as.data.frame()} always returns the full package inventory, and
+\code{x$globalenv}/\code{x$attachments} always return their full data frames.
 }
 \examples{
 sessionstate()

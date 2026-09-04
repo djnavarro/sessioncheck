@@ -113,6 +113,47 @@
   )
 }
 
+.get_globalenv_info <- function() {
+  objs <- ls(envir = .GlobalEnv, all.names = TRUE)
+  cls <- vapply(
+    objs,
+    function(nm) paste(class(get(nm, envir = .GlobalEnv)), collapse = "/"),
+    character(1L)
+  )
+  # bytes as a plain numeric so the captured object stays portable (e.g.
+  # survives saveRDS()/as.data.frame() round-trips); display formatting into
+  # human-readable units happens at print time via .format_object_size()
+  size <- vapply(
+    objs,
+    function(nm) as.numeric(utils::object.size(get(nm, envir = .GlobalEnv))),
+    numeric(1L)
+  )
+  df <- data.frame(name = objs, class = cls, size = size, stringsAsFactors = FALSE)
+  df <- df[order(df$name), , drop = FALSE]
+  rownames(df) <- NULL
+  df
+}
+
+.get_search_path_info <- function() {
+  entries <- search()
+  # mirrors the package/non-package classification used by
+  # .get_attachment_status(): every entry with a "path" attribute is a
+  # package, and the last entry (the base package) always is one even
+  # though it carries no "path" attribute
+  is_pkg <- vapply(
+    seq_along(entries),
+    function(ind) !is.null(attr(as.environment(ind), "path")) | ind == length(entries),
+    logical(1L)
+  )
+  df <- data.frame(
+    name = entries,
+    type = ifelse(is_pkg, "package", "other"),
+    stringsAsFactors = FALSE
+  )
+  rownames(df) <- NULL
+  df
+}
+
 .get_built_rversion <- function(desc) {
   built <- desc$Built
   rver <- if (!is.null(built)) sub("^R ([0-9.]+);.*$", "\\1", built) else NA_character_

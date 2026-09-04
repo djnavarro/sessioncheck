@@ -1,11 +1,37 @@
 test_that("sessionstate() returns a well-formed sessioncheck_sessionstate object", {
   x <- sessionstate()
   expect_s3_class(x, "sessioncheck_sessionstate")
-  expect_named(x, c("platform", "machine", "timing", "packages"))
+  expect_named(x, c("platform", "machine", "timing", "packages", "globalenv", "attachments"))
   expect_true(is.list(x$platform))
   expect_true(is.list(x$machine))
   expect_true(is.list(x$timing))
   expect_s3_class(x$packages, "data.frame")
+  expect_s3_class(x$globalenv, "data.frame")
+  expect_s3_class(x$attachments, "data.frame")
+})
+
+test_that(".get_globalenv_info() captures every object in .GlobalEnv, never values", {
+  assign("sc_test_obj_a", 1:10, envir = .GlobalEnv)
+  assign("sc_test_obj_b", "some string", envir = .GlobalEnv)
+  on.exit(rm(list = c("sc_test_obj_a", "sc_test_obj_b"), envir = .GlobalEnv), add = TRUE)
+
+  df <- .get_globalenv_info()
+  expect_named(df, c("name", "class", "size"))
+  expect_true(all(c("sc_test_obj_a", "sc_test_obj_b") %in% df$name))
+  expect_identical(df$class[df$name == "sc_test_obj_a"], "integer")
+  expect_identical(df$class[df$name == "sc_test_obj_b"], "character")
+  expect_true(is.numeric(df$size))
+  expect_false(any(grepl("some string", unlist(df), fixed = TRUE)))
+})
+
+test_that(".get_search_path_info() classifies packages vs. other attachments", {
+  df <- .get_search_path_info()
+  expect_named(df, c("name", "type"))
+  expect_identical(df$name, search())
+  expect_true(all(df$type[grepl("^package:", df$name)] == "package"))
+  # the base package sits last on the search path and is always a package,
+  # even though (unlike other packages) it carries no "path" attribute
+  expect_identical(df$type[length(df$type)], "package")
 })
 
 test_that("as.data.frame.sessioncheck_sessionstate() returns the package inventory", {
@@ -71,6 +97,132 @@ test_that("format.sessioncheck_sessionstate() defaults platform/machine/timing t
   expect_match(txt, "matrix products", fixed = TRUE)
   expect_match(txt, "nodename", fixed = TRUE)
   expect_match(txt, "captured at", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() defaults globalenv to every column but only the 10 largest rows", {
+  for (i in 1:15) assign(paste0("sc_test_genv_", i), i, envir = .GlobalEnv)
+  on.exit(rm(list = paste0("sc_test_genv_", 1:15), envir = .GlobalEnv), add = TRUE)
+
+  x <- sessionstate()
+  txt <- format(x)
+  expect_match(txt, "Global environment \\[n = ", fixed = FALSE)
+  lines <- strsplit(txt, "\n")[[1]]
+  header_line <- lines[grep("^\\s*name\\s+class\\s+size\\s*$", lines)]
+  expect_length(header_line, 1L)
+  expect_match(txt, "... and", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() shows every globalenv row when there are 10 or fewer", {
+  local_mocked_bindings(.get_globalenv_info = function() {
+    data.frame(name = c("a", "b"), class = c("numeric", "numeric"), size = c(56, 48), stringsAsFactors = FALSE)
+  })
+  x <- sessionstate()
+  txt <- format(x)
+  expect_no_match(txt, "... and", fixed = TRUE)
+  expect_match(txt, "Global environment \\[n = 2\\]", fixed = FALSE)
+})
+
+test_that("format.sessioncheck_sessionstate() orders globalenv rows by size regardless of displayed columns", {
+  local_mocked_bindings(.get_globalenv_info = function() {
+    data.frame(
+      name = c("small", "big", "medium"),
+      class = "numeric",
+      size = c(10, 1000, 100),
+      stringsAsFactors = FALSE
+    )
+  })
+  x <- sessionstate()
+  txt <- format(x, globalenv = "name")
+  lines <- strsplit(txt, "\n")[[1]]
+  genv_start <- grep("^Global environment", lines)
+  genv_lines <- trimws(lines[(genv_start + 2L):(genv_start + 4L)])
+  expect_identical(genv_lines, c("big", "medium", "small"))
+})
+
+test_that("format.sessioncheck_sessionstate() honors sessionstate_globalenv and sessionstate_globalenv_n options", {
+  local_mocked_bindings(.get_globalenv_info = function() {
+    data.frame(
+      name = c("a", "b", "c"),
+      class = "numeric",
+      size = c(30, 20, 10),
+      stringsAsFactors = FALSE
+    )
+  })
+  old <- options(sessioncheck = list(sessionstate_globalenv = "name", sessionstate_globalenv_n = 1))
+  on.exit(options(old), add = TRUE)
+  x <- sessionstate()
+  txt <- format(x)
+  expect_no_match(txt, "class", fixed = TRUE)
+  expect_match(txt, "... and 2 more", fixed = TRUE)
+})
+
+test_that("explicit globalenv/globalenv_n arguments override options(sessioncheck = ...)", {
+  local_mocked_bindings(.get_globalenv_info = function() {
+    data.frame(
+      name = c("a", "b", "c"),
+      class = "numeric",
+      size = c(30, 20, 10),
+      stringsAsFactors = FALSE
+    )
+  })
+  old <- options(sessioncheck = list(sessionstate_globalenv_n = 1))
+  on.exit(options(old), add = TRUE)
+  x <- sessionstate()
+  txt <- format(x, globalenv_n = 3)
+  expect_no_match(txt, "... and", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() errors informatively on invalid globalenv_n", {
+  x <- sessionstate()
+  expect_error(format(x, globalenv_n = "a"), "must be a single number")
+  expect_error(format(x, globalenv_n = c(1, 2)), "must be a single number")
+})
+
+test_that("format.sessioncheck_sessionstate() defaults attachments to every column and every row", {
+  x <- sessionstate()
+  txt <- format(x)
+  expect_match(txt, "Attached environments \\[n = ", fixed = FALSE)
+  lines <- strsplit(txt, "\n")[[1]]
+  att_start <- grep("^Attached environments", lines)
+  header_line <- lines[att_start + 1L]
+  expect_match(header_line, "name", fixed = TRUE)
+  expect_match(header_line, "type", fixed = TRUE)
+  expect_match(txt, "\\.GlobalEnv", fixed = FALSE)
+})
+
+test_that("format.sessioncheck_sessionstate() restricts attachments columns when requested", {
+  x <- sessionstate()
+  txt <- format(x, attachments = "name")
+  lines <- strsplit(txt, "\n")[[1]]
+  att_start <- grep("^Attached environments", lines)
+  header_line <- lines[att_start + 1L]
+  expect_no_match(header_line, "type", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() honors sessionstate_attachments set via options(sessioncheck = ...)", {
+  old <- options(sessioncheck = list(sessionstate_attachments = "name"))
+  on.exit(options(old), add = TRUE)
+  x <- sessionstate()
+  txt <- format(x)
+  lines <- strsplit(txt, "\n")[[1]]
+  att_start <- grep("^Attached environments", lines)
+  header_line <- lines[att_start + 1L]
+  expect_no_match(header_line, "type", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() errors informatively on an unknown globalenv/attachments field", {
+  x <- sessionstate()
+  expect_error(format(x, globalenv = "bogus"), "Unknown globalenv field")
+  expect_error(format(x, attachments = "bogus"), "Unknown attachments field")
+})
+
+test_that("selecting globalenv/attachments display fields never changes the underlying object", {
+  x <- sessionstate()
+  full_genv <- x$globalenv
+  full_att <- x$attachments
+  format(x, globalenv = "name", globalenv_n = 1, attachments = "name")
+  expect_identical(x$globalenv, full_genv)
+  expect_identical(x$attachments, full_att)
 })
 
 test_that("format.sessioncheck_sessionstate() honors sessionstate_packages set via options(sessioncheck = ...)", {
@@ -172,7 +324,13 @@ test_that("format.sessioncheck_sessionstate() errors informatively on an unknown
 
 test_that("format.sessioncheck_sessionstate() defaults to showing every field when NULL", {
   x <- sessionstate()
-  expect_identical(format(x), format(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL))
+  expect_identical(
+    format(x),
+    format(
+      x, platform = NULL, machine = NULL, timing = NULL, packages = NULL,
+      globalenv = NULL, globalenv_n = NULL, attachments = NULL
+    )
+  )
 })
 
 test_that("print.sessioncheck_sessionstate() forwards field-selection arguments to format()", {
@@ -181,6 +339,17 @@ test_that("print.sessioncheck_sessionstate() forwards field-selection arguments 
   expect_equal(
     trimws(paste(out, collapse = "\n")),
     trimws(format(x, platform = "version", machine = "user", timing = "elapsed_sec", packages = "package"))
+  )
+})
+
+test_that("print.sessioncheck_sessionstate() forwards globalenv/globalenv_n/attachments arguments to format()", {
+  x <- sessionstate()
+  out <- capture.output(
+    print(x, globalenv = "name", globalenv_n = 2, attachments = "name")
+  )
+  expect_equal(
+    trimws(paste(out, collapse = "\n")),
+    trimws(format(x, globalenv = "name", globalenv_n = 2, attachments = "name"))
   )
 })
 

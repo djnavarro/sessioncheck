@@ -14,9 +14,12 @@ new_sessioncheck <- function(...) {
   structure(list(...), class = "sessioncheck_sessioncheck")
 }
 
-new_sessionstate <- function(platform, machine, timing, packages) {
+new_sessionstate <- function(platform, machine, timing, packages, globalenv, attachments) {
   structure(
-    list(platform = platform, machine = machine, timing = timing, packages = packages),
+    list(
+      platform = platform, machine = machine, timing = timing, packages = packages,
+      globalenv = globalenv, attachments = attachments
+    ),
     class = "sessioncheck_sessionstate"
   )
 }
@@ -46,22 +49,39 @@ new_sessionstate <- function(platform, machine, timing, packages) {
 #' [sessionstate()] for the full list of columns). Defaults to
 #' `c("package", "attached", "loaded_version", "source")`. Ignored for other
 #' classes. See Details for how the default is resolved.
+#' @param globalenv For `sessioncheck_sessionstate` objects, an optional
+#' character vector selecting which global environment columns to display
+#' (from `"name"`, `"class"`, `"size"`). Defaults to showing all columns.
+#' Ignored for other classes. See Details for how the default is resolved,
+#' and for how `globalenv_n` separately controls the number of rows shown.
+#' @param globalenv_n For `sessioncheck_sessionstate` objects, an optional
+#' single number giving the maximum number of `globalenv` rows to display,
+#' largest objects first. Defaults to `10`. Ignored for other classes. See
+#' Details for how the default is resolved.
+#' @param attachments For `sessioncheck_sessionstate` objects, an optional
+#' character vector selecting which attached-environment columns to display
+#' (from `"name"`, `"type"`). Defaults to showing all columns. Ignored for
+#' other classes. See Details for how the default is resolved.
 #' @param ... Ignored
 #'
 #' @returns Character vector
 #'
 #' @details
 #' For `sessioncheck_sessionstate` objects, the `platform`/`machine`/`timing`/
-#' `packages` arguments are resolved through the same precedence used
-#' elsewhere in the package: an explicit argument always wins; otherwise,
-#' `getOption("sessioncheck")` is checked for a `sessionstate_platform`,
-#' `sessionstate_machine`, `sessionstate_timing`, or `sessionstate_packages`
-#' field (respectively); if neither is set, a built-in default is used
-#' (showing every field, except for `packages`, which defaults to
-#' `c("package", "attached", "loaded_version", "source")`). This selection
-#' only affects what is displayed; it never changes the underlying object, so
-#' `as.data.frame()` always returns the full package inventory regardless of
-#' any selection in effect.
+#' `packages`/`globalenv`/`globalenv_n`/`attachments` arguments are resolved
+#' through the same precedence used elsewhere in the package: an explicit
+#' argument always wins; otherwise, `getOption("sessioncheck")` is checked
+#' for a `sessionstate_platform`, `sessionstate_machine`,
+#' `sessionstate_timing`, `sessionstate_packages`, `sessionstate_globalenv`,
+#' `sessionstate_globalenv_n`, or `sessionstate_attachments` field
+#' (respectively); if neither is set, a built-in default is used (showing
+#' every field/column, except for `packages`, which defaults to
+#' `c("package", "attached", "loaded_version", "source")`, and
+#' `globalenv_n`, which defaults to `10`). This selection only affects what
+#' is displayed; it never changes the underlying object, so
+#' `as.data.frame()` always returns the full package inventory, and
+#' `x$globalenv`/`x$attachments` always return their full data frames,
+#' regardless of any selection in effect.
 #'
 #' @name display_methods
 
@@ -93,7 +113,7 @@ format.sessioncheck_sessioncheck <- function(x, ...) {
 
 #' @rdname display_methods
 #' @exportS3Method base::format
-format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL, ...) {
+format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL, globalenv = NULL, globalenv_n = NULL, attachments = NULL, ...) {
   p <- x$platform
   m <- x$machine
   t <- x$timing
@@ -151,8 +171,42 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL,
     utils::capture.output(print(pkg_df, row.names = FALSE))
   )
 
+  genv_df_full <- x$globalenv
+  # largest objects first, independent of which columns end up displayed
+  genv_df_full <- genv_df_full[order(-genv_df_full$size), , drop = FALSE]
+  globalenv <- .resolve_field_selection(globalenv, "sessionstate_globalenv", NULL)
+  genv_cols <- .select_fields(names(genv_df_full), globalenv, "globalenv")
+  genv_df <- genv_df_full[, genv_cols, drop = FALSE]
+  n_total <- nrow(genv_df)
+  globalenv_n <- .resolve_field_selection(globalenv_n, "sessionstate_globalenv_n", 10L)
+  if (!is.numeric(globalenv_n) || length(globalenv_n) != 1L) {
+    stop("`globalenv_n` must be a single number", call. = FALSE)
+  }
+  n_shown <- min(globalenv_n, n_total)
+  genv_df <- genv_df[seq_len(n_shown), , drop = FALSE]
+  if ("size" %in% names(genv_df)) genv_df$size <- .format_object_size(genv_df$size)
+  genv_lines <- c(
+    sprintf("Global environment [n = %d]:", n_total),
+    utils::capture.output(print(genv_df, row.names = FALSE))
+  )
+  if (n_shown < n_total) {
+    genv_lines <- c(genv_lines, sprintf(" ... and %d more (see x$globalenv)", n_total - n_shown))
+  }
+
+  att_df <- x$attachments
+  attachments <- .resolve_field_selection(attachments, "sessionstate_attachments", NULL)
+  att_cols <- .select_fields(names(att_df), attachments, "attachments")
+  att_df <- att_df[, att_cols, drop = FALSE]
+  att_lines <- c(
+    sprintf("Attached environments [n = %d]:", nrow(att_df)),
+    utils::capture.output(print(att_df, row.names = FALSE))
+  )
+
   paste(
-    c(platform_lines, "", machine_lines, "", timing_lines, "", pkg_lines),
+    c(
+      platform_lines, "", machine_lines, "", timing_lines, "", pkg_lines, "",
+      genv_lines, "", att_lines
+    ),
     collapse = "\n"
   )
 }
@@ -173,8 +227,14 @@ print.sessioncheck_sessioncheck <- function(x, ...) {
 
 #' @rdname display_methods
 #' @exportS3Method base::print
-print.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL, ...) {
-  cat(format(x, platform = platform, machine = machine, timing = timing, packages = packages, ...), "\n")
+print.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL, globalenv = NULL, globalenv_n = NULL, attachments = NULL, ...) {
+  cat(
+    format(
+      x, platform = platform, machine = machine, timing = timing, packages = packages,
+      globalenv = globalenv, globalenv_n = globalenv_n, attachments = attachments, ...
+    ),
+    "\n"
+  )
   invisible(x)
 }
 

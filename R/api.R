@@ -4,15 +4,17 @@
 #' @description
 #' `sessionstate()` captures a point-in-time, human-readable snapshot of the R
 #' session: platform details, selected machine information, session timing,
-#' and an inventory of attached and loaded-namespace packages (including
-#' remote source tracking for packages installed from GitHub). It is intended
-#' as a companion to [sessioncheck()]: where `sessioncheck()` is typically
-#' called at the *start* of a script to check for a clean session,
+#' an inventory of attached and loaded-namespace packages (including remote
+#' source tracking for packages installed from GitHub), the contents of the
+#' global environment, and the non-package entries on the search path. It is
+#' intended as a companion to [sessioncheck()]: where `sessioncheck()` is
+#' typically called at the *start* of a script to check for a clean session,
 #' `sessionstate()` is intended to be called at the *end* of a script to
 #' produce an audit log of the environment the script actually ran in.
 #'
 #' @returns An object of class `sessioncheck_sessionstate`, a list with
-#' elements `platform`, `machine`, `timing`, and `packages`.
+#' elements `platform`, `machine`, `timing`, `packages`, `globalenv`, and
+#' `attachments`.
 #'
 #' @details
 #' The `machine` element includes the node name and user reported by
@@ -37,13 +39,31 @@
 #' `"Github (user/repo@sha)"`, another remote type, or `"local"` when no
 #' remote metadata is available.
 #'
-#' `sessionstate()` itself always captures every field. To display only a
-#' subset when printing, pass `platform`/`machine`/`timing`/`packages`
-#' arguments to `print()` or `format()` on the result, or set defaults via
-#' `options(sessioncheck = list(sessionstate_packages = ...))` (see
-#' [display_methods] for the full precedence rules and option names); the
-#' underlying object is unaffected, so `as.data.frame()` always returns the
-#' full package inventory.
+#' The `globalenv` element is a data frame with one row per object in
+#' `.GlobalEnv` (including dot-prefixed objects), with columns `name`,
+#' `class`, and `size` (in bytes, as reported by [utils::object.size()]). Only
+#' object names, classes, and sizes are captured, never values. Because a
+#' long-running script can accumulate many objects, the default display shows
+#' only the largest few (see below); the captured object itself always holds
+#' every object.
+#'
+#' The `attachments` element is a data frame with one row per entry on the
+#' search path (as returned by [search()]), with columns `name` and `type`
+#' (`"package"` or `"other"`). This surfaces non-package attachments (e.g.
+#' `tools:rstudio`, or environments added via [attach()]) that aren't
+#' reflected in `packages`.
+#'
+#' `sessionstate()` itself always captures every field in full (`globalenv`
+#' is never truncated at capture time). To display only a subset when
+#' printing, pass `platform`/`machine`/`timing`/`packages`/`globalenv`/
+#' `attachments` arguments to `print()` or `format()` on the result, or set
+#' defaults via `options(sessioncheck = list(sessionstate_packages = ...))`
+#' (see [display_methods] for the full precedence rules and option names).
+#' The `globalenv_n` argument separately controls how many rows of
+#' `globalenv` are shown (largest objects first), independent of which
+#' columns are selected. None of this affects the underlying object, so
+#' `as.data.frame()` always returns the full package inventory, and
+#' `x$globalenv`/`x$attachments` always return their full data frames.
 #'
 #' @examples
 #' sessionstate()
@@ -53,10 +73,12 @@
 #' @export
 sessionstate <- function() {
   new_sessionstate(
-    platform = .get_platform_info(),
-    machine  = .get_machine_info(),
-    timing   = .get_timing_info(),
-    packages = .get_package_inventory()
+    platform    = .get_platform_info(),
+    machine     = .get_machine_info(),
+    timing      = .get_timing_info(),
+    packages    = .get_package_inventory(),
+    globalenv   = .get_globalenv_info(),
+    attachments = .get_search_path_info()
   )
 }
 

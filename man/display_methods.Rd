@@ -14,13 +14,33 @@
 
 \method{format}{sessioncheck_sessioncheck}(x, ...)
 
-\method{format}{sessioncheck_sessionstate}(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL, ...)
+\method{format}{sessioncheck_sessionstate}(
+  x,
+  platform = NULL,
+  machine = NULL,
+  timing = NULL,
+  packages = NULL,
+  globalenv = NULL,
+  globalenv_n = NULL,
+  attachments = NULL,
+  ...
+)
 
 \method{print}{sessioncheck_status}(x, ...)
 
 \method{print}{sessioncheck_sessioncheck}(x, ...)
 
-\method{print}{sessioncheck_sessionstate}(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL, ...)
+\method{print}{sessioncheck_sessionstate}(
+  x,
+  platform = NULL,
+  machine = NULL,
+  timing = NULL,
+  packages = NULL,
+  globalenv = NULL,
+  globalenv_n = NULL,
+  attachments = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{An object of class \code{sessioncheck_status}, \code{sessioncheck_sessioncheck},
@@ -49,6 +69,22 @@ vector selecting which package inventory columns to display (see
 \code{\link[=sessionstate]{sessionstate()}} for the full list of columns). Defaults to
 \code{c("package", "attached", "loaded_version", "source")}. Ignored for other
 classes. See Details for how the default is resolved.}
+
+\item{globalenv}{For \code{sessioncheck_sessionstate} objects, an optional
+character vector selecting which global environment columns to display
+(from \code{"name"}, \code{"class"}, \code{"size"}). Defaults to showing all columns.
+Ignored for other classes. See Details for how the default is resolved,
+and for how \code{globalenv_n} separately controls the number of rows shown.}
+
+\item{globalenv_n}{For \code{sessioncheck_sessionstate} objects, an optional
+single number giving the maximum number of \code{globalenv} rows to display,
+largest objects first. Defaults to \code{10}. Ignored for other classes. See
+Details for how the default is resolved.}
+
+\item{attachments}{For \code{sessioncheck_sessionstate} objects, an optional
+character vector selecting which attached-environment columns to display
+(from \code{"name"}, \code{"type"}). Defaults to showing all columns. Ignored for
+other classes. See Details for how the default is resolved.}
 }
 \value{
 Character vector
@@ -58,14 +94,18 @@ Format and print sessioncheck objects
 }
 \details{
 For \code{sessioncheck_sessionstate} objects, the \code{platform}/\code{machine}/\code{timing}/
-\code{packages} arguments are resolved through the same precedence used
-elsewhere in the package: an explicit argument always wins; otherwise,
-\code{getOption("sessioncheck")} is checked for a \code{sessionstate_platform},
-\code{sessionstate_machine}, \code{sessionstate_timing}, or \code{sessionstate_packages}
-field (respectively); if neither is set, a built-in default is used
-(showing every field, except for \code{packages}, which defaults to
-\code{c("package", "attached", "loaded_version", "source")}). This selection
-only affects what is displayed; it never changes the underlying object, so
-\code{as.data.frame()} always returns the full package inventory regardless of
-any selection in effect.
+\code{packages}/\code{globalenv}/\code{globalenv_n}/\code{attachments} arguments are resolved
+through the same precedence used elsewhere in the package: an explicit
+argument always wins; otherwise, \code{getOption("sessioncheck")} is checked
+for a \code{sessionstate_platform}, \code{sessionstate_machine},
+\code{sessionstate_timing}, \code{sessionstate_packages}, \code{sessionstate_globalenv},
+\code{sessionstate_globalenv_n}, or \code{sessionstate_attachments} field
+(respectively); if neither is set, a built-in default is used (showing
+every field/column, except for \code{packages}, which defaults to
+\code{c("package", "attached", "loaded_version", "source")}, and
+\code{globalenv_n}, which defaults to \code{10}). This selection only affects what
+is displayed; it never changes the underlying object, so
+\code{as.data.frame()} always returns the full package inventory, and
+\code{x$globalenv}/\code{x$attachments} always return their full data frames,
+regardless of any selection in effect.
 }
