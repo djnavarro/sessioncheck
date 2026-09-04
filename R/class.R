@@ -131,8 +131,8 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL,
   machine_lines <- c("Machine:", machine_all[machine_fields])
 
   timing_all <- c(
-    captured_at = sprintf(" captured at     %s", format(t$captured_at)),
-    elapsed_sec = sprintf(" elapsed (sec)   %s", t$elapsed_sec)
+    captured_at = sprintf(" captured at              %s", format(t$captured_at, usetz = TRUE)),
+    elapsed_sec = sprintf(" session runtime (sec)    %s", t$elapsed_sec)
   )
   timing <- .resolve_field_selection(timing, "sessionstate_timing", NULL)
   timing_fields <- .select_fields(names(timing_all), timing, "timing")
