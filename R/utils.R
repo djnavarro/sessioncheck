@@ -72,12 +72,22 @@
 }
 
 .get_ui <- function() {
-  if (nzchar(Sys.getenv("POSITRON"))) return("Positron")
-  if (nzchar(Sys.getenv("RSTUDIO"))) return("RStudio")
-  if (!is.na(Sys.getenv("R_GUI_APP_VERSION", unset = NA_character_))) return("R.app")
+  # interactive() distinguishes an actual console session from batch/render
+  # execution (e.g. Quarto/R Markdown rendering, Rscript); .Platform$GUI
+  # cannot make that distinction, since it reflects the compiled/configured
+  # frontend regardless of how the current call was invoked
   if (!interactive()) return("non-interactive")
+  # .Platform$GUI is a base R signal that already reports "Positron" and
+  # "RStudio" in those IDEs (verified for Positron; documented for RStudio),
+  # plus other frontends (e.g. "AQUA" for R.app, "Rgui" on Windows) that a
+  # hand-rolled list of env var checks would otherwise have to track
+  # one-by-one
+  gui <- .get_platform_gui()
+  if (!is.null(gui) && nzchar(gui)) return(gui)
   "unknown"
 }
+
+.get_platform_gui <- function() .Platform$GUI
 
 .get_machine_info <- function() {
   info <- Sys.info()
@@ -168,6 +178,19 @@
   if (identical(desc, NA) || !is.list(desc)) return("unknown")
   if (identical(desc$Priority, "base")) return("base")
 
+  # very old devtools::install_github() installs predate the RemoteType
+  # convention entirely and instead record the ref directly in Github*
+  # fields; reuse the same github formatting/truncation logic by mapping
+  # them onto the modern Remote* field names
+  if (!is.null(desc$GithubSHA1) && nzchar(desc$GithubSHA1)) {
+    legacy_desc <- list(
+      RemoteUsername = desc$GithubUsername,
+      RemoteRepo = desc$GithubRepo,
+      RemoteSha = desc$GithubSHA1
+    )
+    return(.format_remote_source("github", legacy_desc))
+  }
+
   # pak/renv mark ordinary (non-remote) installs with RemoteType = "standard";
   # treat that the same as no RemoteType at all
   remote_type <- desc$RemoteType
@@ -197,7 +220,17 @@
     return(sprintf("%s (R %s)", repo, .get_built_rversion(desc)))
   }
 
+  # a package with no remote/repository/biocViews metadata at all is either
+  # a genuine local install, or the current in-development package loaded
+  # via devtools::load_all() (which stubs in a namespace without going
+  # through the normal install machinery)
+  if (.is_load_all_package(pkg)) return("load_all()")
+
   "local"
+}
+
+.is_load_all_package <- function(pkg) {
+  isNamespaceLoaded(pkg) && !is.null(asNamespace(pkg)$.__DEVTOOLS__)
 }
 
 .get_package_inventory <- function() {

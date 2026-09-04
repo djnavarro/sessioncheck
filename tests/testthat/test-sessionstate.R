@@ -36,6 +36,27 @@ test_that("print.sessioncheck_sessionstate() prints and returns its input invisi
   expect_false(ret$visible)
 })
 
+test_that(".get_ui() reports 'non-interactive' regardless of .Platform$GUI when not interactive", {
+  local_mocked_bindings(interactive = function() FALSE, .package = "base")
+  local_mocked_bindings(.get_platform_gui = function() "Positron")
+  expect_identical(.get_ui(), "non-interactive")
+})
+
+test_that(".get_ui() reports .Platform$GUI when interactive", {
+  local_mocked_bindings(interactive = function() TRUE, .package = "base")
+  local_mocked_bindings(.get_platform_gui = function() "Positron")
+  expect_identical(.get_ui(), "Positron")
+
+  local_mocked_bindings(.get_platform_gui = function() "RStudio")
+  expect_identical(.get_ui(), "RStudio")
+})
+
+test_that(".get_ui() falls back to 'unknown' when .Platform$GUI is empty", {
+  local_mocked_bindings(interactive = function() TRUE, .package = "base")
+  local_mocked_bindings(.get_platform_gui = function() "")
+  expect_identical(.get_ui(), "unknown")
+})
+
 test_that(".get_package_source() classifies base packages", {
   local_mocked_bindings(
     packageDescription = function(pkg, ...) list(Priority = "base"),
@@ -264,6 +285,31 @@ test_that(".get_package_source() classifies pak local installs via RemotePkgRef"
     .get_package_source("mylocalpkg"),
     "local (/tmp/pak_local_test/mylocalpkg)"
   )
+})
+
+test_that(".get_package_source() classifies legacy devtools::install_github() installs", {
+  # pre-RemoteType devtools versions recorded Github* fields directly
+  # instead of RemoteType = "github" + Remote* fields
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) {
+      list(
+        GithubUsername = "someuser",
+        GithubRepo = "somerepo",
+        GithubSHA1 = "abcdef1234567890"
+      )
+    },
+    .package = "utils"
+  )
+  expect_identical(.get_package_source("somepkg"), "Github (someuser/somerepo@abcdef1)")
+})
+
+test_that(".get_package_source() classifies devtools::load_all() packages", {
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) list(Version = "0.0.1"),
+    .package = "utils"
+  )
+  local_mocked_bindings(.is_load_all_package = function(pkg) TRUE)
+  expect_identical(.get_package_source("somepkg"), "load_all()")
 })
 
 test_that(".get_package_source() falls back to the raw RemoteType label when unrecognized", {

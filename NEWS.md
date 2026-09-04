@@ -35,6 +35,24 @@
   fell through to a raw, unlabeled `"bioc_xgit (sha)"`-style string and now
   correctly report as `"Bioconductor (repo@sha)"`.
 
+- Fixed `source` reporting for two more cases, found by auditing
+  `sessionstate()` against `sessioninfo`'s internals: packages installed
+  via very old, pre-`RemoteType` versions of `devtools::install_github()`
+  (which recorded `GithubUsername`/`GithubRepo`/`GithubSHA1` fields
+  directly) now report as `"Github (user/repo@sha)"` instead of falling
+  through to `"local"`; and packages loaded via `devtools::load_all()`
+  (which have no install metadata at all) now report as `"load_all()"`
+  instead of the misleading `"local"`.
+
+- Simplified `ui` detection in `sessionstate()`'s platform info to use the
+  base R `.Platform$GUI` signal (falling back to `"non-interactive"` first,
+  via `interactive()`, for batch/render execution) instead of hand-rolled
+  `Sys.getenv()` checks for Positron, RStudio, and R.app specifically.
+  Confirmed empirically that `.Platform$GUI` reports `"Positron"` inside
+  Positron; other frontends (RStudio, R.app, Rgui, ...) are expected to be
+  reported correctly based on documented `.Platform$GUI` behavior, though
+  not independently verified here.
+
 # sessioncheck 0.1.1
 
 ## Bug fixes
