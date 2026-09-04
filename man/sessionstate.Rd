@@ -23,7 +23,9 @@ produce an audit log of the environment the script actually ran in.
 \details{
 The \code{machine} element includes the node name and user reported by
 \code{\link[=Sys.info]{Sys.info()}}. Because this can reveal a hostname or local username, be
-mindful about where \code{sessionstate()} output is stored or shared.
+mindful about where \code{sessionstate()} output is stored or shared. The same
+caution applies to the \code{ondisk_path}/\code{loaded_path} columns of \code{packages},
+since library paths often embed a home directory.
 
 The \code{packages} element covers every package that is either attached to
 the search path or loaded via namespace (i.e., \code{union(.packages(), loadedNamespaces())}). It has columns \code{package}, \code{attached},
@@ -31,9 +33,14 @@ the search path or loaded via namespace (i.e., \code{union(.packages(), loadedNa
 \code{DESCRIPTION} file), \code{loaded_version} (the version of the namespace
 actually loaded into memory), \code{version_mismatch} (\code{TRUE} when the two
 disagree, e.g. because the package was updated on disk after this
-session loaded it), and \code{source}, which classifies each package as
-\code{"base"}, \code{"CRAN (R x.y.z)"}, \code{"Github (user/repo@sha)"}, another remote
-type, or \code{"local"} when no remote metadata is available.
+session loaded it), \code{ondisk_path} and \code{loaded_path} (the library paths a
+package currently resolves to versus where its loaded namespace actually
+came from), \code{path_mismatch} (\code{TRUE} when both exist but disagree, e.g.
+after a \code{.libPaths()} change mid-session), \code{removed_from_disk} (\code{TRUE}
+when the namespace is loaded but no longer found on disk at all), and
+\code{source}, which classifies each package as \code{"base"}, \code{"CRAN (R x.y.z)"},
+\code{"Github (user/repo@sha)"}, another remote type, or \code{"local"} when no
+remote metadata is available.
 }
 \examples{
 sessionstate()

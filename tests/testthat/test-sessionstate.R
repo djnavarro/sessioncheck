@@ -14,15 +14,22 @@ test_that("as.data.frame.sessioncheck_sessionstate() returns the package invento
   expect_s3_class(df, "data.frame")
   expect_named(
     df,
-    c("package", "attached", "ondisk_version", "loaded_version", "version_mismatch", "source")
+    c(
+      "package", "attached", "ondisk_version", "loaded_version", "version_mismatch",
+      "ondisk_path", "loaded_path", "path_mismatch", "removed_from_disk", "source"
+    )
   )
   expect_true("base" %in% df$package)
   expect_true("sessioncheck" %in% df$package)
   expect_true(is.logical(df$attached))
   expect_true(is.logical(df$version_mismatch))
+  expect_true(is.logical(df$path_mismatch))
+  expect_true(is.logical(df$removed_from_disk))
   # sessioncheck itself is loaded via devtools::load_all() during testing,
-  # so its on-disk/loaded versions should agree in this session
+  # so its on-disk/loaded versions and paths should agree in this session
   expect_false(any(df$version_mismatch, na.rm = TRUE))
+  expect_false(any(df$path_mismatch, na.rm = TRUE))
+  expect_false(any(df$removed_from_disk, na.rm = TRUE))
 })
 
 test_that("format.sessioncheck_sessionstate() produces a single string with expected sections", {
@@ -104,6 +111,83 @@ test_that(".get_package_inventory() does not flag a version_mismatch when versio
 
   df <- .get_package_inventory()
   expect_false(any(df$version_mismatch))
+})
+
+test_that(".get_loaded_path() special-cases 'base'", {
+  local_mocked_bindings(getNamespaceInfo = function(pkg, which) stop("should not be called"), .package = "base")
+  expect_identical(.get_loaded_path("base"), system.file())
+})
+
+test_that(".get_loaded_path() returns NA for a namespace that isn't loaded", {
+  local_mocked_bindings(isNamespaceLoaded = function(pkg) FALSE, .package = "base")
+  expect_identical(.get_loaded_path("somepkg"), NA_character_)
+})
+
+test_that(".get_loaded_path() returns the loaded namespace path", {
+  local_mocked_bindings(isNamespaceLoaded = function(pkg) TRUE, .package = "base")
+  local_mocked_bindings(
+    getNamespaceInfo = function(pkg, which) "/some/lib/somepkg",
+    .package = "base"
+  )
+  expect_identical(.get_loaded_path("somepkg"), "/some/lib/somepkg")
+})
+
+test_that(".get_ondisk_path() returns NA when the package isn't found on disk", {
+  local_mocked_bindings(system.file = function(...) "", .package = "base")
+  expect_identical(.get_ondisk_path("somepkg"), NA_character_)
+})
+
+test_that(".get_package_inventory() flags a path_mismatch when on-disk and loaded paths differ", {
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) list(Version = "1.0.0"),
+    .package = "utils"
+  )
+  local_mocked_bindings(.get_loaded_version = function(pkg) "1.0.0")
+  local_mocked_bindings(.get_package_source = function(pkg) "local")
+  local_mocked_bindings(.get_ondisk_path = function(pkg) "/new/lib/path")
+  local_mocked_bindings(.get_loaded_path = function(pkg) "/old/lib/path")
+  # otherwise sessioncheck itself (loaded via load_all() during testing)
+  # would be correctly excluded from the flag, breaking all()
+  local_mocked_bindings(.is_load_all_package = function(pkg) FALSE)
+
+  df <- .get_package_inventory()
+  expect_true(all(df$path_mismatch))
+  expect_false(any(df$removed_from_disk))
+})
+
+test_that(".get_package_inventory() does not flag load_all() packages as path_mismatch", {
+  # under devtools::load_all(), system.file() resolves to inst/ while the
+  # loaded namespace path is the source root; this is expected and not
+  # genuine path drift (reproduces the false positive found when this was
+  # first implemented, since sessioncheck itself is loaded via load_all()
+  # during testing)
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) list(Version = "1.0.0"),
+    .package = "utils"
+  )
+  local_mocked_bindings(.get_loaded_version = function(pkg) "1.0.0")
+  local_mocked_bindings(.get_package_source = function(pkg) "load_all()")
+  local_mocked_bindings(.get_ondisk_path = function(pkg) "/pkg/inst")
+  local_mocked_bindings(.get_loaded_path = function(pkg) "/pkg")
+  local_mocked_bindings(.is_load_all_package = function(pkg) TRUE)
+
+  df <- .get_package_inventory()
+  expect_false(any(df$path_mismatch))
+})
+
+test_that(".get_package_inventory() flags removed_from_disk when the namespace is loaded but not found on disk", {
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) list(Version = "1.0.0"),
+    .package = "utils"
+  )
+  local_mocked_bindings(.get_loaded_version = function(pkg) "1.0.0")
+  local_mocked_bindings(.get_package_source = function(pkg) "local")
+  local_mocked_bindings(.get_ondisk_path = function(pkg) NA_character_)
+  local_mocked_bindings(.get_loaded_path = function(pkg) "/old/lib/path")
+
+  df <- .get_package_inventory()
+  expect_true(all(df$removed_from_disk))
+  expect_false(any(df$path_mismatch))
 })
 
 test_that(".get_package_source() classifies base packages", {

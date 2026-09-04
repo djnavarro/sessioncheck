@@ -17,7 +17,9 @@
 #' @details
 #' The `machine` element includes the node name and user reported by
 #' [Sys.info()]. Because this can reveal a hostname or local username, be
-#' mindful about where `sessionstate()` output is stored or shared.
+#' mindful about where `sessionstate()` output is stored or shared. The same
+#' caution applies to the `ondisk_path`/`loaded_path` columns of `packages`,
+#' since library paths often embed a home directory.
 #'
 #' The `packages` element covers every package that is either attached to
 #' the search path or loaded via namespace (i.e., `union(.packages(),
@@ -26,9 +28,14 @@
 #' `DESCRIPTION` file), `loaded_version` (the version of the namespace
 #' actually loaded into memory), `version_mismatch` (`TRUE` when the two
 #' disagree, e.g. because the package was updated on disk after this
-#' session loaded it), and `source`, which classifies each package as
-#' `"base"`, `"CRAN (R x.y.z)"`, `"Github (user/repo@sha)"`, another remote
-#' type, or `"local"` when no remote metadata is available.
+#' session loaded it), `ondisk_path` and `loaded_path` (the library paths a
+#' package currently resolves to versus where its loaded namespace actually
+#' came from), `path_mismatch` (`TRUE` when both exist but disagree, e.g.
+#' after a `.libPaths()` change mid-session), `removed_from_disk` (`TRUE`
+#' when the namespace is loaded but no longer found on disk at all), and
+#' `source`, which classifies each package as `"base"`, `"CRAN (R x.y.z)"`,
+#' `"Github (user/repo@sha)"`, another remote type, or `"local"` when no
+#' remote metadata is available.
 #'
 #' @examples
 #' sessionstate()

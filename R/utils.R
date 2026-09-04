@@ -250,6 +250,24 @@
   if (is.null(v) || is.na(v)) NA_character_ else unname(v)
 }
 
+# the library path a package currently resolves to on disk, via the normal
+# search mechanism used to load packages
+.get_ondisk_path <- function(pkg) {
+  p <- system.file(package = pkg, lib.loc = .libPaths())
+  if (!nzchar(p)) NA_character_ else p
+}
+
+# the library path the currently loaded namespace was actually loaded from;
+# getNamespaceInfo() errors on "base" ("operation not allowed on base
+# namespace"), so it needs the same system.file()-with-no-package special
+# case sessioninfo uses
+.get_loaded_path <- function(pkg) {
+  if (identical(pkg, "base")) return(system.file())
+  if (!isNamespaceLoaded(pkg)) return(NA_character_)
+  p <- tryCatch(getNamespaceInfo(pkg, "path"), error = function(e) NA_character_)
+  if (is.null(p) || is.na(p) || !nzchar(p)) NA_character_ else p
+}
+
 .get_package_inventory <- function() {
   pkgs <- sort(union(.packages(), loadedNamespaces()))
   attached_set <- .packages()
@@ -258,6 +276,14 @@
     if (is.null(v)) NA_character_ else v
   }, character(1L))
   loaded_version <- vapply(pkgs, .get_loaded_version, character(1L))
+  ondisk_path <- vapply(pkgs, .get_ondisk_path, character(1L))
+  loaded_path <- vapply(pkgs, .get_loaded_path, character(1L))
+  # under devtools::load_all(), system.file() resolves to inst/ while the
+  # loaded namespace path is the source root: a real, structural difference
+  # that isn't path drift, so load_all() packages are excluded from the
+  # path_mismatch flag (matching how they're already excluded from the
+  # ordinary "local" source classification)
+  is_load_all <- vapply(pkgs, .is_load_all_package, logical(1L))
   df <- data.frame(
     package         = pkgs,
     attached        = pkgs %in% attached_set,
@@ -268,6 +294,16 @@
     # signal worth surfacing rather than masking with a FALSE mismatch
     version_mismatch = !is.na(ondisk_version) & !is.na(loaded_version) &
       ondisk_version != loaded_version,
+    ondisk_path     = ondisk_path,
+    loaded_path     = loaded_path,
+    # "moved": both paths exist but disagree (excluding load_all() packages;
+    # see is_load_all above)
+    path_mismatch   = !is_load_all & !is.na(ondisk_path) & !is.na(loaded_path) &
+      ondisk_path != loaded_path,
+    # "deleted": the namespace is loaded, but it's no longer found on disk;
+    # kept distinct from path_mismatch since these are different failure
+    # modes worth telling apart
+    removed_from_disk = is.na(ondisk_path) & !is.na(loaded_path),
     source          = vapply(pkgs, .get_package_source, character(1L)),
     stringsAsFactors = FALSE
   )

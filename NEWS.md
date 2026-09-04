@@ -54,6 +54,18 @@
   This is a breaking change for any code reading the `version` column by
   name from `as.data.frame(sessionstate())`.
 
+- Added `path_mismatch` and `removed_from_disk` detection to
+  `sessionstate()`'s package inventory, completing the `sessioninfo` audit
+  started with `version_mismatch`. New columns `ondisk_path` and
+  `loaded_path` record the library path a package currently resolves to
+  versus where its loaded namespace actually came from; `path_mismatch` is
+  `TRUE` when both exist but disagree (e.g. after a `.libPaths()` change
+  mid-session), and `removed_from_disk` is `TRUE` when the namespace is
+  loaded but no longer found on disk at all (kept distinct from
+  `path_mismatch` since these are different failure modes). Because
+  library paths often embed a home directory, the same privacy caution
+  already noted for `machine` now also applies to these two columns.
+
 - Simplified `ui` detection in `sessionstate()`'s platform info to use the
   base R `.Platform$GUI` signal (falling back to `"non-interactive"` first,
   via `interactive()`, for batch/render execution) instead of hand-rolled
