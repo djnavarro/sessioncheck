@@ -41,6 +41,14 @@ when the namespace is loaded but no longer found on disk at all), and
 \code{source}, which classifies each package as \code{"base"}, \code{"CRAN (R x.y.z)"},
 \code{"Github (user/repo@sha)"}, another remote type, or \code{"local"} when no
 remote metadata is available.
+
+\code{sessionstate()} itself always captures every field. To display only a
+subset when printing, pass \code{platform}/\code{machine}/\code{timing}/\code{packages}
+arguments to \code{print()} or \code{format()} on the result, or set defaults via
+\code{options(sessioncheck = list(sessionstate_packages = ...))} (see
+\link{display_methods} for the full precedence rules and option names); the
+underlying object is unaffected, so \code{as.data.frame()} always returns the
+full package inventory.
 }
 \examples{
 sessionstate()

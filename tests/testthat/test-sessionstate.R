@@ -50,6 +50,156 @@ test_that("print.sessioncheck_sessionstate() prints and returns its input invisi
   expect_false(ret$visible)
 })
 
+test_that("format.sessioncheck_sessionstate() defaults packages to the curated column subset", {
+  x <- sessionstate()
+  txt <- format(x)
+  expect_match(txt, "package", fixed = TRUE)
+  expect_match(txt, "attached", fixed = TRUE)
+  expect_match(txt, "loaded_version", fixed = TRUE)
+  expect_match(txt, "source", fixed = TRUE)
+  expect_no_match(txt, "ondisk_version", fixed = TRUE)
+  expect_no_match(txt, "ondisk_path", fixed = TRUE)
+  expect_no_match(txt, "loaded_path", fixed = TRUE)
+  expect_no_match(txt, "version_mismatch", fixed = TRUE)
+  expect_no_match(txt, "path_mismatch", fixed = TRUE)
+  expect_no_match(txt, "removed_from_disk", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() defaults platform/machine/timing to showing every field", {
+  x <- sessionstate()
+  txt <- format(x)
+  expect_match(txt, "matrix products", fixed = TRUE)
+  expect_match(txt, "nodename", fixed = TRUE)
+  expect_match(txt, "captured at", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() honors sessionstate_packages set via options(sessioncheck = ...)", {
+  old <- options(sessioncheck = list(sessionstate_packages = c("package", "source")))
+  on.exit(options(old), add = TRUE)
+  x <- sessionstate()
+  txt <- format(x)
+  # the "attached + loaded via namespace" sentence in the section heading
+  # always contains the word "attached", so restrict the check to the
+  # table itself, below the heading line
+  lines <- strsplit(txt, "\n")[[1]]
+  table_txt <- paste(lines[-seq_len(grep("^Packages", lines))], collapse = "\n")
+  expect_no_match(table_txt, "attached", fixed = TRUE)
+  expect_no_match(table_txt, "loaded_version", fixed = TRUE)
+})
+
+test_that("an explicit packages argument overrides options(sessioncheck = ...)", {
+  old <- options(sessioncheck = list(sessionstate_packages = c("package", "source")))
+  on.exit(options(old), add = TRUE)
+  x <- sessionstate()
+  txt <- format(x, packages = c("package", "attached"))
+  expect_match(txt, "attached", fixed = TRUE)
+  expect_no_match(txt, "source", fixed = TRUE)
+})
+
+test_that("options(sessioncheck = ...) can also set defaults for platform/machine/timing", {
+  old <- options(sessioncheck = list(sessionstate_platform = "version", sessionstate_machine = "user"))
+  on.exit(options(old), add = TRUE)
+  x <- sessionstate()
+  txt <- format(x)
+  expect_no_match(txt, "matrix products", fixed = TRUE)
+  expect_no_match(txt, "nodename", fixed = TRUE)
+  # timing has no option set, so it should still fall back to "show everything"
+  expect_match(txt, "captured at", fixed = TRUE)
+})
+
+test_that(".resolve_field_selection() prefers the explicit argument", {
+  old <- options(sessioncheck = list(some_option = "from_option"))
+  on.exit(options(old), add = TRUE)
+  expect_identical(.resolve_field_selection("from_arg", "some_option", "from_default"), "from_arg")
+})
+
+test_that(".resolve_field_selection() falls back to options(sessioncheck = ...) when no explicit argument is given", {
+  old <- options(sessioncheck = list(some_option = "from_option"))
+  on.exit(options(old), add = TRUE)
+  expect_identical(.resolve_field_selection(NULL, "some_option", "from_default"), "from_option")
+})
+
+test_that(".resolve_field_selection() falls back to the hard-coded default when neither is set", {
+  old <- options(sessioncheck = NULL)
+  on.exit(options(old), add = TRUE)
+  expect_identical(.resolve_field_selection(NULL, "some_option", "from_default"), "from_default")
+})
+
+test_that(".resolve_field_selection() falls back to the hard-coded default when getOption('sessioncheck') isn't a list", {
+  old <- options(sessioncheck = "not_a_list")
+  on.exit(options(old), add = TRUE)
+  expect_identical(.resolve_field_selection(NULL, "some_option", "from_default"), "from_default")
+})
+
+test_that("format.sessioncheck_sessionstate() restricts platform fields when requested", {
+  x <- sessionstate()
+  txt <- format(x, platform = c("version", "os"))
+  expect_match(txt, "version", fixed = TRUE)
+  expect_match(txt, "os", fixed = TRUE)
+  expect_no_match(txt, "ui ", fixed = TRUE)
+  expect_no_match(txt, "matrix products", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() shows the matrix products heading only when blas/lapack are requested", {
+  x <- sessionstate()
+  txt_with <- format(x, platform = c("version", "blas"))
+  txt_without <- format(x, platform = "version")
+  expect_match(txt_with, "matrix products", fixed = TRUE)
+  expect_no_match(txt_without, "matrix products", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() restricts machine and timing fields when requested", {
+  x <- sessionstate()
+  txt <- format(x, machine = "user", timing = "elapsed_sec")
+  expect_no_match(txt, "nodename", fixed = TRUE)
+  expect_no_match(txt, "captured at", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() restricts package columns when requested", {
+  x <- sessionstate()
+  txt <- format(x, packages = c("package", "source"))
+  expect_no_match(txt, "ondisk_version", fixed = TRUE)
+  expect_no_match(txt, "loaded_path", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() errors informatively on an unknown field", {
+  x <- sessionstate()
+  expect_error(format(x, platform = "bogus"), "Unknown platform field")
+  expect_error(format(x, machine = "bogus"), "Unknown machine field")
+  expect_error(format(x, timing = "bogus"), "Unknown timing field")
+  expect_error(format(x, packages = "bogus"), "Unknown packages field")
+})
+
+test_that("format.sessioncheck_sessionstate() defaults to showing every field when NULL", {
+  x <- sessionstate()
+  expect_identical(format(x), format(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL))
+})
+
+test_that("print.sessioncheck_sessionstate() forwards field-selection arguments to format()", {
+  x <- sessionstate()
+  out <- capture.output(print(x, platform = "version", machine = "user", timing = "elapsed_sec", packages = "package"))
+  expect_equal(
+    trimws(paste(out, collapse = "\n")),
+    trimws(format(x, platform = "version", machine = "user", timing = "elapsed_sec", packages = "package"))
+  )
+})
+
+test_that(".select_fields() preserves canonical order regardless of requested order", {
+  expect_identical(.select_fields(c("a", "b", "c"), c("c", "a"), "test"), c("a", "c"))
+})
+
+test_that(".select_fields() returns all names unchanged when requested is NULL", {
+  expect_identical(.select_fields(c("a", "b"), NULL, "test"), c("a", "b"))
+})
+
+test_that(".select_fields() errors on non-character input", {
+  expect_error(.select_fields(c("a", "b"), 1, "test"), "must be a character vector")
+})
+
+test_that(".select_fields() errors informatively on unknown fields", {
+  expect_error(.select_fields(c("a", "b"), "z", "test"), "Unknown test field.*z.*Valid fields are: a, b")
+})
+
 test_that(".get_ui() reports 'non-interactive' regardless of .Platform$GUI when not interactive", {
   local_mocked_bindings(.is_interactive = function() FALSE)
   local_mocked_bindings(.get_platform_gui = function() "Positron")

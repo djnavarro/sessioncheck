@@ -28,9 +28,40 @@ new_sessionstate <- function(platform, machine, timing, packages) {
 #'
 #' @param x An object of class `sessioncheck_status`, `sessioncheck_sessioncheck`,
 #' or `sessioncheck_sessionstate`
+#' @param platform For `sessioncheck_sessionstate` objects, an optional character
+#' vector selecting which platform fields to display (from `"version"`, `"os"`,
+#' `"system"`, `"ui"`, `"language"`, `"collate"`, `"ctype"`, `"tz"`, `"date"`,
+#' `"blas"`, `"lapack"`). Defaults to showing all fields. Ignored for other
+#' classes. See Details for how the default is resolved.
+#' @param machine For `sessioncheck_sessionstate` objects, an optional character
+#' vector selecting which machine fields to display (from `"nodename"`, `"user"`).
+#' Defaults to showing all fields. Ignored for other classes. See Details for
+#' how the default is resolved.
+#' @param timing For `sessioncheck_sessionstate` objects, an optional character
+#' vector selecting which timing fields to display (from `"captured_at"`,
+#' `"elapsed_sec"`). Defaults to showing all fields. Ignored for other classes.
+#' See Details for how the default is resolved.
+#' @param packages For `sessioncheck_sessionstate` objects, an optional character
+#' vector selecting which package inventory columns to display (see
+#' [sessionstate()] for the full list of columns). Defaults to
+#' `c("package", "attached", "loaded_version", "source")`. Ignored for other
+#' classes. See Details for how the default is resolved.
 #' @param ... Ignored
 #'
 #' @returns Character vector
+#'
+#' @details
+#' For `sessioncheck_sessionstate` objects, the `platform`/`machine`/`timing`/
+#' `packages` arguments are resolved through the same precedence used
+#' elsewhere in the package: an explicit argument always wins; otherwise,
+#' `getOption("sessioncheck")` is checked for a `sessionstate_platform`,
+#' `sessionstate_machine`, `sessionstate_timing`, or `sessionstate_packages`
+#' field (respectively); if neither is set, a built-in default is used
+#' (showing every field, except for `packages`, which defaults to
+#' `c("package", "attached", "loaded_version", "source")`). This selection
+#' only affects what is displayed; it never changes the underlying object, so
+#' `as.data.frame()` always returns the full package inventory regardless of
+#' any selection in effect.
 #'
 #' @name display_methods
 
@@ -62,41 +93,59 @@ format.sessioncheck_sessioncheck <- function(x, ...) {
 
 #' @rdname display_methods
 #' @exportS3Method base::format
-format.sessioncheck_sessionstate <- function(x, ...) {
+format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL, ...) {
   p <- x$platform
   m <- x$machine
   t <- x$timing
 
-  platform_lines <- c(
-    "Platform:",
-    sprintf(" version         %s", p$version),
-    sprintf(" os              %s", p$os),
-    sprintf(" system          %s", p$system),
-    sprintf(" ui              %s", p$ui),
-    sprintf(" language        %s", if (is.na(p$language)) "(unset)" else p$language),
-    sprintf(" collate         %s", p$collate),
-    sprintf(" ctype           %s", p$ctype),
-    sprintf(" tz              %s", p$tz),
-    sprintf(" date            %s", p$date),
-    " matrix products",
-    sprintf("   BLAS:   %s", p$blas),
-    sprintf("   LAPACK: %s", p$lapack)
+  platform_all <- c(
+    version  = sprintf(" version         %s", p$version),
+    os       = sprintf(" os              %s", p$os),
+    system   = sprintf(" system          %s", p$system),
+    ui       = sprintf(" ui              %s", p$ui),
+    language = sprintf(" language        %s", if (is.na(p$language)) "(unset)" else p$language),
+    collate  = sprintf(" collate         %s", p$collate),
+    ctype    = sprintf(" ctype           %s", p$ctype),
+    tz       = sprintf(" tz              %s", p$tz),
+    date     = sprintf(" date            %s", p$date),
+    blas     = sprintf("   BLAS:   %s", p$blas),
+    lapack   = sprintf("   LAPACK: %s", p$lapack)
   )
+  platform <- .resolve_field_selection(platform, "sessionstate_platform", NULL)
+  platform_fields <- .select_fields(names(platform_all), platform, "platform")
+  # keep the "matrix products" subheading only when blas/lapack are shown,
+  # and always immediately above them (their canonical position)
+  matrix_fields <- intersect(c("blas", "lapack"), platform_fields)
+  regular_fields <- setdiff(platform_fields, matrix_fields)
+  platform_lines <- c("Platform:", platform_all[regular_fields])
+  if (length(matrix_fields) > 0L) {
+    platform_lines <- c(platform_lines, " matrix products", platform_all[matrix_fields])
+  }
 
-  machine_lines <- c(
-    "Machine:",
-    sprintf(" nodename        %s", m$nodename),
-    sprintf(" user            %s", m$user)
+  machine_all <- c(
+    nodename = sprintf(" nodename        %s", m$nodename),
+    user     = sprintf(" user            %s", m$user)
   )
+  machine <- .resolve_field_selection(machine, "sessionstate_machine", NULL)
+  machine_fields <- .select_fields(names(machine_all), machine, "machine")
+  machine_lines <- c("Machine:", machine_all[machine_fields])
 
-  timing_lines <- c(
-    "Timing:",
-    sprintf(" captured at     %s", format(t$captured_at)),
-    sprintf(" elapsed (sec)   %s", t$elapsed_sec)
+  timing_all <- c(
+    captured_at = sprintf(" captured at     %s", format(t$captured_at)),
+    elapsed_sec = sprintf(" elapsed (sec)   %s", t$elapsed_sec)
   )
+  timing <- .resolve_field_selection(timing, "sessionstate_timing", NULL)
+  timing_fields <- .select_fields(names(timing_all), timing, "timing")
+  timing_lines <- c("Timing:", timing_all[timing_fields])
 
   pkg_df <- x$packages
-  pkg_df$attached <- ifelse(pkg_df$attached, "*", " ")
+  packages <- .resolve_field_selection(
+    packages, "sessionstate_packages",
+    c("package", "attached", "loaded_version", "source")
+  )
+  pkg_cols <- .select_fields(names(pkg_df), packages, "packages")
+  pkg_df <- pkg_df[, pkg_cols, drop = FALSE]
+  if ("attached" %in% names(pkg_df)) pkg_df$attached <- ifelse(pkg_df$attached, "*", " ")
   pkg_lines <- c(
     sprintf("Packages [n = %d] (attached + loaded via namespace):", nrow(pkg_df)),
     utils::capture.output(print(pkg_df, row.names = FALSE))
@@ -124,8 +173,8 @@ print.sessioncheck_sessioncheck <- function(x, ...) {
 
 #' @rdname display_methods
 #' @exportS3Method base::print
-print.sessioncheck_sessionstate <- function(x, ...) {
-  cat(format(x, ...), "\n")
+print.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL, ...) {
+  cat(format(x, platform = platform, machine = machine, timing = timing, packages = packages, ...), "\n")
   invisible(x)
 }
 

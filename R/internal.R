@@ -46,6 +46,38 @@
   }
 }
 
+# resolves a print/format field-selection argument through the same
+# precedence tiering used elsewhere in the package: explicit arg >
+# options(sessioncheck = list(<option_name> = ...)) > hard-coded default
+# (which may itself be NULL, meaning "show everything")
+.resolve_field_selection <- function(explicit, option_name, hardcoded_default) {
+  if (!is.null(explicit)) return(explicit)
+  opts <- getOption("sessioncheck")
+  if (is.list(opts) && !is.null(opts[[option_name]])) return(opts[[option_name]])
+  hardcoded_default
+}
+
+# selects and validates a subset of named fields (e.g. for print/format
+# display filtering), preserving canonical order rather than the order the
+# user requested; returns all_names unchanged when requested is NULL
+.select_fields <- function(all_names, requested, label) {
+  if (is.null(requested)) return(all_names)
+  if (!is.character(requested)) {
+    stop(sprintf("`%s` must be a character vector or NULL", label), call. = FALSE)
+  }
+  unknown <- setdiff(requested, all_names)
+  if (length(unknown) > 0L) {
+    stop(
+      sprintf(
+        "Unknown %s field(s): %s. Valid fields are: %s",
+        label, paste(unknown, collapse = ", "), paste(all_names, collapse = ", ")
+      ),
+      call. = FALSE
+    )
+  }
+  all_names[all_names %in% requested]
+}
+
 # status checkers: packages and namespaces ------
 
 .get_namespace_status <- function(allow) {

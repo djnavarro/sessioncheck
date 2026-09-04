@@ -37,6 +37,14 @@
 #' `"Github (user/repo@sha)"`, another remote type, or `"local"` when no
 #' remote metadata is available.
 #'
+#' `sessionstate()` itself always captures every field. To display only a
+#' subset when printing, pass `platform`/`machine`/`timing`/`packages`
+#' arguments to `print()` or `format()` on the result, or set defaults via
+#' `options(sessioncheck = list(sessionstate_packages = ...))` (see
+#' [display_methods] for the full precedence rules and option names); the
+#' underlying object is unaffected, so `as.data.frame()` always returns the
+#' full package inventory.
+#'
 #' @examples
 #' sessionstate()
 #'

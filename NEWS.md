@@ -66,6 +66,25 @@
   library paths often embed a home directory, the same privacy caution
   already noted for `machine` now also applies to these two columns.
 
+- Added `platform`, `machine`, `timing`, and `packages` arguments to
+  `format()`/`print()` for `sessioncheck_sessionstate` objects, letting
+  users restrict which fields/columns are displayed (e.g.
+  `print(sessionstate(), packages = c("package", "attached", "source"))`).
+  Selection is display-only: `sessionstate()` itself always captures every
+  field, and `as.data.frame()` always returns the full package inventory
+  regardless of what was requested at print time. Unknown field names
+  raise an informative error listing the valid choices.
+
+- These field-selection arguments are resolved through the same precedence
+  used by `sessioncheck()`: an explicit argument wins; otherwise
+  `options(sessioncheck = list(sessionstate_platform = ..., sessionstate_machine
+  = ..., sessionstate_timing = ..., sessionstate_packages = ...))` supplies a
+  project-wide default; otherwise a built-in default applies. The built-in
+  default for `packages` is now the trimmed-down
+  `c("package", "attached", "loaded_version", "source")` view, rather than
+  every column; `platform`, `machine`, and `timing` still default to showing
+  every field.
+
 - Simplified `ui` detection in `sessionstate()`'s platform info to use the
   base R `.Platform$GUI` signal (falling back to `"non-interactive"` first,
   via `interactive()`, for batch/render execution) instead of hand-rolled

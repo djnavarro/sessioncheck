@@ -14,23 +14,58 @@
 
 \method{format}{sessioncheck_sessioncheck}(x, ...)
 
-\method{format}{sessioncheck_sessionstate}(x, ...)
+\method{format}{sessioncheck_sessionstate}(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL, ...)
 
 \method{print}{sessioncheck_status}(x, ...)
 
 \method{print}{sessioncheck_sessioncheck}(x, ...)
 
-\method{print}{sessioncheck_sessionstate}(x, ...)
+\method{print}{sessioncheck_sessionstate}(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL, ...)
 }
 \arguments{
 \item{x}{An object of class \code{sessioncheck_status}, \code{sessioncheck_sessioncheck},
 or \code{sessioncheck_sessionstate}}
 
 \item{...}{Ignored}
+
+\item{platform}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which platform fields to display (from \code{"version"}, \code{"os"},
+\code{"system"}, \code{"ui"}, \code{"language"}, \code{"collate"}, \code{"ctype"}, \code{"tz"}, \code{"date"},
+\code{"blas"}, \code{"lapack"}). Defaults to showing all fields. Ignored for other
+classes. See Details for how the default is resolved.}
+
+\item{machine}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which machine fields to display (from \code{"nodename"}, \code{"user"}).
+Defaults to showing all fields. Ignored for other classes. See Details for
+how the default is resolved.}
+
+\item{timing}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which timing fields to display (from \code{"captured_at"},
+\code{"elapsed_sec"}). Defaults to showing all fields. Ignored for other classes.
+See Details for how the default is resolved.}
+
+\item{packages}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which package inventory columns to display (see
+\code{\link[=sessionstate]{sessionstate()}} for the full list of columns). Defaults to
+\code{c("package", "attached", "loaded_version", "source")}. Ignored for other
+classes. See Details for how the default is resolved.}
 }
 \value{
 Character vector
 }
 \description{
 Format and print sessioncheck objects
+}
+\details{
+For \code{sessioncheck_sessionstate} objects, the \code{platform}/\code{machine}/\code{timing}/
+\code{packages} arguments are resolved through the same precedence used
+elsewhere in the package: an explicit argument always wins; otherwise,
+\code{getOption("sessioncheck")} is checked for a \code{sessionstate_platform},
+\code{sessionstate_machine}, \code{sessionstate_timing}, or \code{sessionstate_packages}
+field (respectively); if neither is set, a built-in default is used
+(showing every field, except for \code{packages}, which defaults to
+\code{c("package", "attached", "loaded_version", "source")}). This selection
+only affects what is displayed; it never changes the underlying object, so
+\code{as.data.frame()} always returns the full package inventory regardless of
+any selection in effect.
 }
