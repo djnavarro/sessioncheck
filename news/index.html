@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">sessioncheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/why-check-the-r-session.html">Why is it important to check the R session?</a></li>
+    <li><a class="dropdown-item" href="../articles/sessionstate-reporting.html">Reporting the session state</a></li>
     <li><a class="dropdown-item" href="../articles/customizing-sessioncheck.html">Customizing sessioncheck() behavior</a></li>
     <li><a class="dropdown-item" href="../articles/individual-checks.html">Individual session check functions</a></li>
     <li><a class="dropdown-item" href="../articles/s3-classes.html">S3 classes and methods</a></li>
@@ -43,11 +44,18 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/djnavarro/sessioncheck/blob/v0.1.1/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/djnavarro/sessioncheck/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.1.1" id="sessioncheck-011">sessioncheck 0.1.1<a class="anchor" aria-label="anchor" href="#sessioncheck-011"></a></h2>
+<h2 class="pkg-version" data-toc-text="development version" id="sessioncheck-development-version">sessioncheck (development version)<a class="anchor" aria-label="anchor" href="#sessioncheck-development-version"></a></h2>
+<div class="section level3">
+<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<ul><li>Added <code><a href="../reference/sessionstate.html">sessionstate()</a></code>, a companion to <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> intended for use at the <em>end</em> of a script as an audit log. It reports platform details (R version, OS, matrix products, locale, timezone, UI/frontend), selected machine information from <code><a href="https://rdrr.io/r/base/Sys.info.html" class="external-link">Sys.info()</a></code>, session timing, RNG state, and an inventory of attached and loaded-namespace packages, similar to <code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code>. Returns an object of class <code>sessioncheck_sessionstate</code> with <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code>, <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, and <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> methods.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.1" id="sessioncheck-011">sessioncheck 0.1.1<a class="anchor" aria-label="anchor" href="#sessioncheck-011"></a></h2><p class="text-muted">CRAN release: 2026-07-28</p>
 <div class="section level3">
 <h3 id="bug-fixes-0-1-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-1-1"></a></h3>
 <ul><li><p>Fixed a broken roxygen2 comment in <code><a href="../reference/check_loaded_namespaces.html">check_loaded_namespaces()</a></code> that caused the first sentence of the <code>@details</code> help section to be silently dropped. The page previously opened mid-sentence with “(packages that have been loaded but not attached)…”; it now correctly reads “This checker inspects the list of loaded namespaces (packages that have been loaded but not attached)…”.</p></li>

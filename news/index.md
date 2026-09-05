@@ -1,6 +1,29 @@
 # Changelog
 
+## sessioncheck (development version)
+
+### New features
+
+- Added
+  [`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md),
+  a companion to
+  [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
+  intended for use at the *end* of a script as an audit log. It reports
+  platform details (R version, OS, matrix products, locale, timezone,
+  UI/frontend), selected machine information from
+  [`Sys.info()`](https://rdrr.io/r/base/Sys.info.html), session timing,
+  RNG state, and an inventory of attached and loaded-namespace packages,
+  similar to
+  [`sessioninfo::session_info()`](https://sessioninfo.r-lib.org/reference/session_info.html).
+  Returns an object of class `sessioncheck_sessionstate` with
+  [`format()`](https://rdrr.io/r/base/format.html),
+  [`print()`](https://rdrr.io/r/base/print.html), and
+  [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
+  methods.
+
 ## sessioncheck 0.1.1
+
+CRAN release: 2026-07-28
 
 ### Bug fixes
 

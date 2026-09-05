@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">sessioncheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/why-check-the-r-session.html">Why is it important to check the R session?</a></li>
+    <li><a class="dropdown-item" href="../articles/sessionstate-reporting.html">Reporting the session state</a></li>
     <li><a class="dropdown-item" href="../articles/customizing-sessioncheck.html">Customizing sessioncheck() behavior</a></li>
     <li><a class="dropdown-item" href="../articles/individual-checks.html">Individual session check functions</a></li>
     <li><a class="dropdown-item" href="../articles/s3-classes.html">S3 classes and methods</a></li>
@@ -43,7 +44,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Coerce session check object to a data frame</h1>
-      <small class="dont-index">Source: <a href="https://github.com/djnavarro/sessioncheck/blob/v0.1.1/R/class.R" class="external-link"><code>R/class.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/djnavarro/sessioncheck/blob/main/R/class.R" class="external-link"><code>R/class.R</code></a></small>
       <div class="d-none name"><code>coercion_methods.Rd</code></div>
     </div>
 
@@ -57,7 +58,10 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">x</span>, row.names <span class="op">=</span> <span class="cn">NULL</span>, optional <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'sessioncheck_sessioncheck'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">x</span>, row.names <span class="op">=</span> <span class="cn">NULL</span>, optional <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">x</span>, row.names <span class="op">=</span> <span class="cn">NULL</span>, optional <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'sessioncheck_sessionstate'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">x</span>, row.names <span class="op">=</span> <span class="cn">NULL</span>, optional <span class="op">=</span> <span class="cn">FALSE</span>, which <span class="op">=</span> <span class="st">"packages"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -65,7 +69,8 @@
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>An object of class <code>sessioncheck_status</code> or <code>sessioncheck_sessioncheck</code></p></dd>
+<dd><p>An object of class <code>sessioncheck_status</code>, <code>sessioncheck_sessioncheck</code>,
+or <code>sessioncheck_sessionstate</code></p></dd>
 
 
 <dt id="arg-row-names">row.names<a class="anchor" aria-label="anchor" href="#arg-row-names"></a></dt>
@@ -79,10 +84,31 @@
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Ignored</p></dd>
 
+
+<dt id="arg-which">which<a class="anchor" aria-label="anchor" href="#arg-which"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstate</code> objects, which tabular
+component to return: one of <code>"packages"</code> (the default), <code>"globalenv"</code>,
+or <code>"attachments"</code>. Ignored for other classes.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A data frame</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>For <code>sessioncheck_status</code> and <code>sessioncheck_sessioncheck</code> objects, this
+coercion is lossless: every entity and status recorded in <code>x</code> appears as a
+row in the result. That guarantee does not extend to
+<code>sessioncheck_sessionstate</code> objects: <code><a href="sessionstate.html">sessionstate()</a></code> captures more than
+any single rectangular table can hold, mixing scalar fields (<code>platform</code>,
+<code>locale</code>, <code>matrix</code>, <code>document</code>, <code>machine</code>, <code>git</code>, <code>timing</code>, <code>rng</code>), a bare
+character vector (<code>libpaths</code>), and three differently-shaped tables
+(<code>packages</code>, <code>globalenv</code>, <code>attachments</code>). <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> returns
+whichever one of those three tables <code>which</code> selects; none of the scalar
+fields or <code>libpaths</code> are represented in the result. Use <code>x$platform</code>,
+<code>x$machine</code>, <code>x$git</code>, <code>x$libpaths</code>, etc. (or <code>unclass(x)</code> for everything
+at once) to access those directly.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

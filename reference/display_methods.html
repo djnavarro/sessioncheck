@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">sessioncheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/why-check-the-r-session.html">Why is it important to check the R session?</a></li>
+    <li><a class="dropdown-item" href="../articles/sessionstate-reporting.html">Reporting the session state</a></li>
     <li><a class="dropdown-item" href="../articles/customizing-sessioncheck.html">Customizing sessioncheck() behavior</a></li>
     <li><a class="dropdown-item" href="../articles/individual-checks.html">Individual session check functions</a></li>
     <li><a class="dropdown-item" href="../articles/s3-classes.html">S3 classes and methods</a></li>
@@ -43,7 +44,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Format and print sessioncheck objects</h1>
-      <small class="dont-index">Source: <a href="https://github.com/djnavarro/sessioncheck/blob/v0.1.1/R/class.R" class="external-link"><code>R/class.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/djnavarro/sessioncheck/blob/main/R/class.R" class="external-link"><code>R/class.R</code></a></small>
       <div class="d-none name"><code>display_methods.Rd</code></div>
     </div>
 
@@ -59,11 +60,47 @@
 <span><span class="co"># S3 method for class 'sessioncheck_sessioncheck'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S3 method for class 'sessioncheck_sessionstate'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  platform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  locale <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  matrix <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  document <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  machine <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  git <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  timing <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rng <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  packages <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  globalenv <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  globalenv_n <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  attachments <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S3 method for class 'sessioncheck_status'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'sessioncheck_sessioncheck'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'sessioncheck_sessionstate'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  platform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  locale <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  matrix <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  document <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  machine <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  git <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  timing <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rng <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  packages <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  globalenv <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  globalenv_n <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  attachments <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -71,16 +108,126 @@
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>An object of class <code>sessioncheck_status</code> or <code>sessioncheck_sessioncheck</code></p></dd>
+<dd><p>An object of class <code>sessioncheck_status</code>, <code>sessioncheck_sessioncheck</code>,
+or <code>sessioncheck_sessionstate</code></p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Ignored</p></dd>
 
+
+<dt id="arg-platform">platform<a class="anchor" aria-label="anchor" href="#arg-platform"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional character
+vector selecting which platform fields to display (from <code>"version"</code>, <code>"os"</code>,
+<code>"system"</code>, <code>"ui"</code>, <code>"tz"</code>, <code>"date"</code>). Defaults to showing all fields.
+Ignored for other classes. See Details for how the default is resolved.</p></dd>
+
+
+<dt id="arg-locale">locale<a class="anchor" aria-label="anchor" href="#arg-locale"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional character
+vector selecting which locale fields to display (from <code>"language"</code>,
+<code>"collate"</code>, <code>"ctype"</code>). Defaults to showing all fields. Ignored for
+other classes. See Details for how the default is resolved.</p></dd>
+
+
+<dt id="arg-matrix">matrix<a class="anchor" aria-label="anchor" href="#arg-matrix"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional character
+vector selecting which matrix-products fields to display (from <code>"blas"</code>,
+<code>"lapack"</code>). Defaults to showing all fields. Ignored for other classes.
+See Details for how the default is resolved.</p></dd>
+
+
+<dt id="arg-document">document<a class="anchor" aria-label="anchor" href="#arg-document"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional character
+vector selecting which document-products fields to display (from
+<code>"pandoc"</code>, <code>"quarto"</code>). Defaults to showing all fields. Ignored for
+other classes. See Details for how the default is resolved.</p></dd>
+
+
+<dt id="arg-machine">machine<a class="anchor" aria-label="anchor" href="#arg-machine"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional character
+vector selecting which machine fields to display (from <code>"nodename"</code>,
+<code>"user"</code>, <code>"cwd"</code>). Defaults to showing all fields. Ignored for other
+classes. See Details for how the default is resolved.</p></dd>
+
+
+<dt id="arg-git">git<a class="anchor" aria-label="anchor" href="#arg-git"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional character
+vector selecting which git fields to display (from <code>"sha"</code>, <code>"dirty"</code>).
+Defaults to showing all fields. Ignored for other classes. See Details for
+how the default is resolved.</p></dd>
+
+
+<dt id="arg-timing">timing<a class="anchor" aria-label="anchor" href="#arg-timing"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional character
+vector selecting which timing fields to display (from <code>"captured_at"</code>,
+<code>"elapsed_sec"</code>). Defaults to showing all fields. Ignored for other classes.
+See Details for how the default is resolved.</p></dd>
+
+
+<dt id="arg-rng">rng<a class="anchor" aria-label="anchor" href="#arg-rng"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional character
+vector selecting which RNG fields to display (from <code>"kind"</code>,
+<code>"normal_kind"</code>, <code>"sample_kind"</code>, <code>"seed_hash"</code>). Defaults to showing all
+fields. Ignored for other classes. See Details for how the default is
+resolved.</p></dd>
+
+
+<dt id="arg-packages">packages<a class="anchor" aria-label="anchor" href="#arg-packages"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional character
+vector selecting which package inventory columns to display (see
+<code><a href="sessionstate.html">sessionstate()</a></code> for the full list of columns). Defaults to
+<code>c("package", "attached", "loaded_version", "source")</code>. Ignored for other
+classes. See Details for how the default is resolved.</p></dd>
+
+
+<dt id="arg-globalenv">globalenv<a class="anchor" aria-label="anchor" href="#arg-globalenv"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional
+character vector selecting which global environment columns to display
+(from <code>"name"</code>, <code>"class"</code>, <code>"size"</code>). Defaults to showing all columns.
+Ignored for other classes. See Details for how the default is resolved,
+and for how <code>globalenv_n</code> separately controls the number of rows shown.</p></dd>
+
+
+<dt id="arg-globalenv-n">globalenv_n<a class="anchor" aria-label="anchor" href="#arg-globalenv-n"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional
+single number giving the maximum number of <code>globalenv</code> rows to display,
+largest objects first. Defaults to <code>10</code>. Ignored for other classes. See
+Details for how the default is resolved.</p></dd>
+
+
+<dt id="arg-attachments">attachments<a class="anchor" aria-label="anchor" href="#arg-attachments"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional
+character vector selecting which attached-environment columns to display
+(from <code>"name"</code>, <code>"type"</code>). Defaults to showing all columns. Ignored for
+other classes. See Details for how the default is resolved.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Character vector</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>For <code>sessioncheck_sessionstate</code> objects, the <code>platform</code>/<code>locale</code>/<code>matrix</code>/
+<code>document</code>/<code>machine</code>/<code>git</code>/<code>timing</code>/<code>rng</code>/<code>packages</code>/<code>globalenv</code>/
+<code>globalenv_n</code>/<code>attachments</code>
+arguments are resolved through the same precedence used elsewhere in the
+package: an explicit argument always wins; otherwise,
+<code>getOption("sessioncheck")</code> is checked for a <code>sessionstate_platform</code>,
+<code>sessionstate_locale</code>, <code>sessionstate_matrix</code>, <code>sessionstate_document</code>,
+<code>sessionstate_machine</code>, <code>sessionstate_git</code>, <code>sessionstate_timing</code>,
+<code>sessionstate_rng</code>, <code>sessionstate_packages</code>, <code>sessionstate_globalenv</code>,
+<code>sessionstate_globalenv_n</code>, or <code>sessionstate_attachments</code> field
+(respectively); if neither is set, a
+built-in default is used (showing every field/column, except for
+<code>packages</code>, which defaults to
+<code>c("package", "attached", "loaded_version", "source")</code>, and
+<code>globalenv_n</code>, which defaults to <code>10</code>). This selection only affects what
+is displayed; it never changes the underlying object, so
+<code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> always returns the full package inventory, and
+<code>x$globalenv</code>/<code>x$attachments</code> always return their full data frames,
+regardless of any selection in effect.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

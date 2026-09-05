@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">sessioncheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/why-check-the-r-session.html">Why is it important to check the R session?</a></li>
+    <li><a class="dropdown-item" href="articles/sessionstate-reporting.html">Reporting the session state</a></li>
     <li><a class="dropdown-item" href="articles/customizing-sessioncheck.html">Customizing sessioncheck() behavior</a></li>
     <li><a class="dropdown-item" href="articles/individual-checks.html">Individual session check functions</a></li>
     <li><a class="dropdown-item" href="articles/s3-classes.html">S3 classes and methods</a></li>
@@ -86,6 +87,97 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The default behavior is to check for objects in the global environment and to check packages and environments attached to the search path and produce a warning if issues are detected. This can be converted to an error if a stricter check is required, and additional checks can be added if desired. For details on how the checks work and how they can be customized see the <a href="https://sessioncheck.djnavarro.net/articles/sessioncheck.html">get started</a> page.</p>
+<p>In addition to providing tools to check the session state (most useful at the start of a script), the package also supplies a <code><a href="reference/sessionstate.html">sessionstate()</a></code> function that reports the current state of a session (most useful at the end of a script).</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="reference/sessionstate.html">sessionstate</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Platform:</span></span>
+<span><span class="co">#&gt;  version         R version 4.6.1 (2026-06-24)</span></span>
+<span><span class="co">#&gt;  os              Ubuntu 24.04.4 LTS</span></span>
+<span><span class="co">#&gt;  system          x86_64, linux-gnu</span></span>
+<span><span class="co">#&gt;  ui              non-interactive</span></span>
+<span><span class="co">#&gt;  tz              Australia/Sydney</span></span>
+<span><span class="co">#&gt;  date            2026-09-05</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Locale:</span></span>
+<span><span class="co">#&gt;  language        (unset)</span></span>
+<span><span class="co">#&gt;  collate         en_US.UTF-8</span></span>
+<span><span class="co">#&gt;  ctype           en_US.UTF-8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Matrix products:</span></span>
+<span><span class="co">#&gt;  BLAS            /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0</span></span>
+<span><span class="co">#&gt;  LAPACK          /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Document products:</span></span>
+<span><span class="co">#&gt;  pandoc          3.10</span></span>
+<span><span class="co">#&gt;  quarto          1.5.52</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Machine:</span></span>
+<span><span class="co">#&gt;  hostname            wrex</span></span>
+<span><span class="co">#&gt;  user                danielle</span></span>
+<span><span class="co">#&gt;  working directory   /home/danielle/GitHub/djnavarro/sessioncheck</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Git:</span></span>
+<span><span class="co">#&gt;  commit sha      3c40984b6d9c603210237c872df537790e9b04fd</span></span>
+<span><span class="co">#&gt;  dirty           TRUE</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Timing:</span></span>
+<span><span class="co">#&gt;  captured at              2026-09-05 12:56:44 AEST</span></span>
+<span><span class="co">#&gt;  session runtime (sec)    0.401</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; RNG state:</span></span>
+<span><span class="co">#&gt;  kind            Mersenne-Twister</span></span>
+<span><span class="co">#&gt;  normal kind     Inversion</span></span>
+<span><span class="co">#&gt;  sample kind     Rejection</span></span>
+<span><span class="co">#&gt;  seed hash       (not set)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Library paths [n = 5]:</span></span>
+<span><span class="co">#&gt;  1  /tmp/RtmpubrOrb/temp_libpath6c20a3e6f62e2</span></span>
+<span><span class="co">#&gt;  2  /home/danielle/R/x86_64-pc-linux-gnu-library/4.6</span></span>
+<span><span class="co">#&gt;  3  /usr/local/lib/R/site-library</span></span>
+<span><span class="co">#&gt;  4  /usr/lib/R/site-library</span></span>
+<span><span class="co">#&gt;  5  /usr/lib/R/library</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Packages [n = 21] (attached + loaded via namespace):</span></span>
+<span><span class="co">#&gt;       package attached loaded_version         source</span></span>
+<span><span class="co">#&gt;          base        *          4.6.1           base</span></span>
+<span><span class="co">#&gt;           cli                   3.6.6 RSPM (R 4.6.0)</span></span>
+<span><span class="co">#&gt;      compiler                   4.6.1           base</span></span>
+<span><span class="co">#&gt;      datasets        *          4.6.1           base</span></span>
+<span><span class="co">#&gt;        digest                  0.6.39 RSPM (R 4.6.0)</span></span>
+<span><span class="co">#&gt;      evaluate                   1.0.5 RSPM (R 4.6.0)</span></span>
+<span><span class="co">#&gt;       fastmap                   1.2.0 RSPM (R 4.6.0)</span></span>
+<span><span class="co">#&gt;      graphics        *          4.6.1           base</span></span>
+<span><span class="co">#&gt;     grDevices        *          4.6.1           base</span></span>
+<span><span class="co">#&gt;     htmltools                   0.5.9 RSPM (R 4.6.0)</span></span>
+<span><span class="co">#&gt;         knitr                    1.51 RSPM (R 4.6.0)</span></span>
+<span><span class="co">#&gt;       methods        *          4.6.1           base</span></span>
+<span><span class="co">#&gt;          otel                   0.2.0 RSPM (R 4.6.0)</span></span>
+<span><span class="co">#&gt;         rlang                   1.3.0 CRAN (R 4.6.1)</span></span>
+<span><span class="co">#&gt;     rmarkdown                    2.32 RSPM (R 4.6.0)</span></span>
+<span><span class="co">#&gt;  sessioncheck              0.1.1.9000          local</span></span>
+<span><span class="co">#&gt;         stats        *          4.6.1           base</span></span>
+<span><span class="co">#&gt;         tools                   4.6.1           base</span></span>
+<span><span class="co">#&gt;         utils        *          4.6.1           base</span></span>
+<span><span class="co">#&gt;          xfun                    0.60 RSPM (R 4.6.0)</span></span>
+<span><span class="co">#&gt;          yaml                  2.3.12 RSPM (R 4.6.0)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Global environment [n = 0]:</span></span>
+<span><span class="co">#&gt; [1] name  class size </span></span>
+<span><span class="co">#&gt; &lt;0 rows&gt; (or 0-length row.names)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attached environments [n = 10]:</span></span>
+<span><span class="co">#&gt;               name    type</span></span>
+<span><span class="co">#&gt;         .GlobalEnv   other</span></span>
+<span><span class="co">#&gt;      package:stats package</span></span>
+<span><span class="co">#&gt;   package:graphics package</span></span>
+<span><span class="co">#&gt;  package:grDevices package</span></span>
+<span><span class="co">#&gt;      package:utils package</span></span>
+<span><span class="co">#&gt;   package:datasets package</span></span>
+<span><span class="co">#&gt;    package:methods package</span></span>
+<span><span class="co">#&gt;          Autoloads   other</span></span>
+<span><span class="co">#&gt;        tools:callr   other</span></span>
+<span><span class="co">#&gt;       package:base package</span></span></code></pre></div>
+<p>The <code><a href="reference/sessionstate.html">sessionstate()</a></code> function is similar in spirit to session information functions provided by base R and other packages. For details on the similarities and differences between them, and when to prefer one over the other see the <a href="https://sessioncheck.djnavarro.net/articles/sessionstate-reporting.html">session state reporting</a> page.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
