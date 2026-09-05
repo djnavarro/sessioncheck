@@ -424,12 +424,22 @@ test_that("format.sessioncheck_sessionstate() reports '(not found)' when pandoc/
 })
 
 test_that("format.sessioncheck_sessionstate() defaults globalenv to every column but only the 10 largest rows", {
-  for (i in 1:15) assign(paste0("sc_test_genv_", i), i, envir = .GlobalEnv)
-  on.exit(rm(list = paste0("sc_test_genv_", 1:15), envir = .GlobalEnv), add = TRUE)
-
+  # mocked rather than populating the real .GlobalEnv: doing the latter mixes
+  # in whatever else happens to be present ambiently (e.g. leftover objects
+  # from devtools::load_all() or earlier tests), and if any of those has a
+  # long `class` string, print.data.frame() wraps the table across multiple
+  # lines and no single line matches the header regex below
+  local_mocked_bindings(.get_globalenv_info = function() {
+    data.frame(
+      name = paste0("sc_test_genv_", 1:15),
+      class = "numeric",
+      size = as.numeric(15:1),
+      stringsAsFactors = FALSE
+    )
+  })
   x <- sessionstate()
   txt <- format(x)
-  expect_match(txt, "Global environment \\[n = ", fixed = FALSE)
+  expect_match(txt, "Global environment \\[n = 15\\]", fixed = FALSE)
   lines <- strsplit(txt, "\n")[[1]]
   header_line <- lines[grep("^\\s*name\\s+class\\s+size\\s*$", lines)]
   expect_length(header_line, 1L)
