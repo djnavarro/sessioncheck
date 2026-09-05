@@ -94,16 +94,20 @@ test_that(".ansi_enabled() honors options(cli.num_colors = )", {
 })
 
 # the remaining .ansi_enabled() tests exercise checks that come after
-# cli.num_colors/NO_COLOR, so both must be neutralized first; returns a
-# restore function so each test can register its own on.exit() cleanup,
-# rather than depending on whether NO_COLOR happens to be set already
+# cli.num_colors/NO_COLOR, so these must be neutralized first (including the
+# RStudio console signal, which would otherwise short-circuit the isatty
+# fallback tests); returns a restore function so each test can register its
+# own on.exit() cleanup, rather than depending on the ambient environment
 .reset_ansi_precedence <- function() {
   old_opt <- options(cli.num_colors = NULL)
-  old_env <- Sys.getenv("NO_COLOR", unset = NA)
-  Sys.unsetenv("NO_COLOR")
+  env_vars <- c("NO_COLOR", "RSTUDIO", "RSTUDIO_CONSOLE_COLOR")
+  old_env <- Sys.getenv(env_vars, unset = NA, names = TRUE)
+  Sys.unsetenv(env_vars)
   function() {
     options(old_opt)
-    if (is.na(old_env)) Sys.unsetenv("NO_COLOR") else Sys.setenv(NO_COLOR = old_env)
+    to_restore <- !is.na(old_env)
+    if (any(to_restore)) do.call(Sys.setenv, as.list(old_env[to_restore]))
+    Sys.unsetenv(env_vars[!to_restore])
   }
 }
 
@@ -136,6 +140,49 @@ test_that(".ansi_enabled() falls back to isatty(stdout()) otherwise", {
   expect_true(.ansi_enabled())
 
   local_mocked_bindings(sink.number = function() 0L, isatty = function(con) FALSE, .package = "base")
+  expect_false(.ansi_enabled())
+})
+
+test_that(".rstudio_console_with_color() requires both RSTUDIO and a numeric RSTUDIO_CONSOLE_COLOR", {
+  restore <- .reset_ansi_precedence()
+  on.exit(restore(), add = TRUE)
+
+  # neither set
+  expect_false(.rstudio_console_with_color())
+
+  # RSTUDIO alone (e.g. Terminal pane, Build pane, or an RStudio Job)
+  Sys.setenv(RSTUDIO = "1")
+  expect_false(.rstudio_console_with_color())
+
+  # RSTUDIO_CONSOLE_COLOR alone should not occur in practice, but shouldn't count either
+  Sys.unsetenv("RSTUDIO")
+  Sys.setenv(RSTUDIO_CONSOLE_COLOR = "256")
+  expect_false(.rstudio_console_with_color())
+
+  # both set, as RStudio's Console pane does
+  Sys.setenv(RSTUDIO = "1")
+  expect_true(.rstudio_console_with_color())
+
+  # a non-numeric RSTUDIO_CONSOLE_COLOR should not count
+  Sys.setenv(RSTUDIO_CONSOLE_COLOR = "")
+  expect_false(.rstudio_console_with_color())
+})
+
+test_that(".ansi_enabled() honors the RStudio console color signal even when isatty(stdout()) is FALSE", {
+  restore <- .reset_ansi_precedence()
+  on.exit(restore(), add = TRUE)
+  local_mocked_bindings(sink.number = function() 0L, isatty = function(con) FALSE, .package = "base")
+
+  Sys.setenv(RSTUDIO = "1", RSTUDIO_CONSOLE_COLOR = "256")
+  expect_true(.ansi_enabled())
+})
+
+test_that(".ansi_enabled() ignores RSTUDIO outside the Console pane", {
+  restore <- .reset_ansi_precedence()
+  on.exit(restore(), add = TRUE)
+  local_mocked_bindings(sink.number = function() 0L, isatty = function(con) FALSE, .package = "base")
+
+  Sys.setenv(RSTUDIO = "1")
   expect_false(.ansi_enabled())
 })
 

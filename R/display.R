@@ -26,11 +26,23 @@
 
 # ansi color support ------
 
+# detects RStudio's Console pane specifically. RStudio (>= 1.3) sets
+# RSTUDIO_CONSOLE_COLOR only in the Console pane, not in the Terminal pane,
+# Build pane, or RStudio Jobs, so this is a safe, console-scoped signal --
+# unlike a bare RSTUDIO == "1" check, which is set in all of those contexts.
+# Mirrors the approach used by crayon/cli's rstudio_with_ansi_support().
+# Positron has no documented equivalent as of this writing, so it is not
+# handled here; isatty(stdout()) is FALSE in the Positron console too, so
+# color will only appear there when `cli.num_colors` is set explicitly.
+.rstudio_console_with_color <- function() {
+  if (!identical(Sys.getenv("RSTUDIO", ""), "1")) return(FALSE)
+  cols <- Sys.getenv("RSTUDIO_CONSOLE_COLOR", "")
+  !is.na(suppressWarnings(as.numeric(cols)))
+}
+
 # detects whether ANSI escape codes are safe to emit. `cli.num_colors` is
 # checked first so that this defers to detection already performed by other
-# packages (e.g. cli) when present; note that RStudio/Positron consoles
-# report isatty(stdout()) == FALSE despite being able to render ANSI, so
-# color will not appear there unless `cli.num_colors` is set explicitly
+# packages (e.g. cli) when present.
 .ansi_enabled <- function() {
   opt <- getOption("cli.num_colors", NULL)
   if (!is.null(opt)) return(opt > 1)
@@ -43,6 +55,8 @@
 
   # output has been redirected/captured (e.g. capture.output(), testthat)
   if (sink.number() > 0) return(FALSE)
+
+  if (.rstudio_console_with_color()) return(TRUE)
 
   isatty(stdout())
 }
