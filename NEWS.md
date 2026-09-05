@@ -1,5 +1,10 @@
 # sessioncheck (development version)
 
+## Improvements
+
+- Formatted output (from `print()`, `format()`, and messages/warnings raised by
+  `action = "message"`/`"warn"`) is now nicer to read, with a cli-like style.
+
 ## New features
 
 - Added `sessionstate()`, a companion to `sessioncheck()` intended for use at

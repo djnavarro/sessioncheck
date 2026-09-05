@@ -35,18 +35,30 @@
 # Build pane, or RStudio Jobs, so this is a safe, console-scoped signal --
 # unlike a bare RSTUDIO == "1" check, which is set in all of those contexts.
 # Mirrors the approach used by crayon/cli's rstudio_with_ansi_support().
-# Positron has no documented equivalent as of this writing, so it is not
-# handled here; isatty(stdout()) is FALSE in the Positron console too, so
-# color will only appear there when `cli.num_colors` is set explicitly.
 .rstudio_console_with_color <- function() {
   if (!identical(Sys.getenv("RSTUDIO", ""), "1")) return(FALSE)
   cols <- Sys.getenv("RSTUDIO_CONSOLE_COLOR", "")
   !is.na(suppressWarnings(as.numeric(cols)))
 }
 
+# detects Positron's console. ark (Positron's R kernel) sets
+# options(cli.default_num_colors = <n>) directly at session startup to tell
+# `cli` that its console can render ANSI color, bypassing isatty()/RSTUDIO
+# style detection entirely -- Positron's console is not a real tty, and it
+# does not set RSTUDIO = "1". Scoped to Sys.getenv("POSITRON") == "1" so
+# this doesn't trust `cli.default_num_colors` if something else set it
+# outside of a Positron session.
+.positron_console_with_color <- function() {
+  if (!identical(Sys.getenv("POSITRON", ""), "1")) return(FALSE)
+  n <- getOption("cli.default_num_colors", NULL)
+  is.numeric(n) && n > 1
+}
+
 # detects whether ANSI escape codes are safe to emit. `cli.num_colors` is
 # checked first so that this defers to detection already performed by other
-# packages (e.g. cli) when present.
+# packages (e.g. cli) when present. After that, front end signals are
+# checked in order: Positron's console, then RStudio's console, falling
+# back to isatty(stdout()) for plain terminals.
 .ansi_enabled <- function() {
   opt <- getOption("cli.num_colors", NULL)
   if (!is.null(opt)) return(opt > 1)
@@ -60,6 +72,7 @@
   # output has been redirected/captured (e.g. capture.output(), testthat)
   if (sink.number() > 0) return(FALSE)
 
+  if (.positron_console_with_color()) return(TRUE)
   if (.rstudio_console_with_color()) return(TRUE)
 
   isatty(stdout())

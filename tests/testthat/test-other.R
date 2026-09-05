@@ -139,12 +139,15 @@ test_that(".ansi_enabled() honors options(cli.num_colors = )", {
 
 # the remaining .ansi_enabled() tests exercise checks that come after
 # cli.num_colors/NO_COLOR, so these must be neutralized first (including the
-# RStudio console signal, which would otherwise short-circuit the isatty
-# fallback tests); returns a restore function so each test can register its
-# own on.exit() cleanup, rather than depending on the ambient environment
+# Positron and RStudio console signals, which would otherwise short-circuit
+# the isatty fallback tests); returns a restore function so each test can
+# register its own on.exit() cleanup, rather than depending on the ambient
+# environment -- this matters in particular because this suite may itself be
+# running inside Positron, where POSITRON = "1" and cli.default_num_colors
+# are genuinely set
 .reset_ansi_precedence <- function() {
-  old_opt <- options(cli.num_colors = NULL)
-  env_vars <- c("NO_COLOR", "RSTUDIO", "RSTUDIO_CONSOLE_COLOR")
+  old_opt <- options(cli.num_colors = NULL, cli.default_num_colors = NULL)
+  env_vars <- c("NO_COLOR", "RSTUDIO", "RSTUDIO_CONSOLE_COLOR", "POSITRON")
   old_env <- Sys.getenv(env_vars, unset = NA, names = TRUE)
   Sys.unsetenv(env_vars)
   function() {
@@ -227,6 +230,50 @@ test_that(".ansi_enabled() ignores RSTUDIO outside the Console pane", {
   local_mocked_bindings(sink.number = function() 0L, isatty = function(con) FALSE, .package = "base")
 
   Sys.setenv(RSTUDIO = "1")
+  expect_false(.ansi_enabled())
+})
+
+test_that(".positron_console_with_color() requires both POSITRON and a numeric cli.default_num_colors greater than 1", {
+  restore <- .reset_ansi_precedence()
+  on.exit(restore(), add = TRUE)
+
+  # neither set
+  expect_false(.positron_console_with_color())
+
+  # POSITRON alone
+  Sys.setenv(POSITRON = "1")
+  expect_false(.positron_console_with_color())
+
+  # cli.default_num_colors alone should not occur in practice, but shouldn't count either
+  Sys.unsetenv("POSITRON")
+  options(cli.default_num_colors = 256L)
+  expect_false(.positron_console_with_color())
+
+  # both set, as ark sets them at session startup
+  Sys.setenv(POSITRON = "1")
+  expect_true(.positron_console_with_color())
+
+  # cli.default_num_colors of 1 means no color, even with POSITRON set
+  options(cli.default_num_colors = 1L)
+  expect_false(.positron_console_with_color())
+})
+
+test_that(".ansi_enabled() honors the Positron console color signal even when isatty(stdout()) is FALSE", {
+  restore <- .reset_ansi_precedence()
+  on.exit(restore(), add = TRUE)
+  local_mocked_bindings(sink.number = function() 0L, isatty = function(con) FALSE, .package = "base")
+
+  Sys.setenv(POSITRON = "1")
+  options(cli.default_num_colors = 256L)
+  expect_true(.ansi_enabled())
+})
+
+test_that(".ansi_enabled() ignores cli.default_num_colors outside Positron", {
+  restore <- .reset_ansi_precedence()
+  on.exit(restore(), add = TRUE)
+  local_mocked_bindings(sink.number = function() 0L, isatty = function(con) FALSE, .package = "base")
+
+  options(cli.default_num_colors = 256L)
   expect_false(.ansi_enabled())
 })
 
