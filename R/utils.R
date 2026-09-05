@@ -426,11 +426,22 @@
 .get_ondisk_path <- function(pkg) {
   lib_loc <- .libPaths()
   loaded_path <- .get_loaded_path(pkg)
-  if (!is.na(loaded_path) && !(dirname(loaded_path) %in% lib_loc)) {
+  if (!is.na(loaded_path) && !(.normalize_path(dirname(loaded_path)) %in% .normalize_path(lib_loc))) {
     lib_loc <- c(dirname(loaded_path), lib_loc)
   }
   p <- system.file(package = pkg, lib.loc = lib_loc)
   if (!nzchar(p)) NA_character_ else p
+}
+
+# resolves symlinks so that two spellings of the same real directory
+# (e.g. macOS's /var -> /private/var, or a package cache that symlinks
+# rather than copies) aren't treated as different locations; NA-safe
+# and a no-op for paths that don't exist, since callers may pass NA or
+# an already-nonexistent path
+.normalize_path <- function(p) {
+  ok <- !is.na(p) & nzchar(p)
+  p[ok] <- normalizePath(p[ok], winslash = "/", mustWork = FALSE)
+  p
 }
 
 # the library path the currently loaded namespace was actually loaded from;
@@ -472,10 +483,12 @@
       ondisk_version != loaded_version,
     ondisk_path     = ondisk_path,
     loaded_path     = loaded_path,
-    # "moved": both paths exist but disagree (excluding load_all() packages;
-    # see is_load_all above)
+    # "moved": both paths exist but disagree once symlinks are resolved
+    # (excluding load_all() packages; see is_load_all above). Comparing
+    # normalized forms avoids false positives from cosmetic path
+    # differences such as macOS's /var -> /private/var alias
     path_mismatch   = !is_load_all & !is.na(ondisk_path) & !is.na(loaded_path) &
-      ondisk_path != loaded_path,
+      .normalize_path(ondisk_path) != .normalize_path(loaded_path),
     # "deleted": the namespace is loaded, but it's no longer found on disk;
     # kept distinct from path_mismatch since these are different failure
     # modes worth telling apart

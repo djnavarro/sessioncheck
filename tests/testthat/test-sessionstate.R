@@ -569,7 +569,13 @@ test_that("an explicit packages argument overrides options(sessioncheck = ...)",
   x <- sessionstate()
   txt <- format(x, packages = c("package", "attached"))
   expect_match(txt, "attached", fixed = TRUE)
-  expect_no_match(txt, "source", fixed = TRUE)
+  # restrict the "source" check to the packages table itself: earlier
+  # sections can legitimately contain the substring "source" (e.g. a
+  # library path under macOS's .../Resources/library), which isn't the
+  # "source" column this test is guarding against
+  lines <- strsplit(txt, "\n")[[1]]
+  table_txt <- paste(lines[-seq_len(grep("^Packages", lines))], collapse = "\n")
+  expect_no_match(table_txt, "source", fixed = TRUE)
 })
 
 test_that("options(sessioncheck = ...) can also set defaults for platform/machine/timing", {
@@ -853,6 +859,33 @@ test_that(".get_package_inventory() flags a path_mismatch when on-disk and loade
   df <- .get_package_inventory()
   expect_true(all(df$path_mismatch))
   expect_false(any(df$removed_from_disk))
+})
+
+test_that(".get_package_inventory() does not flag path_mismatch for two spellings of the same real directory", {
+  # reproduces the false positive seen on macOS CI, where the on-disk and
+  # loaded paths for a package can differ only in whether a symlink (e.g.
+  # macOS's /var -> /private/var) has been resolved, not in actual location
+  real_dir <- file.path(tempdir(), paste0("real-", basename(tempfile())))
+  link_dir <- file.path(tempdir(), paste0("link-", basename(tempfile())))
+  dir.create(real_dir)
+  on.exit(unlink(c(real_dir, link_dir), recursive = TRUE))
+  skip_if_not(
+    isTRUE(file.symlink(real_dir, link_dir)),
+    "symlinks not supported/permitted on this platform"
+  )
+
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) list(Version = "1.0.0"),
+    .package = "utils"
+  )
+  local_mocked_bindings(.get_loaded_version = function(pkg) "1.0.0")
+  local_mocked_bindings(.get_package_source = function(pkg) "local")
+  local_mocked_bindings(.get_ondisk_path = function(pkg) real_dir)
+  local_mocked_bindings(.get_loaded_path = function(pkg) link_dir)
+  local_mocked_bindings(.is_load_all_package = function(pkg) FALSE)
+
+  df <- .get_package_inventory()
+  expect_false(any(df$path_mismatch))
 })
 
 test_that(".get_package_inventory() does not flag load_all() packages as path_mismatch", {
