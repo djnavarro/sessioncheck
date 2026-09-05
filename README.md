@@ -49,3 +49,106 @@ added if desired. For details on how the checks work and how they can be
 customized see the [get
 started](https://sessioncheck.djnavarro.net/articles/sessioncheck.html)
 page.
+
+In addition to providing tools to check the session state (most useful
+at the start of a script), the package also supplies a `sessionstate()`
+function that reports the current state of a session (most useful at the
+end of a script).
+
+``` r
+sessioncheck::sessionstate()
+#> Platform:
+#>  version         R version 4.6.1 (2026-06-24)
+#>  os              Ubuntu 24.04.4 LTS
+#>  system          x86_64, linux-gnu
+#>  ui              non-interactive
+#>  tz              Australia/Sydney
+#>  date            2026-09-05
+#> 
+#> Locale:
+#>  language        (unset)
+#>  collate         en_US.UTF-8
+#>  ctype           en_US.UTF-8
+#> 
+#> Matrix products:
+#>  BLAS            /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0
+#>  LAPACK          /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0
+#> 
+#> Document products:
+#>  pandoc          3.10
+#>  quarto          1.5.52
+#> 
+#> Machine:
+#>  hostname            wrex
+#>  user                danielle
+#>  working directory   /home/danielle/GitHub/djnavarro/sessioncheck
+#> 
+#> Git:
+#>  commit sha      3c40984b6d9c603210237c872df537790e9b04fd
+#>  dirty           TRUE
+#> 
+#> Timing:
+#>  captured at              2026-09-05 12:56:44 AEST
+#>  session runtime (sec)    0.401
+#> 
+#> RNG state:
+#>  kind            Mersenne-Twister
+#>  normal kind     Inversion
+#>  sample kind     Rejection
+#>  seed hash       (not set)
+#> 
+#> Library paths [n = 5]:
+#>  1  /tmp/RtmpubrOrb/temp_libpath6c20a3e6f62e2
+#>  2  /home/danielle/R/x86_64-pc-linux-gnu-library/4.6
+#>  3  /usr/local/lib/R/site-library
+#>  4  /usr/lib/R/site-library
+#>  5  /usr/lib/R/library
+#> 
+#> Packages [n = 21] (attached + loaded via namespace):
+#>       package attached loaded_version         source
+#>          base        *          4.6.1           base
+#>           cli                   3.6.6 RSPM (R 4.6.0)
+#>      compiler                   4.6.1           base
+#>      datasets        *          4.6.1           base
+#>        digest                  0.6.39 RSPM (R 4.6.0)
+#>      evaluate                   1.0.5 RSPM (R 4.6.0)
+#>       fastmap                   1.2.0 RSPM (R 4.6.0)
+#>      graphics        *          4.6.1           base
+#>     grDevices        *          4.6.1           base
+#>     htmltools                   0.5.9 RSPM (R 4.6.0)
+#>         knitr                    1.51 RSPM (R 4.6.0)
+#>       methods        *          4.6.1           base
+#>          otel                   0.2.0 RSPM (R 4.6.0)
+#>         rlang                   1.3.0 CRAN (R 4.6.1)
+#>     rmarkdown                    2.32 RSPM (R 4.6.0)
+#>  sessioncheck              0.1.1.9000          local
+#>         stats        *          4.6.1           base
+#>         tools                   4.6.1           base
+#>         utils        *          4.6.1           base
+#>          xfun                    0.60 RSPM (R 4.6.0)
+#>          yaml                  2.3.12 RSPM (R 4.6.0)
+#> 
+#> Global environment [n = 0]:
+#> [1] name  class size 
+#> <0 rows> (or 0-length row.names)
+#> 
+#> Attached environments [n = 10]:
+#>               name    type
+#>         .GlobalEnv   other
+#>      package:stats package
+#>   package:graphics package
+#>  package:grDevices package
+#>      package:utils package
+#>   package:datasets package
+#>    package:methods package
+#>          Autoloads   other
+#>        tools:callr   other
+#>       package:base package
+```
+
+The `sessionstate()` function is similar in spirit to session
+information functions provided by base R and other packages. For details
+on the similarities and differences between them, and when to prefer one
+over the other see the [session state
+reporting](https://sessioncheck.djnavarro.net/articles/sessionstate-reporting.html)
+page.

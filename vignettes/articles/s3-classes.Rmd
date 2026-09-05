@@ -13,19 +13,21 @@ knitr::opts_chunk$set(
 library(sessioncheck)
 ```
 
-The **sessioncheck** package is designed to be lightweight, and has no dependencies. It defines two S3 classes: the `sessioncheck()` function returns an object of class `sessioncheck_sessioncheck` and the individual check functions return objects of class `sessioncheck_status`. 
+The **sessioncheck** package is designed to be lightweight, and has no dependencies. It defines three S3 classes: the individual check functions return objects of class `sessioncheck_status`, the `sessioncheck()` function returns an object of class `sessioncheck_sessioncheck`, and `sessionstate()` returns an object of class `sessioncheck_sessionstate`.
 
 ```{r}
 pkg_status <- check_attached_packages(action = "none")
 obj_status <- check_globalenv_objects(action = "none") 
 session_check <- sessioncheck(action = "none")
+session_state <- sessionstate()
 
 class(pkg_status)
 class(obj_status)
 class(session_check)
+class(session_state)
 ```
 
-Both classes have a `format()` method and a `print()` method, and both are coercible to data frames via `as.data.frame()`. A brief discussion of these classes and methods is provided here.
+All three classes have a `format()` method and a `print()` method, and all three are coercible to data frames via `as.data.frame()`. A brief discussion of these classes and methods is provided here.
 
 ## sessioncheck_status objects
 
@@ -70,3 +72,28 @@ Similarly, there is an `as.data.frame()` method provided as a convenience:
 ```{r}
 as.data.frame(session_check)
 ```
+
+## sessioncheck_sessionstate objects
+
+Unlike the two classes above, a `sessioncheck_sessionstate` object isn't a check result -- it's a snapshot of session state produced by `sessionstate()`, intended as an audit record rather than a pass/fail judgment. Internally it's a named list with twelve components (`platform`, `locale`, `matrix`, `document`, `machine`, `git`, `timing`, `rng`, `libpaths`, `packages`, `globalenv`, `attachments`), most of which are themselves lists or data frames rather than simple vectors:
+
+```{r}
+str(unclass(session_state), max.level = 1)
+```
+
+Because there's a lot captured here, the `format()` and `print()` methods accept optional arguments (one per component, plus `globalenv_n`) that select which fields or columns to display, without touching the underlying object:
+
+```{r}
+print(session_state, packages = "package", globalenv = "class", machine = character(0))
+```
+
+See `?display_methods` for the complete list of these arguments and how their defaults are resolved.
+
+The `as.data.frame()` method is necessarily different here too. For `sessioncheck_status`/`sessioncheck_sessioncheck` objects, the coercion is lossless: every entity and status recorded in `x` shows up as a row. That guarantee is impossible for `sessioncheck_sessionstate`, because there is no single rectangular table that could hold eight scalar-field components, a bare character vector, and three differently-shaped data frames all at once. Rather than pretend otherwise, `as.data.frame()` returns exactly one of the three tabular components -- `packages`, `globalenv`, or `attachments` -- selected via its `which` argument (defaulting to `"packages"`, the largest and most commonly needed of the three):
+
+```{r}
+head(as.data.frame(session_state))
+head(as.data.frame(session_state, which = "globalenv"))
+```
+
+The eight scalar-field components (`platform`, `locale`, `matrix`, `document`, `machine`, `git`, `timing`, `rng`) and `libpaths` are never included in `as.data.frame()`'s output, regardless of `which` -- access them directly via `session_state$platform`, `session_state$machine`, and so on, or via `unclass(session_state)` for everything at once. See [sessionstate() versus sessionInfo() and session_info()](sessionstate-vs-sessioninfo.html) for a discussion of what each component captures.

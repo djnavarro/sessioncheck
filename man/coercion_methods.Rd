@@ -4,24 +4,46 @@
 \alias{coercion_methods}
 \alias{as.data.frame.sessioncheck_status}
 \alias{as.data.frame.sessioncheck_sessioncheck}
+\alias{as.data.frame.sessioncheck_sessionstate}
 \title{Coerce session check object to a data frame}
 \usage{
 \method{as.data.frame}{sessioncheck_status}(x, row.names = NULL, optional = FALSE, ...)
 
 \method{as.data.frame}{sessioncheck_sessioncheck}(x, row.names = NULL, optional = FALSE, ...)
+
+\method{as.data.frame}{sessioncheck_sessionstate}(x, row.names = NULL, optional = FALSE, which = "packages", ...)
 }
 \arguments{
-\item{x}{An object of class \code{sessioncheck_status} or \code{sessioncheck_sessioncheck}}
+\item{x}{An object of class \code{sessioncheck_status}, \code{sessioncheck_sessioncheck},
+or \code{sessioncheck_sessionstate}}
 
 \item{row.names}{Ignored}
 
 \item{optional}{Ignored}
 
 \item{...}{Ignored}
+
+\item{which}{For \code{sessioncheck_sessionstate} objects, which tabular
+component to return: one of \code{"packages"} (the default), \code{"globalenv"},
+or \code{"attachments"}. Ignored for other classes.}
 }
 \value{
 A data frame
 }
 \description{
 Coerce session check object to a data frame
+}
+\details{
+For \code{sessioncheck_status} and \code{sessioncheck_sessioncheck} objects, this
+coercion is lossless: every entity and status recorded in \code{x} appears as a
+row in the result. That guarantee does not extend to
+\code{sessioncheck_sessionstate} objects: \code{sessionstate()} captures more than
+any single rectangular table can hold, mixing scalar fields (\code{platform},
+\code{locale}, \code{matrix}, \code{document}, \code{machine}, \code{git}, \code{timing}, \code{rng}), a bare
+character vector (\code{libpaths}), and three differently-shaped tables
+(\code{packages}, \code{globalenv}, \code{attachments}). \code{as.data.frame()} returns
+whichever one of those three tables \code{which} selects; none of the scalar
+fields or \code{libpaths} are represented in the result. Use \code{x$platform},
+\code{x$machine}, \code{x$git}, \code{x$libpaths}, etc. (or \code{unclass(x)} for everything
+at once) to access those directly.
 }

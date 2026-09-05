@@ -4,26 +4,147 @@
 \alias{display_methods}
 \alias{format.sessioncheck_status}
 \alias{format.sessioncheck_sessioncheck}
+\alias{format.sessioncheck_sessionstate}
 \alias{print.sessioncheck_status}
 \alias{print.sessioncheck_sessioncheck}
+\alias{print.sessioncheck_sessionstate}
 \title{Format and print sessioncheck objects}
 \usage{
 \method{format}{sessioncheck_status}(x, ...)
 
 \method{format}{sessioncheck_sessioncheck}(x, ...)
 
+\method{format}{sessioncheck_sessionstate}(
+  x,
+  platform = NULL,
+  locale = NULL,
+  matrix = NULL,
+  document = NULL,
+  machine = NULL,
+  git = NULL,
+  timing = NULL,
+  rng = NULL,
+  packages = NULL,
+  globalenv = NULL,
+  globalenv_n = NULL,
+  attachments = NULL,
+  ...
+)
+
 \method{print}{sessioncheck_status}(x, ...)
 
 \method{print}{sessioncheck_sessioncheck}(x, ...)
+
+\method{print}{sessioncheck_sessionstate}(
+  x,
+  platform = NULL,
+  locale = NULL,
+  matrix = NULL,
+  document = NULL,
+  machine = NULL,
+  git = NULL,
+  timing = NULL,
+  rng = NULL,
+  packages = NULL,
+  globalenv = NULL,
+  globalenv_n = NULL,
+  attachments = NULL,
+  ...
+)
 }
 \arguments{
-\item{x}{An object of class \code{sessioncheck_status} or \code{sessioncheck_sessioncheck}}
+\item{x}{An object of class \code{sessioncheck_status}, \code{sessioncheck_sessioncheck},
+or \code{sessioncheck_sessionstate}}
 
 \item{...}{Ignored}
+
+\item{platform}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which platform fields to display (from \code{"version"}, \code{"os"},
+\code{"system"}, \code{"ui"}, \code{"tz"}, \code{"date"}). Defaults to showing all fields.
+Ignored for other classes. See Details for how the default is resolved.}
+
+\item{locale}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which locale fields to display (from \code{"language"},
+\code{"collate"}, \code{"ctype"}). Defaults to showing all fields. Ignored for
+other classes. See Details for how the default is resolved.}
+
+\item{matrix}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which matrix-products fields to display (from \code{"blas"},
+\code{"lapack"}). Defaults to showing all fields. Ignored for other classes.
+See Details for how the default is resolved.}
+
+\item{document}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which document-products fields to display (from
+\code{"pandoc"}, \code{"quarto"}). Defaults to showing all fields. Ignored for
+other classes. See Details for how the default is resolved.}
+
+\item{machine}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which machine fields to display (from \code{"nodename"},
+\code{"user"}, \code{"cwd"}). Defaults to showing all fields. Ignored for other
+classes. See Details for how the default is resolved.}
+
+\item{git}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which git fields to display (from \code{"sha"}, \code{"dirty"}).
+Defaults to showing all fields. Ignored for other classes. See Details for
+how the default is resolved.}
+
+\item{timing}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which timing fields to display (from \code{"captured_at"},
+\code{"elapsed_sec"}). Defaults to showing all fields. Ignored for other classes.
+See Details for how the default is resolved.}
+
+\item{rng}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which RNG fields to display (from \code{"kind"},
+\code{"normal_kind"}, \code{"sample_kind"}, \code{"seed_hash"}). Defaults to showing all
+fields. Ignored for other classes. See Details for how the default is
+resolved.}
+
+\item{packages}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which package inventory columns to display (see
+\code{\link[=sessionstate]{sessionstate()}} for the full list of columns). Defaults to
+\code{c("package", "attached", "loaded_version", "source")}. Ignored for other
+classes. See Details for how the default is resolved.}
+
+\item{globalenv}{For \code{sessioncheck_sessionstate} objects, an optional
+character vector selecting which global environment columns to display
+(from \code{"name"}, \code{"class"}, \code{"size"}). Defaults to showing all columns.
+Ignored for other classes. See Details for how the default is resolved,
+and for how \code{globalenv_n} separately controls the number of rows shown.}
+
+\item{globalenv_n}{For \code{sessioncheck_sessionstate} objects, an optional
+single number giving the maximum number of \code{globalenv} rows to display,
+largest objects first. Defaults to \code{10}. Ignored for other classes. See
+Details for how the default is resolved.}
+
+\item{attachments}{For \code{sessioncheck_sessionstate} objects, an optional
+character vector selecting which attached-environment columns to display
+(from \code{"name"}, \code{"type"}). Defaults to showing all columns. Ignored for
+other classes. See Details for how the default is resolved.}
 }
 \value{
 Character vector
 }
 \description{
 Format and print sessioncheck objects
+}
+\details{
+For \code{sessioncheck_sessionstate} objects, the \code{platform}/\code{locale}/\code{matrix}/
+\code{document}/\code{machine}/\code{git}/\code{timing}/\code{rng}/\code{packages}/\code{globalenv}/
+\code{globalenv_n}/\code{attachments}
+arguments are resolved through the same precedence used elsewhere in the
+package: an explicit argument always wins; otherwise,
+\code{getOption("sessioncheck")} is checked for a \code{sessionstate_platform},
+\code{sessionstate_locale}, \code{sessionstate_matrix}, \code{sessionstate_document},
+\code{sessionstate_machine}, \code{sessionstate_git}, \code{sessionstate_timing},
+\code{sessionstate_rng}, \code{sessionstate_packages}, \code{sessionstate_globalenv},
+\code{sessionstate_globalenv_n}, or \code{sessionstate_attachments} field
+(respectively); if neither is set, a
+built-in default is used (showing every field/column, except for
+\code{packages}, which defaults to
+\code{c("package", "attached", "loaded_version", "source")}, and
+\code{globalenv_n}, which defaults to \code{10}). This selection only affects what
+is displayed; it never changes the underlying object, so
+\code{as.data.frame()} always returns the full package inventory, and
+\code{x$globalenv}/\code{x$attachments} always return their full data frames,
+regardless of any selection in effect.
 }
