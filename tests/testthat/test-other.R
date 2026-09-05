@@ -88,14 +88,42 @@ test_that(".colored_symbol() colors the bullet blue, distinct from tick/cross", 
   expect_equal(.colored_symbol("bullet"), "\033[34m*\033[0m")
 })
 
-test_that(".section_header() prefixes text with a plain bullet when ansi is disabled", {
+test_that(".bullet_line() prefixes text with a plain bullet when ansi is disabled", {
   local_mocked_bindings(.ansi_enabled = function() FALSE, .unicode_enabled = function() FALSE)
-  expect_equal(.section_header("Platform:"), "* Platform:")
+  expect_equal(.bullet_line("version  1.0"), "* version  1.0")
 })
 
-test_that(".section_header() prefixes text with a colored bullet when ansi is enabled", {
+test_that(".bullet_line() prefixes text with a colored bullet when ansi is enabled", {
   local_mocked_bindings(.ansi_enabled = function() TRUE, .unicode_enabled = function() TRUE)
-  expect_equal(.section_header("Platform:"), paste0("\033[34m", "\u2022", "\033[0m Platform:"))
+  expect_equal(.bullet_line("version  1.0"), paste0("\033[34m", "\u2022", "\033[0m version  1.0"))
+})
+
+test_that(".bullet_line() is vectorized, recycling the bullet against each element", {
+  local_mocked_bindings(.ansi_enabled = function() FALSE, .unicode_enabled = function() FALSE)
+  expect_equal(.bullet_line(c("a", "b")), c("* a", "* b"))
+})
+
+test_that(".symbol() returns a horizontal line character for 'line'", {
+  local_mocked_bindings(.unicode_enabled = function() FALSE)
+  expect_equal(.symbol("line"), "-")
+  local_mocked_bindings(.unicode_enabled = function() TRUE)
+  expect_equal(.symbol("line"), "\u2500")
+})
+
+test_that(".rule() left-aligns a title and fills the rest of the width with the line symbol", {
+  local_mocked_bindings(.ansi_enabled = function() FALSE, .unicode_enabled = function() FALSE)
+  expect_equal(.rule("Platform", width = 20), "- Platform ---------")
+  expect_equal(nchar(.rule("Platform", width = 20)), 20)
+})
+
+test_that(".rule() never truncates the title even if it would exceed the requested width", {
+  local_mocked_bindings(.ansi_enabled = function() FALSE, .unicode_enabled = function() FALSE)
+  expect_equal(.rule("A very long title indeed", width = 10), "- A very long title indeed ")
+})
+
+test_that(".rule() is dimmed when ansi is enabled", {
+  local_mocked_bindings(.ansi_enabled = function() TRUE, .unicode_enabled = function() FALSE)
+  expect_equal(.rule("Platform", width = 20), paste0("\033[2m", "- Platform ---------", "\033[0m"))
 })
 
 test_that(".ansi_enabled() honors options(cli.num_colors = )", {
