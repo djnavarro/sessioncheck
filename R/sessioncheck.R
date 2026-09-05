@@ -438,7 +438,8 @@ check_required_sysenv <- function(action = "warn", required_sysenv = NULL) {
 .message_text <- function(prefix, status, max_len = 4L) {
   lst <- names(status[status])
   len <- length(lst)
-  if (len == 0L) return(paste(prefix, "[no issues detected]"))
+  symbol <- .symbol(if (len == 0L) "tick" else "cross")
+  if (len == 0L) return(paste(symbol, prefix, "[no issues detected]"))
   if (len <= max_len) {
     txt <- paste(lst, collapse = ", ")
   } else {
@@ -446,7 +447,7 @@ check_required_sysenv <- function(action = "warn", required_sysenv = NULL) {
     txt <- paste(lst, collapse = ", ")
     txt <- paste0(txt, ", and ", len - max_len, " more")
   }
-  paste(prefix, txt)
+  paste(symbol, prefix, txt)
 }
 
 .action <- function(action, status) {

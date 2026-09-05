@@ -39,11 +39,38 @@ test_that(".action() produces the requested action for sessioncheck objects", {
   expect_no_message(.action(action = "none", status = sessioncheck_true))
 })
 
-test_that(".message_text() produces the expected text", {
-  ss <- c(a = FALSE, b = TRUE, c = TRUE, d = TRUE)  
-  expect_equal(.message_text("hi", ss, 5L), "hi b, c, d")
-  expect_equal(.message_text("no", ss, 5L), "no b, c, d")
-  expect_equal(.message_text("hi", ss, 1L), "hi b, and 2 more")
+test_that(".message_text() prefixes with a cross symbol when issues are found", {
+  ss <- c(a = FALSE, b = TRUE, c = TRUE, d = TRUE)
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE)
+  expect_equal(.message_text("hi", ss, 5L), "x hi b, c, d")
+  expect_equal(.message_text("no", ss, 5L), "x no b, c, d")
+  expect_equal(.message_text("hi", ss, 1L), "x hi b, and 2 more")
+
+  local_mocked_bindings(.unicode_enabled = function() TRUE)
+  expect_equal(.message_text("hi", ss, 5L), "\u2716 hi b, c, d")
+})
+
+test_that(".message_text() prefixes with a tick symbol when no issues are found", {
+  ss <- c(a = FALSE, b = FALSE)
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE)
+  expect_equal(.message_text("hi", ss), "v hi [no issues detected]")
+
+  local_mocked_bindings(.unicode_enabled = function() TRUE)
+  expect_equal(.message_text("hi", ss), "\u2714 hi [no issues detected]")
+})
+
+test_that(".symbol() falls back to ASCII when unicode is unavailable", {
+  local_mocked_bindings(.unicode_enabled = function() FALSE)
+  expect_equal(.symbol("tick"), "v")
+  expect_equal(.symbol("cross"), "x")
+})
+
+test_that(".symbol() returns unicode glyphs when unicode is available", {
+  local_mocked_bindings(.unicode_enabled = function() TRUE)
+  expect_equal(.symbol("tick"), "\u2714")
+  expect_equal(.symbol("cross"), "\u2716")
 })
 
 test_that(".get_xiny_status() returns expected integer status", {
