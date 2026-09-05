@@ -231,15 +231,15 @@ test_that("format.sessioncheck_sessionstate() defaults git to showing every fiel
   x <- sessionstate()
   txt <- format(x)
   expect_match(txt, "Git", fixed = TRUE)
-  expect_match(txt, "commit sha      abc123", fixed = TRUE)
-  expect_match(txt, "dirty           TRUE", fixed = TRUE)
+  expect_match(txt, "commit sha          abc123", fixed = TRUE)
+  expect_match(txt, "dirty               TRUE", fixed = TRUE)
 })
 
 test_that("format.sessioncheck_sessionstate() restricts git fields when requested", {
   local_mocked_bindings(.get_git_info = function() list(sha = "abc123", dirty = TRUE))
   x <- sessionstate()
   txt <- format(x, git = "sha")
-  expect_match(txt, "commit sha      abc123", fixed = TRUE)
+  expect_match(txt, "commit sha          abc123", fixed = TRUE)
   expect_no_match(txt, "dirty", fixed = TRUE)
 })
 
@@ -265,8 +265,8 @@ test_that("format.sessioncheck_sessionstate() reports placeholders when git info
   local_mocked_bindings(.get_git_info = function() list(sha = NA_character_, dirty = NA))
   x <- sessionstate()
   txt <- format(x)
-  expect_match(txt, "commit sha      \\(not a git repository\\)", fixed = FALSE)
-  expect_match(txt, "dirty           \\(unknown\\)", fixed = FALSE)
+  expect_match(txt, "commit sha          \\(not a git repository\\)", fixed = FALSE)
+  expect_match(txt, "dirty               \\(unknown\\)", fixed = FALSE)
 })
 
 test_that("format.sessioncheck_sessionstate() errors informatively on an unknown git field", {
@@ -279,17 +279,17 @@ test_that("format.sessioncheck_sessionstate() defaults rng to showing every fiel
   x <- sessionstate()
   txt <- format(x)
   expect_match(txt, "RNG state", fixed = TRUE)
-  expect_match(txt, "kind            Mersenne-Twister", fixed = TRUE)
-  expect_match(txt, "normal kind     Inversion", fixed = TRUE)
-  expect_match(txt, "sample kind     Rejection", fixed = TRUE)
-  expect_match(txt, "seed hash       ", fixed = TRUE)
+  expect_match(txt, "kind                Mersenne-Twister", fixed = TRUE)
+  expect_match(txt, "normal kind         Inversion", fixed = TRUE)
+  expect_match(txt, "sample kind         Rejection", fixed = TRUE)
+  expect_match(txt, "seed hash           ", fixed = TRUE)
 })
 
 test_that("format.sessioncheck_sessionstate() restricts rng fields when requested", {
   set.seed(2024)
   x <- sessionstate()
   txt <- format(x, rng = "kind")
-  expect_match(txt, "kind            Mersenne-Twister", fixed = TRUE)
+  expect_match(txt, "kind                Mersenne-Twister", fixed = TRUE)
   expect_no_match(txt, "seed hash", fixed = TRUE)
 })
 
@@ -317,7 +317,7 @@ test_that("format.sessioncheck_sessionstate() reports '(not set)' when seed_hash
   })
   x <- sessionstate()
   txt <- format(x)
-  expect_match(txt, "seed hash       \\(not set\\)", fixed = FALSE)
+  expect_match(txt, "seed hash           \\(not set\\)", fixed = FALSE)
 })
 
 test_that("format.sessioncheck_sessionstate() errors informatively on an unknown rng field", {
