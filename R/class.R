@@ -129,7 +129,9 @@ format.sessioncheck_status <- function(x, ...) {
 format.sessioncheck_sessioncheck <- function(x, ...) {
   msg <- vapply(x, format, "")
   if (length(msg) > 0L) {
-    msg <- paste("-", msg)
+    # no "- " list marker needed here: each element of msg already starts
+    # with a tick/cross symbol from .message_text(), which now serves that
+    # purpose
     msg <- paste(msg, collapse = "\n")
     msg <- paste("Session check results:", msg, sep = "\n")
   }

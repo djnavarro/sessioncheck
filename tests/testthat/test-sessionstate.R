@@ -32,9 +32,9 @@ test_that("format.sessioncheck_sessionstate() lists every library path", {
   local_mocked_bindings(.get_libpaths_info = function() c("/lib/one", "/lib/two"))
   x <- sessionstate()
   txt <- format(x)
-  expect_match(txt, "Library paths \\[n = 2\\]:", fixed = FALSE)
-  expect_match(txt, "1  /lib/one", fixed = TRUE)
-  expect_match(txt, "2  /lib/two", fixed = TRUE)
+  expect_match(txt, "Library paths \\[n = 2\\]", fixed = FALSE)
+  expect_match(txt, "/lib/one", fixed = TRUE)
+  expect_match(txt, "/lib/two", fixed = TRUE)
 })
 
 test_that(".get_rng_info() reports RNGkind() and a seed hash", {
@@ -145,9 +145,9 @@ test_that("format.sessioncheck_sessionstate() produces a single string with expe
   txt <- format(x)
   expect_type(txt, "character")
   expect_length(txt, 1L)
-  expect_match(txt, "Platform:", fixed = TRUE)
-  expect_match(txt, "Machine:", fixed = TRUE)
-  expect_match(txt, "Timing:", fixed = TRUE)
+  expect_match(txt, "Platform", fixed = TRUE)
+  expect_match(txt, "Machine", fixed = TRUE)
+  expect_match(txt, "Timing", fixed = TRUE)
   expect_match(txt, "Packages \\[n = ", fixed = FALSE)
 })
 
@@ -176,7 +176,7 @@ test_that("format.sessioncheck_sessionstate() defaults packages to the curated c
 test_that("format.sessioncheck_sessionstate() defaults platform/machine/timing to showing every field", {
   x <- sessionstate()
   txt <- format(x)
-  expect_match(txt, "Matrix products:", fixed = TRUE)
+  expect_match(txt, "Matrix products", fixed = TRUE)
   expect_match(txt, "hostname", fixed = TRUE)
   expect_match(txt, "captured at", fixed = TRUE)
   expect_match(txt, "working directory   ", fixed = TRUE)
@@ -230,7 +230,7 @@ test_that("format.sessioncheck_sessionstate() defaults git to showing every fiel
   local_mocked_bindings(.get_git_info = function() list(sha = "abc123", dirty = TRUE))
   x <- sessionstate()
   txt <- format(x)
-  expect_match(txt, "Git:", fixed = TRUE)
+  expect_match(txt, "Git", fixed = TRUE)
   expect_match(txt, "commit sha      abc123", fixed = TRUE)
   expect_match(txt, "dirty           TRUE", fixed = TRUE)
 })
@@ -278,7 +278,7 @@ test_that("format.sessioncheck_sessionstate() defaults rng to showing every fiel
   set.seed(2024)
   x <- sessionstate()
   txt <- format(x)
-  expect_match(txt, "RNG state:", fixed = TRUE)
+  expect_match(txt, "RNG state", fixed = TRUE)
   expect_match(txt, "kind            Mersenne-Twister", fixed = TRUE)
   expect_match(txt, "normal kind     Inversion", fixed = TRUE)
   expect_match(txt, "sample kind     Rejection", fixed = TRUE)
@@ -458,7 +458,7 @@ test_that("format.sessioncheck_sessionstate() orders globalenv rows by size rega
   x <- sessionstate()
   txt <- format(x, globalenv = "name")
   lines <- strsplit(txt, "\n")[[1]]
-  genv_start <- grep("^Global environment", lines)
+  genv_start <- grep("Global environment \\[n = ", lines)
   genv_lines <- trimws(lines[(genv_start + 2L):(genv_start + 4L)])
   expect_identical(genv_lines, c("big", "medium", "small"))
 })
@@ -507,7 +507,7 @@ test_that("format.sessioncheck_sessionstate() defaults attachments to every colu
   txt <- format(x)
   expect_match(txt, "Attached environments \\[n = ", fixed = FALSE)
   lines <- strsplit(txt, "\n")[[1]]
-  att_start <- grep("^Attached environments", lines)
+  att_start <- grep("Attached environments \\[n = ", lines)
   header_line <- lines[att_start + 1L]
   expect_match(header_line, "name", fixed = TRUE)
   expect_match(header_line, "type", fixed = TRUE)
@@ -518,7 +518,7 @@ test_that("format.sessioncheck_sessionstate() restricts attachments columns when
   x <- sessionstate()
   txt <- format(x, attachments = "name")
   lines <- strsplit(txt, "\n")[[1]]
-  att_start <- grep("^Attached environments", lines)
+  att_start <- grep("Attached environments \\[n = ", lines)
   header_line <- lines[att_start + 1L]
   expect_no_match(header_line, "type", fixed = TRUE)
 })
@@ -529,7 +529,7 @@ test_that("format.sessioncheck_sessionstate() honors sessionstate_attachments se
   x <- sessionstate()
   txt <- format(x)
   lines <- strsplit(txt, "\n")[[1]]
-  att_start <- grep("^Attached environments", lines)
+  att_start <- grep("Attached environments \\[n = ", lines)
   header_line <- lines[att_start + 1L]
   expect_no_match(header_line, "type", fixed = TRUE)
 })
@@ -558,7 +558,7 @@ test_that("format.sessioncheck_sessionstate() honors sessionstate_packages set v
   # always contains the word "attached", so restrict the check to the
   # table itself, below the heading line
   lines <- strsplit(txt, "\n")[[1]]
-  table_txt <- paste(lines[-seq_len(grep("^Packages", lines))], collapse = "\n")
+  table_txt <- paste(lines[-seq_len(grep("Packages \\[n = ", lines))], collapse = "\n")
   expect_no_match(table_txt, "attached", fixed = TRUE)
   expect_no_match(table_txt, "loaded_version", fixed = TRUE)
 })
@@ -574,7 +574,7 @@ test_that("an explicit packages argument overrides options(sessioncheck = ...)",
   # library path under macOS's .../Resources/library), which isn't the
   # "source" column this test is guarding against
   lines <- strsplit(txt, "\n")[[1]]
-  table_txt <- paste(lines[-seq_len(grep("^Packages", lines))], collapse = "\n")
+  table_txt <- paste(lines[-seq_len(grep("Packages \\[n = ", lines))], collapse = "\n")
   expect_no_match(table_txt, "source", fixed = TRUE)
 })
 

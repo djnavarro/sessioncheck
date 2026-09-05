@@ -59,87 +59,87 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   r <- x$rng
 
   platform_all <- c(
-    version = sprintf(" version         %s", p$version),
-    os      = sprintf(" os              %s", p$os),
-    system  = sprintf(" system          %s", p$system),
-    ui      = sprintf(" ui              %s", p$ui),
-    tz      = sprintf(" tz              %s", p$tz),
-    date    = sprintf(" date            %s", p$date)
+    version = .bullet_line(sprintf("%-16s%s", "version", p$version)),
+    os      = .bullet_line(sprintf("%-16s%s", "os", p$os)),
+    system  = .bullet_line(sprintf("%-16s%s", "system", p$system)),
+    ui      = .bullet_line(sprintf("%-16s%s", "ui", p$ui)),
+    tz      = .bullet_line(sprintf("%-16s%s", "tz", p$tz)),
+    date    = .bullet_line(sprintf("%-16s%s", "date", p$date))
   )
   platform <- .resolve_field_selection(platform, "sessionstate_platform", NULL)
   platform_fields <- .select_fields(names(platform_all), platform, "platform")
-  platform_lines <- c("Platform:", platform_all[platform_fields])
+  platform_lines <- c(.rule("Platform"), platform_all[platform_fields])
 
   locale_all <- c(
-    language = sprintf(" language        %s", if (is.na(loc$language)) "(unset)" else loc$language),
-    collate  = sprintf(" collate         %s", if (is.na(loc$collate)) "(unknown)" else loc$collate),
-    ctype    = sprintf(" ctype           %s", if (is.na(loc$ctype)) "(unknown)" else loc$ctype)
+    language = .bullet_line(sprintf("%-16s%s", "language", if (is.na(loc$language)) "(unset)" else loc$language)),
+    collate  = .bullet_line(sprintf("%-16s%s", "collate", if (is.na(loc$collate)) "(unknown)" else loc$collate)),
+    ctype    = .bullet_line(sprintf("%-16s%s", "ctype", if (is.na(loc$ctype)) "(unknown)" else loc$ctype))
   )
   locale <- .resolve_field_selection(locale, "sessionstate_locale", NULL)
   locale_fields <- .select_fields(names(locale_all), locale, "locale")
-  locale_lines <- c("Locale:", locale_all[locale_fields])
+  locale_lines <- c(.rule("Locale"), locale_all[locale_fields])
 
   matrix_all <- c(
-    blas   = sprintf(" %-16s%s", "BLAS", mx$blas),
-    lapack = sprintf(" %-16s%s", "LAPACK", mx$lapack)
+    blas   = .bullet_line(sprintf("%-16s%s", "BLAS", mx$blas)),
+    lapack = .bullet_line(sprintf("%-16s%s", "LAPACK", mx$lapack))
   )
   matrix <- .resolve_field_selection(matrix, "sessionstate_matrix", NULL)
   matrix_fields <- .select_fields(names(matrix_all), matrix, "matrix")
-  matrix_lines <- c("Matrix products:", matrix_all[matrix_fields])
+  matrix_lines <- c(.rule("Matrix products"), matrix_all[matrix_fields])
 
   document_all <- c(
-    pandoc = sprintf(" %-16s%s", "pandoc", if (is.na(doc$pandoc)) "(not found)" else doc$pandoc),
-    quarto = sprintf(" %-16s%s", "quarto", if (is.na(doc$quarto)) "(not found)" else doc$quarto)
+    pandoc = .bullet_line(sprintf("%-16s%s", "pandoc", if (is.na(doc$pandoc)) "(not found)" else doc$pandoc)),
+    quarto = .bullet_line(sprintf("%-16s%s", "quarto", if (is.na(doc$quarto)) "(not found)" else doc$quarto))
   )
   document <- .resolve_field_selection(document, "sessionstate_document", NULL)
   document_fields <- .select_fields(names(document_all), document, "document")
-  document_lines <- c("Document products:", document_all[document_fields])
+  document_lines <- c(.rule("Document products"), document_all[document_fields])
 
   machine_all <- c(
     # "hostname" and "working directory" are used as the display labels
     # here (rather than the "nodename"/"cwd" field names) since they're
     # the more widely understood terms; the underlying field names are
     # unchanged and still what `machine = ` selects by
-    nodename = sprintf(" %-20s%s", "hostname", m$nodename),
-    user     = sprintf(" %-20s%s", "user", m$user),
-    cwd      = sprintf(" %-20s%s", "working directory", m$cwd)
+    nodename = .bullet_line(sprintf("%-20s%s", "hostname", m$nodename)),
+    user     = .bullet_line(sprintf("%-20s%s", "user", m$user)),
+    cwd      = .bullet_line(sprintf("%-20s%s", "working directory", m$cwd))
   )
   machine <- .resolve_field_selection(machine, "sessionstate_machine", NULL)
   machine_fields <- .select_fields(names(machine_all), machine, "machine")
-  machine_lines <- c("Machine:", machine_all[machine_fields])
+  machine_lines <- c(.rule("Machine"), machine_all[machine_fields])
 
   git_all <- c(
     # "commit sha" (rather than the bare "sha") to match the descriptive
     # style used elsewhere (e.g. "seed hash" under RNG state)
-    sha   = sprintf(" %-16s%s", "commit sha", if (is.na(g$sha)) "(not a git repository)" else g$sha),
-    dirty = sprintf(" %-16s%s", "dirty", if (is.na(g$dirty)) "(unknown)" else g$dirty)
+    sha   = .bullet_line(sprintf("%-16s%s", "commit sha", if (is.na(g$sha)) "(not a git repository)" else g$sha)),
+    dirty = .bullet_line(sprintf("%-16s%s", "dirty", if (is.na(g$dirty)) "(unknown)" else g$dirty))
   )
   git <- .resolve_field_selection(git, "sessionstate_git", NULL)
   git_fields <- .select_fields(names(git_all), git, "git")
-  git_lines <- c("Git:", git_all[git_fields])
+  git_lines <- c(.rule("Git"), git_all[git_fields])
 
   timing_all <- c(
-    captured_at = sprintf(" captured at              %s", format(t$captured_at, usetz = TRUE)),
-    elapsed_sec = sprintf(" session runtime (sec)    %s", t$elapsed_sec)
+    captured_at = .bullet_line(sprintf("%-25s%s", "captured at", format(t$captured_at, usetz = TRUE))),
+    elapsed_sec = .bullet_line(sprintf("%-25s%s", "session runtime (sec)", t$elapsed_sec))
   )
   timing <- .resolve_field_selection(timing, "sessionstate_timing", NULL)
   timing_fields <- .select_fields(names(timing_all), timing, "timing")
-  timing_lines <- c("Timing:", timing_all[timing_fields])
+  timing_lines <- c(.rule("Timing"), timing_all[timing_fields])
 
   rng_all <- c(
-    kind        = sprintf(" kind            %s", r$kind),
-    normal_kind = sprintf(" normal kind     %s", r$normal_kind),
-    sample_kind = sprintf(" sample kind     %s", r$sample_kind),
-    seed_hash   = sprintf(" seed hash       %s", if (is.na(r$seed_hash)) "(not set)" else r$seed_hash)
+    kind        = .bullet_line(sprintf("%-16s%s", "kind", r$kind)),
+    normal_kind = .bullet_line(sprintf("%-16s%s", "normal kind", r$normal_kind)),
+    sample_kind = .bullet_line(sprintf("%-16s%s", "sample kind", r$sample_kind)),
+    seed_hash   = .bullet_line(sprintf("%-16s%s", "seed hash", if (is.na(r$seed_hash)) "(not set)" else r$seed_hash))
   )
   rng <- .resolve_field_selection(rng, "sessionstate_rng", NULL)
   rng_fields <- .select_fields(names(rng_all), rng, "rng")
-  rng_lines <- c("RNG state:", rng_all[rng_fields])
+  rng_lines <- c(.rule("RNG state"), rng_all[rng_fields])
 
   libpaths <- x$libpaths
   libpaths_lines <- c(
-    sprintf("Library paths [n = %d]:", length(libpaths)),
-    paste0(" ", seq_along(libpaths), "  ", libpaths)
+    .rule(sprintf("Library paths [n = %d]", length(libpaths))),
+    .bullet_line(libpaths)
   )
 
   pkg_df <- x$packages
@@ -151,7 +151,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   pkg_df <- pkg_df[, pkg_cols, drop = FALSE]
   if ("attached" %in% names(pkg_df)) pkg_df$attached <- ifelse(pkg_df$attached, "*", " ")
   pkg_lines <- c(
-    sprintf("Packages [n = %d] (attached + loaded via namespace):", nrow(pkg_df)),
+    .rule(sprintf("Packages [n = %d] (attached + loaded via namespace)", nrow(pkg_df))),
     utils::capture.output(print(pkg_df, row.names = FALSE))
   )
 
@@ -170,7 +170,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   genv_df <- genv_df[seq_len(n_shown), , drop = FALSE]
   if ("size" %in% names(genv_df)) genv_df$size <- .format_object_size(genv_df$size)
   genv_lines <- c(
-    sprintf("Global environment [n = %d]:", n_total),
+    .rule(sprintf("Global environment [n = %d]", n_total)),
     utils::capture.output(print(genv_df, row.names = FALSE))
   )
   if (n_shown < n_total) {
@@ -182,7 +182,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   att_cols <- .select_fields(names(att_df), attachments, "attachments")
   att_df <- att_df[, att_cols, drop = FALSE]
   att_lines <- c(
-    sprintf("Attached environments [n = %d]:", nrow(att_df)),
+    .rule(sprintf("Attached environments [n = %d]", nrow(att_df))),
     utils::capture.output(print(att_df, row.names = FALSE))
   )
 
