@@ -47,8 +47,14 @@
 
 # sessionstate helpers ------
 
+# thin wrapper around utils::osVersion for the same reason as
+# .get_platform_gui() and .is_interactive() below: keeps a base R value
+# that isn't always present (older R versions lack osVersion entirely)
+# mockable in tests without needing to fake the OS itself
+.get_os_version <- function() tryCatch(utils::osVersion, error = function(e) NA_character_)
+
 .get_platform_info <- function() {
-  os <- tryCatch(utils::osVersion, error = function(e) NA_character_)
+  os <- .get_os_version()
   if (is.null(os) || is.na(os) || !nzchar(os)) {
     os <- paste(Sys.info()[["sysname"]], Sys.info()[["release"]])
   }

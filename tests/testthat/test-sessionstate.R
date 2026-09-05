@@ -733,6 +733,16 @@ test_that(".get_ui() falls back to 'unknown' when .Platform$GUI is empty", {
   expect_identical(.get_ui(), "unknown")
 })
 
+test_that(".get_platform_gui() returns .Platform$GUI", {
+  expect_identical(.get_platform_gui(), .Platform$GUI)
+})
+
+test_that(".get_platform_info() falls back to Sys.info() when osVersion is unavailable", {
+  local_mocked_bindings(.get_os_version = function() NA_character_)
+  info <- .get_platform_info()
+  expect_identical(info$os, paste(Sys.info()[["sysname"]], Sys.info()[["release"]]))
+})
+
 test_that(".get_loaded_version() returns NA for a namespace that isn't loaded", {
   local_mocked_bindings(isNamespaceLoaded = function(pkg) FALSE, .package = "base")
   expect_identical(.get_loaded_version("somepkg"), NA_character_)
@@ -878,6 +888,23 @@ test_that(".get_package_inventory() flags removed_from_disk when the namespace i
   df <- .get_package_inventory()
   expect_true(all(df$removed_from_disk))
   expect_false(any(df$path_mismatch))
+})
+
+test_that(".get_built_rversion() falls back to the current R version when Built is missing or unparseable", {
+  expect_identical(.get_built_rversion(list()), paste(getRversion()))
+  expect_identical(.get_built_rversion(list(Built = "not a version string")), paste(getRversion()))
+})
+
+test_that(".get_remote_ref() falls back to RemoteRef when RemoteSha is absent", {
+  expect_identical(.get_remote_ref(list(RemoteRef = "main")), "main")
+})
+
+test_that(".get_remote_ref() falls back to 'unknown' when neither RemoteSha nor RemoteRef is set", {
+  expect_identical(.get_remote_ref(list()), "unknown")
+})
+
+test_that(".get_package_source() returns 'unknown' for a package with no DESCRIPTION metadata", {
+  expect_identical(suppressWarnings(.get_package_source("zzz_not_an_installed_package_zzz")), "unknown")
 })
 
 test_that(".get_package_source() classifies base packages", {
