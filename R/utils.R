@@ -149,6 +149,30 @@
   )
 }
 
+.get_git_info <- function() {
+  sha <- .run_git_command(c("rev-parse", "HEAD"))
+  if (is.na(sha)) return(list(sha = NA_character_, dirty = NA))
+  status <- .run_git_command(c("status", "--porcelain"))
+  list(sha = sha, dirty = if (is.na(status)) NA else nzchar(status))
+}
+
+# runs a git subcommand against the current working directory (i.e. getwd(),
+# matching the machine$cwd captured elsewhere), returning NA_character_ when
+# git isn't installed, or the current directory isn't inside a git
+# repository, rather than erroring -- most sessions won't be in a git repo,
+# and that's an ordinary, non-exceptional outcome for an audit function
+.run_git_command <- function(args) {
+  out <- tryCatch(
+    suppressWarnings(system2("git", args, stdout = TRUE, stderr = FALSE)),
+    error = function(e) NULL
+  )
+  if (is.null(out)) return(NA_character_)
+  status <- attr(out, "status")
+  if (!is.null(status) && status != 0L) return(NA_character_)
+  if (length(out) == 0L) return("")
+  paste(out, collapse = "\n")
+}
+
 .get_rng_info <- function() {
   kind <- RNGkind()
   list(

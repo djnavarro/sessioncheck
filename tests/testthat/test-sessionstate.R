@@ -1,11 +1,12 @@
 test_that("sessionstate() returns a well-formed sessioncheck_sessionstate object", {
   x <- sessionstate()
   expect_s3_class(x, "sessioncheck_sessionstate")
-  expect_named(x, c("platform", "machine", "timing", "rng", "packages", "globalenv", "attachments"))
+  expect_named(x, c("platform", "machine", "git", "timing", "rng", "packages", "globalenv", "attachments"))
   expect_true(is.list(x$platform))
   expect_true(is.list(x$machine))
   expect_true(is.list(x$timing))
   expect_true(is.list(x$rng))
+  expect_true(is.list(x$git))
   expect_identical(x$machine$cwd, getwd())
   expect_s3_class(x$packages, "data.frame")
   expect_s3_class(x$globalenv, "data.frame")
@@ -138,6 +139,92 @@ test_that("format.sessioncheck_sessionstate() restricts machine fields to exclud
   x <- sessionstate()
   txt <- format(x, machine = "nodename")
   expect_no_match(txt, "cwd", fixed = TRUE)
+})
+
+test_that(".run_git_command() returns NA when git errors or exits non-zero", {
+  local_mocked_bindings(system2 = function(...) stop("git not found"), .package = "base")
+  expect_identical(.run_git_command(c("rev-parse", "HEAD")), NA_character_)
+
+  local_mocked_bindings(
+    system2 = function(...) structure(character(0), status = 128L),
+    .package = "base"
+  )
+  expect_identical(.run_git_command(c("rev-parse", "HEAD")), NA_character_)
+})
+
+test_that(".run_git_command() returns the joined output on success", {
+  local_mocked_bindings(system2 = function(...) c("line1", "line2"), .package = "base")
+  expect_identical(.run_git_command("status"), "line1\nline2")
+})
+
+test_that(".run_git_command() returns an empty string for empty output", {
+  local_mocked_bindings(system2 = function(...) character(0), .package = "base")
+  expect_identical(.run_git_command("status"), "")
+})
+
+test_that(".get_git_info() reports NA sha/dirty when not in a git repository", {
+  local_mocked_bindings(.run_git_command = function(args) NA_character_)
+  expect_identical(.get_git_info(), list(sha = NA_character_, dirty = NA))
+})
+
+test_that(".get_git_info() reports sha and dirty when in a git repository", {
+  local_mocked_bindings(.run_git_command = function(args) {
+    if (identical(args, c("rev-parse", "HEAD"))) "abc123" else ""
+  })
+  expect_identical(.get_git_info(), list(sha = "abc123", dirty = FALSE))
+
+  local_mocked_bindings(.run_git_command = function(args) {
+    if (identical(args, c("rev-parse", "HEAD"))) "abc123" else " M file.R"
+  })
+  expect_identical(.get_git_info(), list(sha = "abc123", dirty = TRUE))
+})
+
+test_that("format.sessioncheck_sessionstate() defaults git to showing every field", {
+  local_mocked_bindings(.get_git_info = function() list(sha = "abc123", dirty = TRUE))
+  x <- sessionstate()
+  txt <- format(x)
+  expect_match(txt, "Git:", fixed = TRUE)
+  expect_match(txt, "sha             abc123", fixed = TRUE)
+  expect_match(txt, "dirty           TRUE", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() restricts git fields when requested", {
+  local_mocked_bindings(.get_git_info = function() list(sha = "abc123", dirty = TRUE))
+  x <- sessionstate()
+  txt <- format(x, git = "sha")
+  expect_match(txt, "sha             abc123", fixed = TRUE)
+  expect_no_match(txt, "dirty", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() honors sessionstate_git set via options(sessioncheck = ...)", {
+  local_mocked_bindings(.get_git_info = function() list(sha = "abc123", dirty = TRUE))
+  old <- options(sessioncheck = list(sessionstate_git = "sha"))
+  on.exit(options(old), add = TRUE)
+  x <- sessionstate()
+  txt <- format(x)
+  expect_no_match(txt, "dirty", fixed = TRUE)
+})
+
+test_that("an explicit git argument overrides options(sessioncheck = ...)", {
+  local_mocked_bindings(.get_git_info = function() list(sha = "abc123", dirty = TRUE))
+  old <- options(sessioncheck = list(sessionstate_git = "sha"))
+  on.exit(options(old), add = TRUE)
+  x <- sessionstate()
+  txt <- format(x, git = c("sha", "dirty"))
+  expect_match(txt, "dirty", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() reports placeholders when git info is NA", {
+  local_mocked_bindings(.get_git_info = function() list(sha = NA_character_, dirty = NA))
+  x <- sessionstate()
+  txt <- format(x)
+  expect_match(txt, "sha             \\(not a git repository\\)", fixed = FALSE)
+  expect_match(txt, "dirty           \\(unknown\\)", fixed = FALSE)
+})
+
+test_that("format.sessioncheck_sessionstate() errors informatively on an unknown git field", {
+  x <- sessionstate()
+  expect_error(format(x, git = "bogus"), "Unknown git field")
 })
 
 test_that("format.sessioncheck_sessionstate() defaults rng to showing every field", {
@@ -509,6 +596,7 @@ test_that("format.sessioncheck_sessionstate() errors informatively on an unknown
   x <- sessionstate()
   expect_error(format(x, platform = "bogus"), "Unknown platform field")
   expect_error(format(x, machine = "bogus"), "Unknown machine field")
+  expect_error(format(x, git = "bogus"), "Unknown git field")
   expect_error(format(x, timing = "bogus"), "Unknown timing field")
   expect_error(format(x, rng = "bogus"), "Unknown rng field")
   expect_error(format(x, packages = "bogus"), "Unknown packages field")
@@ -519,7 +607,7 @@ test_that("format.sessioncheck_sessionstate() defaults to showing every field wh
   expect_identical(
     format(x),
     format(
-      x, platform = NULL, machine = NULL, timing = NULL, rng = NULL, packages = NULL,
+      x, platform = NULL, machine = NULL, git = NULL, timing = NULL, rng = NULL, packages = NULL,
       globalenv = NULL, globalenv_n = NULL, attachments = NULL
     )
   )
@@ -528,11 +616,17 @@ test_that("format.sessioncheck_sessionstate() defaults to showing every field wh
 test_that("print.sessioncheck_sessionstate() forwards field-selection arguments to format()", {
   x <- sessionstate()
   out <- capture.output(
-    print(x, platform = "version", machine = "user", timing = "elapsed_sec", rng = "kind", packages = "package")
+    print(
+      x, platform = "version", machine = "user", git = "sha", timing = "elapsed_sec", rng = "kind",
+      packages = "package"
+    )
   )
   expect_equal(
     trimws(paste(out, collapse = "\n")),
-    trimws(format(x, platform = "version", machine = "user", timing = "elapsed_sec", rng = "kind", packages = "package"))
+    trimws(format(
+      x, platform = "version", machine = "user", git = "sha", timing = "elapsed_sec", rng = "kind",
+      packages = "package"
+    ))
   )
 })
 

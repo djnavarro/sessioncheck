@@ -13,8 +13,8 @@
 #' produce an audit log of the environment the script actually ran in.
 #'
 #' @returns An object of class `sessioncheck_sessionstate`, a list with
-#' elements `platform`, `machine`, `timing`, `rng`, `packages`, `globalenv`,
-#' and `attachments`.
+#' elements `platform`, `machine`, `git`, `timing`, `rng`, `packages`,
+#' `globalenv`, and `attachments`.
 #'
 #' @details
 #' The `machine` element includes the node name and user reported by
@@ -26,6 +26,16 @@
 #' stored or shared. The same caution applies to the `ondisk_path`/
 #' `loaded_path` columns of `packages`, since library paths often embed a
 #' home directory.
+#'
+#' The `git` element records `sha`, the current commit
+#' (`git rev-parse HEAD`, run in the working directory captured as
+#' `machine$cwd`), and `dirty`, whether the working tree has uncommitted
+#' changes (`git status --porcelain` is non-empty). Both are `NA` if the
+#' working directory isn't inside a git repository, or if `git` itself
+#' isn't installed. This is arguably the single most useful field for
+#' reproducing a script's output later: `sha` identifies exactly which
+#' version of the code ran, and `dirty` flags whether that identification is
+#' trustworthy (a `TRUE` means the code that ran may not match any commit).
 #'
 #' The `rng` element records [RNGkind()] (as `kind`, `normal_kind`, and
 #' `sample_kind`) together with `seed_hash`, an MD5 fingerprint of
@@ -84,8 +94,9 @@
 #'
 #' `sessionstate()` itself always captures every field in full (`globalenv`
 #' is never truncated at capture time). To display only a subset when
-#' printing, pass `platform`/`machine`/`timing`/`rng`/`packages`/`globalenv`/
-#' `attachments` arguments to `print()` or `format()` on the result, or set
+#' printing, pass `platform`/`machine`/`git`/`timing`/`rng`/`packages`/
+#' `globalenv`/`attachments` arguments to `print()` or `format()` on the
+#' result, or set
 #' defaults via `options(sessioncheck = list(sessionstate_packages = ...))`
 #' (see [display_methods] for the full precedence rules and option names).
 #' The `globalenv_n` argument separately controls how many rows of
@@ -104,6 +115,7 @@ sessionstate <- function() {
   new_sessionstate(
     platform    = .get_platform_info(),
     machine     = .get_machine_info(),
+    git         = .get_git_info(),
     timing      = .get_timing_info(),
     rng         = .get_rng_info(),
     packages    = .get_package_inventory(),

@@ -14,11 +14,11 @@ new_sessioncheck <- function(...) {
   structure(list(...), class = "sessioncheck_sessioncheck")
 }
 
-new_sessionstate <- function(platform, machine, timing, rng, packages, globalenv, attachments) {
+new_sessionstate <- function(platform, machine, git, timing, rng, packages, globalenv, attachments) {
   structure(
     list(
-      platform = platform, machine = machine, timing = timing, rng = rng, packages = packages,
-      globalenv = globalenv, attachments = attachments
+      platform = platform, machine = machine, git = git, timing = timing, rng = rng,
+      packages = packages, globalenv = globalenv, attachments = attachments
     ),
     class = "sessioncheck_sessionstate"
   )
@@ -41,6 +41,10 @@ new_sessionstate <- function(platform, machine, timing, rng, packages, globalenv
 #' vector selecting which machine fields to display (from `"nodename"`,
 #' `"user"`, `"cwd"`). Defaults to showing all fields. Ignored for other
 #' classes. See Details for how the default is resolved.
+#' @param git For `sessioncheck_sessionstate` objects, an optional character
+#' vector selecting which git fields to display (from `"sha"`, `"dirty"`).
+#' Defaults to showing all fields. Ignored for other classes. See Details for
+#' how the default is resolved.
 #' @param timing For `sessioncheck_sessionstate` objects, an optional character
 #' vector selecting which timing fields to display (from `"captured_at"`,
 #' `"elapsed_sec"`). Defaults to showing all fields. Ignored for other classes.
@@ -73,14 +77,15 @@ new_sessionstate <- function(platform, machine, timing, rng, packages, globalenv
 #' @returns Character vector
 #'
 #' @details
-#' For `sessioncheck_sessionstate` objects, the `platform`/`machine`/`timing`/
-#' `rng`/`packages`/`globalenv`/`globalenv_n`/`attachments` arguments are
-#' resolved through the same precedence used elsewhere in the package: an
-#' explicit argument always wins; otherwise, `getOption("sessioncheck")` is
-#' checked for a `sessionstate_platform`, `sessionstate_machine`,
-#' `sessionstate_timing`, `sessionstate_rng`, `sessionstate_packages`,
-#' `sessionstate_globalenv`, `sessionstate_globalenv_n`, or
-#' `sessionstate_attachments` field (respectively); if neither is set, a
+#' For `sessioncheck_sessionstate` objects, the `platform`/`machine`/`git`/
+#' `timing`/`rng`/`packages`/`globalenv`/`globalenv_n`/`attachments`
+#' arguments are resolved through the same precedence used elsewhere in the
+#' package: an explicit argument always wins; otherwise,
+#' `getOption("sessioncheck")` is checked for a `sessionstate_platform`,
+#' `sessionstate_machine`, `sessionstate_git`, `sessionstate_timing`,
+#' `sessionstate_rng`, `sessionstate_packages`, `sessionstate_globalenv`,
+#' `sessionstate_globalenv_n`, or `sessionstate_attachments` field
+#' (respectively); if neither is set, a
 #' built-in default is used (showing every field/column, except for
 #' `packages`, which defaults to
 #' `c("package", "attached", "loaded_version", "source")`, and
@@ -120,9 +125,10 @@ format.sessioncheck_sessioncheck <- function(x, ...) {
 
 #' @rdname display_methods
 #' @exportS3Method base::format
-format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, timing = NULL, rng = NULL, packages = NULL, globalenv = NULL, globalenv_n = NULL, attachments = NULL, ...) {
+format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, git = NULL, timing = NULL, rng = NULL, packages = NULL, globalenv = NULL, globalenv_n = NULL, attachments = NULL, ...) {
   p <- x$platform
   m <- x$machine
+  g <- x$git
   t <- x$timing
   r <- x$rng
 
@@ -165,6 +171,14 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL,
   machine <- .resolve_field_selection(machine, "sessionstate_machine", NULL)
   machine_fields <- .select_fields(names(machine_all), machine, "machine")
   machine_lines <- c("Machine:", machine_all[machine_fields])
+
+  git_all <- c(
+    sha   = sprintf(" sha             %s", if (is.na(g$sha)) "(not a git repository)" else g$sha),
+    dirty = sprintf(" dirty           %s", if (is.na(g$dirty)) "(unknown)" else g$dirty)
+  )
+  git <- .resolve_field_selection(git, "sessionstate_git", NULL)
+  git_fields <- .select_fields(names(git_all), git, "git")
+  git_lines <- c("Git:", git_all[git_fields])
 
   timing_all <- c(
     captured_at = sprintf(" captured at              %s", format(t$captured_at, usetz = TRUE)),
@@ -230,7 +244,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL,
 
   paste(
     c(
-      platform_lines, "", machine_lines, "", timing_lines, "", rng_lines, "",
+      platform_lines, "", machine_lines, "", git_lines, "", timing_lines, "", rng_lines, "",
       pkg_lines, "", genv_lines, "", att_lines
     ),
     collapse = "\n"
@@ -253,11 +267,11 @@ print.sessioncheck_sessioncheck <- function(x, ...) {
 
 #' @rdname display_methods
 #' @exportS3Method base::print
-print.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, timing = NULL, rng = NULL, packages = NULL, globalenv = NULL, globalenv_n = NULL, attachments = NULL, ...) {
+print.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, git = NULL, timing = NULL, rng = NULL, packages = NULL, globalenv = NULL, globalenv_n = NULL, attachments = NULL, ...) {
   cat(
     format(
-      x, platform = platform, machine = machine, timing = timing, rng = rng, packages = packages,
-      globalenv = globalenv, globalenv_n = globalenv_n, attachments = attachments, ...
+      x, platform = platform, machine = machine, git = git, timing = timing, rng = rng,
+      packages = packages, globalenv = globalenv, globalenv_n = globalenv_n, attachments = attachments, ...
     ),
     "\n"
   )

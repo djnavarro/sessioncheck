@@ -8,8 +8,8 @@ sessionstate()
 }
 \value{
 An object of class \code{sessioncheck_sessionstate}, a list with
-elements \code{platform}, \code{machine}, \code{timing}, \code{rng}, \code{packages}, \code{globalenv},
-and \code{attachments}.
+elements \code{platform}, \code{machine}, \code{git}, \code{timing}, \code{rng}, \code{packages},
+\code{globalenv}, and \code{attachments}.
 }
 \description{
 \code{sessionstate()} captures a point-in-time, human-readable snapshot of the R
@@ -32,6 +32,16 @@ directory structure, be mindful about where \code{sessionstate()} output is
 stored or shared. The same caution applies to the \code{ondisk_path}/
 \code{loaded_path} columns of \code{packages}, since library paths often embed a
 home directory.
+
+The \code{git} element records \code{sha}, the current commit
+(\verb{git rev-parse HEAD}, run in the working directory captured as
+\code{machine$cwd}), and \code{dirty}, whether the working tree has uncommitted
+changes (\verb{git status --porcelain} is non-empty). Both are \code{NA} if the
+working directory isn't inside a git repository, or if \code{git} itself
+isn't installed. This is arguably the single most useful field for
+reproducing a script's output later: \code{sha} identifies exactly which
+version of the code ran, and \code{dirty} flags whether that identification is
+trustworthy (a \code{TRUE} means the code that ran may not match any commit).
 
 The \code{rng} element records \code{\link[=RNGkind]{RNGkind()}} (as \code{kind}, \code{normal_kind}, and
 \code{sample_kind}) together with \code{seed_hash}, an MD5 fingerprint of
@@ -89,8 +99,9 @@ reflected in \code{packages}.
 
 \code{sessionstate()} itself always captures every field in full (\code{globalenv}
 is never truncated at capture time). To display only a subset when
-printing, pass \code{platform}/\code{machine}/\code{timing}/\code{rng}/\code{packages}/\code{globalenv}/
-\code{attachments} arguments to \code{print()} or \code{format()} on the result, or set
+printing, pass \code{platform}/\code{machine}/\code{git}/\code{timing}/\code{rng}/\code{packages}/
+\code{globalenv}/\code{attachments} arguments to \code{print()} or \code{format()} on the
+result, or set
 defaults via \code{options(sessioncheck = list(sessionstate_packages = ...))}
 (see \link{display_methods} for the full precedence rules and option names).
 The \code{globalenv_n} argument separately controls how many rows of
