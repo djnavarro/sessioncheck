@@ -248,12 +248,12 @@ print(session_state, packages = "package", globalenv = "class", machine = charac
 #> Machine:
 #> 
 #> Git:
-#>  commit sha      5de598a6be590aee80f9473278cf199f1fea63bc
+#>  commit sha      8d29f8d1649f6f1834759674fec10d3e69155ceb
 #>  dirty           FALSE
 #> 
 #> Timing:
-#>  captured at              2026-09-05 11:24:57 UTC
-#>  session runtime (sec)    0.818
+#>  captured at              2026-09-05 11:32:03 UTC
+#>  session runtime (sec)    0.84
 #> 
 #> RNG state:
 #>  kind            Mersenne-Twister
