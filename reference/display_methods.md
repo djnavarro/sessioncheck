@@ -11,6 +11,12 @@ format(x, ...)
 # S3 method for class 'sessioncheck_sessioncheck'
 format(x, ...)
 
+# S3 method for class 'sessioncheck_status'
+print(x, ...)
+
+# S3 method for class 'sessioncheck_sessioncheck'
+print(x, ...)
+
 # S3 method for class 'sessioncheck_sessionstate'
 format(
   x,
@@ -28,12 +34,6 @@ format(
   attachments = NULL,
   ...
 )
-
-# S3 method for class 'sessioncheck_status'
-print(x, ...)
-
-# S3 method for class 'sessioncheck_sessioncheck'
-print(x, ...)
 
 # S3 method for class 'sessioncheck_sessionstate'
 print(

@@ -172,12 +172,12 @@ sessionstate()
 #>  working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles
 #> 
 #> Git:
-#>  commit sha      8d29f8d1649f6f1834759674fec10d3e69155ceb
+#>  commit sha      d189028879a88b309e82625b5be80018f7e2f16c
 #>  dirty           FALSE
 #> 
 #> Timing:
-#>  captured at              2026-09-05 11:32:08 UTC
-#>  session runtime (sec)    1.007
+#>  captured at              2026-09-05 11:58:43 UTC
+#>  session runtime (sec)    1.023
 #> 
 #> RNG state:
 #>  kind            Mersenne-Twister
@@ -415,12 +415,12 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> Machine:
 #> 
 #> Git:
-#>  commit sha      8d29f8d1649f6f1834759674fec10d3e69155ceb
+#>  commit sha      d189028879a88b309e82625b5be80018f7e2f16c
 #>  dirty           FALSE
 #> 
 #> Timing:
-#>  captured at              2026-09-05 11:32:08 UTC
-#>  session runtime (sec)    1.123
+#>  captured at              2026-09-05 11:58:44 UTC
+#>  session runtime (sec)    1.142
 #> 
 #> RNG state:
 #>  kind            Mersenne-Twister
