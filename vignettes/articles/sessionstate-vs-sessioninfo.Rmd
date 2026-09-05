@@ -1,0 +1,91 @@
+---
+title: "sessionstate() versus sessionInfo() and session_info()"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(sessioncheck)
+```
+
+Base R already ships a tool for reporting on the state of a session, [`utils::sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html), and the [**sessioninfo**](https://sessioninfo.r-lib.org/) package offers a more detailed replacement, `sessioninfo::session_info()`. **sessioncheck** adds a third option, `sessionstate()`. This article explains how `sessionstate()` relates to the other two, what it adds, and -- because it adds quite a lot -- what you give up in return, namely some privacy.
+
+## Two different jobs
+
+`sessioncheck()` and `sessionstate()` are companions, but they solve different problems:
+
+- `sessioncheck()` is typically called at the *start* of a script. It looks for signs that the session isn't "clean" and, depending on `action`, warns or errors before the rest of the script runs.
+- `sessionstate()` is typically called at the *end* of a script (or embedded in a rendered report). It doesn't judge anything; it just records what the session actually looked like, so that if something goes wrong later, there's a record to consult.
+
+`utils::sessionInfo()` and `sessioninfo::session_info()` serve the same "record what happened" purpose as `sessionstate()`. All three are audit tools, not gatekeeping tools, and none of them will stop a script from running.
+
+## A side-by-side look
+
+Here's what each of the three produces in the same session:
+
+```{r}
+utils::sessionInfo()
+```
+
+```{r}
+sessioninfo::session_info()
+```
+
+```{r}
+sessionstate()
+```
+
+The three outputs overlap heavily -- R version, platform, locale, BLAS/LAPACK, attached and loaded packages -- but `sessionstate()` goes noticeably further. It records:
+
+- **git provenance** (`git`): the current commit SHA and whether the working tree is dirty, so a script's output can later be tied to an exact version of the code.
+- **RNG state** (`rng`): the kind of generator in use, plus an MD5 fingerprint of `.Random.seed` so two runs can be compared for a change in random state without printing the seed itself.
+- **timing** (`timing`): when the snapshot was captured and how much wall-clock time the session had been running.
+- **document tooling versions** (`document`): the pandoc and quarto versions in use, since these affect how a rendered report looks even when the R-level session is identical.
+- **package drift** (`packages`): beyond version numbers, whether a package's on-disk and loaded versions or paths disagree (`version_mismatch`, `path_mismatch`), or whether a loaded namespace has since vanished from disk (`removed_from_disk`).
+- **non-package attachments** (`attachments`): everything on the search path, including things like `tools:rstudio` or environments added with `attach()`, that package-only listings omit.
+- **global environment contents** (`globalenv`): the name, class, and size of every object currently in `.GlobalEnv` (values are never captured, only metadata about them).
+
+None of `utils::sessionInfo()` or `sessioninfo::session_info()` capture any of the above.
+
+## The cost: more identifying information
+
+`sessionstate()` gets this extra detail by looking at things the other two tools mostly leave alone: the filesystem, the machine, and the objects sitting in memory. That has a real privacy cost, and it's worth being deliberate about it before pasting `sessionstate()` output into a GitHub issue, a CI log, or a shared report.
+
+The table below summarizes what identifying information each tool can expose:
+
+| Information | `utils::sessionInfo()` | `sessioninfo::session_info()` | `sessionstate()` |
+|---|---|---|---|
+| Hostname | No | No | Yes (`machine$nodename`) |
+| Local username | No | No | Yes (`machine$user`) |
+| Working directory | No | No | Yes (`machine$cwd`) |
+| Library paths (often embed a home directory) | No | Yes, in the `[1] /home/...` listing | Yes (`libpaths`, and `packages$ondisk_path`/`loaded_path`) |
+| Object names from your script | No | No | Yes (`globalenv$name`) |
+
+`sessioninfo::session_info()` already leaks a little here -- its library-path listing routinely includes a personal library under a home directory, as it does in the example above. `sessionstate()` goes considerably further: `machine` directly records the hostname and username reported by `Sys.info()`, plus `getwd()` at capture time, and `globalenv` lists the name of every object in `.GlobalEnv` (never its value, but object names alone can be revealing -- e.g. `patient_ids`, `q3_salary_data`).
+
+This isn't accidental -- these fields are exactly what makes `sessionstate()` useful as a reproducibility audit trail. `machine$cwd` matters because relative paths elsewhere in the script only resolve correctly relative to it; `ondisk_path`/`loaded_path` matter because they show precisely which library a package came from. But usefulness and shareability are in tension here, and the output above makes the tradeoff concrete: it exposes this machine's real hostname, username, and directory structure, simply by being rendered.
+
+## Choosing between the three
+
+None of these functions is a strictly better choice than the others; they trade off detail against exposure:
+
+- **`utils::sessionInfo()`** -- no external dependency, no privacy exposure beyond package/platform names. Good default for a quick report or a bug filed by someone you don't know well.
+- **`sessioninfo::session_info()`** -- much more readable package table (remotes, install source, mismatch flags), at the cost of a library-path listing that usually reveals a home directory.
+- **`sessionstate()`** -- the most complete audit trail, including git/RNG/timing information the other two don't capture at all, but with the most exposure: hostname, username, working directory, and global environment object names.
+
+If you do want to share `sessionstate()` output but need to redact some of it, the `print()`/`format()` methods accept field-selection arguments so you don't have to hand-edit the output. For example, this hides `machine` entirely and drops the `name` column from `globalenv` (keeping only object classes, not the names that might describe their contents):
+
+```{r}
+print(sessionstate(), machine = character(0), globalenv = "class")
+```
+
+Selecting fields this way only changes what's displayed -- it never touches the underlying object, so `x$machine` and `x$globalenv` are still captured in full for your own use. See `?display_methods` for the complete list of selectable fields, and the [customizing sessioncheck](customizing-sessioncheck.html) article for how these defaults can also be set globally via `options(sessioncheck = list(...))`.
+
+## Suggested next step
+
+Because `machine`, `libpaths`, and `packages$ondisk_path`/`loaded_path` are the fields most likely to carry personal information, it's worth deciding *before* you start using `sessionstate()` in scripts or reports whether its output will ever leave your machine (e.g. committed logs, shared reports, public CI artifacts) and, if so, which fields you're comfortable including.
