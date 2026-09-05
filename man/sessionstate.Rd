@@ -131,8 +131,11 @@ defaults via \code{options(sessioncheck = list(sessionstate_packages = ...))}
 The \code{globalenv_n} argument separately controls how many rows of
 \code{globalenv} are shown (largest objects first), independent of which
 columns are selected. None of this affects the underlying object, so
-\code{as.data.frame()} always returns the full package inventory, and
 \code{x$globalenv}/\code{x$attachments} always return their full data frames.
+Separately, \code{as.data.frame()} returns one of the three tables captured by
+\code{sessionstate()} (\code{packages}, \code{globalenv}, or \code{attachments}, selected via
+its \code{which} argument); see \link{coercion_methods} for why this coercion,
+unlike the one for \code{\link[=sessioncheck]{sessioncheck()}}, cannot be lossless.
 }
 \examples{
 sessionstate()

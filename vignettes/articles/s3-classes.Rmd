@@ -89,10 +89,11 @@ print(session_state, packages = "package", globalenv = "class", machine = charac
 
 See `?display_methods` for the complete list of these arguments and how their defaults are resolved.
 
-The `as.data.frame()` method behaves differently here than it does for the other two classes: rather than coercing every component into one combined table, it returns just the `packages` data frame, since that's the one component of `sessionstate()` that was already tabular and is the most natural fit for `as.data.frame()`.
+The `as.data.frame()` method is necessarily different here too. For `sessioncheck_status`/`sessioncheck_sessioncheck` objects, the coercion is lossless: every entity and status recorded in `x` shows up as a row. That guarantee is impossible for `sessioncheck_sessionstate`, because there is no single rectangular table that could hold eight scalar-field components, a bare character vector, and three differently-shaped data frames all at once. Rather than pretend otherwise, `as.data.frame()` returns exactly one of the three tabular components -- `packages`, `globalenv`, or `attachments` -- selected via its `which` argument (defaulting to `"packages"`, the largest and most commonly needed of the three):
 
 ```{r}
 head(as.data.frame(session_state))
+head(as.data.frame(session_state, which = "globalenv"))
 ```
 
-The other components remain available via `session_state$globalenv`, `session_state$attachments`, and so on -- see [sessionstate() versus sessionInfo() and session_info()](sessionstate-vs-sessioninfo.html) for a discussion of what each component captures.
+The eight scalar-field components (`platform`, `locale`, `matrix`, `document`, `machine`, `git`, `timing`, `rng`) and `libpaths` are never included in `as.data.frame()`'s output, regardless of `which` -- access them directly via `session_state$platform`, `session_state$machine`, and so on, or via `unclass(session_state)` for everything at once. See [sessionstate() versus sessionInfo() and session_info()](sessionstate-vs-sessioninfo.html) for a discussion of what each component captures.

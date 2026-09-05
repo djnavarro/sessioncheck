@@ -126,8 +126,11 @@
 #' The `globalenv_n` argument separately controls how many rows of
 #' `globalenv` are shown (largest objects first), independent of which
 #' columns are selected. None of this affects the underlying object, so
-#' `as.data.frame()` always returns the full package inventory, and
 #' `x$globalenv`/`x$attachments` always return their full data frames.
+#' Separately, `as.data.frame()` returns one of the three tables captured by
+#' `sessionstate()` (`packages`, `globalenv`, or `attachments`, selected via
+#' its `which` argument); see [coercion_methods] for why this coercion,
+#' unlike the one for [sessioncheck()], cannot be lossless.
 #'
 #' @examples
 #' sessionstate()

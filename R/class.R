@@ -325,9 +325,27 @@ print.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, m
 #' or `sessioncheck_sessionstate`
 #' @param row.names Ignored
 #' @param optional Ignored
+#' @param which For `sessioncheck_sessionstate` objects, which tabular
+#' component to return: one of `"packages"` (the default), `"globalenv"`,
+#' or `"attachments"`. Ignored for other classes.
 #' @param ... Ignored
 #'
 #' @returns A data frame
+#'
+#' @details
+#' For `sessioncheck_status` and `sessioncheck_sessioncheck` objects, this
+#' coercion is lossless: every entity and status recorded in `x` appears as a
+#' row in the result. That guarantee does not extend to
+#' `sessioncheck_sessionstate` objects: `sessionstate()` captures more than
+#' any single rectangular table can hold, mixing scalar fields (`platform`,
+#' `locale`, `matrix`, `document`, `machine`, `git`, `timing`, `rng`), a bare
+#' character vector (`libpaths`), and three differently-shaped tables
+#' (`packages`, `globalenv`, `attachments`). `as.data.frame()` returns
+#' whichever one of those three tables `which` selects; none of the scalar
+#' fields or `libpaths` are represented in the result. Use `x$platform`,
+#' `x$machine`, `x$git`, `x$libpaths`, etc. (or `unclass(x)` for everything
+#' at once) to access those directly.
+#'
 #' @name coercion_methods
 
 #' @rdname coercion_methods
@@ -351,8 +369,9 @@ as.data.frame.sessioncheck_sessioncheck <- function(x, row.names = NULL, optiona
 
 #' @rdname coercion_methods
 #' @exportS3Method base::as.data.frame
-as.data.frame.sessioncheck_sessionstate <- function(x, row.names = NULL, optional = FALSE, ...) {
-  x$packages
+as.data.frame.sessioncheck_sessionstate <- function(x, row.names = NULL, optional = FALSE, which = "packages", ...) {
+  which <- match.arg(which, c("packages", "globalenv", "attachments"))
+  x[[which]]
 }
 
 

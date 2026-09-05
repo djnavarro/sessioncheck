@@ -93,9 +93,10 @@ test_that(".get_search_path_info() classifies packages vs. other attachments", {
   expect_identical(df$type[length(df$type)], "package")
 })
 
-test_that("as.data.frame.sessioncheck_sessionstate() returns the package inventory", {
+test_that("as.data.frame.sessioncheck_sessionstate() defaults to the package inventory", {
   x <- sessionstate()
   df <- as.data.frame(x)
+  expect_identical(df, as.data.frame(x, which = "packages"))
   expect_s3_class(df, "data.frame")
   expect_named(
     df,
@@ -115,6 +116,25 @@ test_that("as.data.frame.sessioncheck_sessionstate() returns the package invento
   expect_false(any(df$version_mismatch, na.rm = TRUE))
   expect_false(any(df$path_mismatch, na.rm = TRUE))
   expect_false(any(df$removed_from_disk, na.rm = TRUE))
+})
+
+test_that("as.data.frame.sessioncheck_sessionstate() can return the globalenv table", {
+  x <- sessionstate()
+  df <- as.data.frame(x, which = "globalenv")
+  expect_identical(df, x$globalenv)
+  expect_named(df, c("name", "class", "size"))
+})
+
+test_that("as.data.frame.sessioncheck_sessionstate() can return the attachments table", {
+  x <- sessionstate()
+  df <- as.data.frame(x, which = "attachments")
+  expect_identical(df, x$attachments)
+  expect_named(df, c("name", "type"))
+})
+
+test_that("as.data.frame.sessioncheck_sessionstate() errors informatively on an unknown which value", {
+  x <- sessionstate()
+  expect_error(as.data.frame(x, which = "machine"))
 })
 
 test_that("format.sessioncheck_sessionstate() produces a single string with expected sections", {
