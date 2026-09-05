@@ -4,13 +4,15 @@
 # unicode symbols used to prefix formatted status output, with an ASCII
 # fallback for locales/terminals that cannot render UTF-8
 .symbols_unicode <- c(
-  tick  = "\u2714",
-  cross = "\u2716"
+  tick   = "\u2714",
+  cross  = "\u2716",
+  bullet = "\u2022"
 )
 
 .symbols_ascii <- c(
-  tick  = "v",
-  cross = "x"
+  tick   = "v",
+  cross  = "x",
+  bullet = "*"
 )
 
 # mirrors base R's own UTF-8 capability check (see l10n_info()) rather than
@@ -71,11 +73,20 @@
 
 .col_green <- .ansi_style("32")
 .col_red   <- .ansi_style("31")
+.col_blue  <- .ansi_style("34")
 
-# combines a symbol with the color conventionally associated with it (green
-# for "ok", red for "problem"); falls back to a plain symbol when
-# .ansi_enabled() is FALSE
+# combines a symbol with the color conventionally associated with it: green
+# for "ok", red for "problem", blue for a neutral/informational bullet with
+# no pass/fail meaning; falls back to a plain symbol when .ansi_enabled()
+# is FALSE
 .colored_symbol <- function(name) {
-  col <- switch(name, tick = .col_green, cross = .col_red, identity)
+  col <- switch(name, tick = .col_green, cross = .col_red, bullet = .col_blue, identity)
   col(.symbol(name))
+}
+
+# prefixes a section heading with a neutral bullet symbol/color; used by
+# format.sessioncheck_sessionstate(), which is a plain snapshot with no
+# pass/fail semantics, unlike the tick/cross used for sessioncheck_status
+.section_header <- function(text) {
+  paste(.colored_symbol("bullet"), text)
 }

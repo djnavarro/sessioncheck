@@ -68,7 +68,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   )
   platform <- .resolve_field_selection(platform, "sessionstate_platform", NULL)
   platform_fields <- .select_fields(names(platform_all), platform, "platform")
-  platform_lines <- c("Platform:", platform_all[platform_fields])
+  platform_lines <- c(.section_header("Platform:"), platform_all[platform_fields])
 
   locale_all <- c(
     language = sprintf(" language        %s", if (is.na(loc$language)) "(unset)" else loc$language),
@@ -77,7 +77,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   )
   locale <- .resolve_field_selection(locale, "sessionstate_locale", NULL)
   locale_fields <- .select_fields(names(locale_all), locale, "locale")
-  locale_lines <- c("Locale:", locale_all[locale_fields])
+  locale_lines <- c(.section_header("Locale:"), locale_all[locale_fields])
 
   matrix_all <- c(
     blas   = sprintf(" %-16s%s", "BLAS", mx$blas),
@@ -85,7 +85,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   )
   matrix <- .resolve_field_selection(matrix, "sessionstate_matrix", NULL)
   matrix_fields <- .select_fields(names(matrix_all), matrix, "matrix")
-  matrix_lines <- c("Matrix products:", matrix_all[matrix_fields])
+  matrix_lines <- c(.section_header("Matrix products:"), matrix_all[matrix_fields])
 
   document_all <- c(
     pandoc = sprintf(" %-16s%s", "pandoc", if (is.na(doc$pandoc)) "(not found)" else doc$pandoc),
@@ -93,7 +93,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   )
   document <- .resolve_field_selection(document, "sessionstate_document", NULL)
   document_fields <- .select_fields(names(document_all), document, "document")
-  document_lines <- c("Document products:", document_all[document_fields])
+  document_lines <- c(.section_header("Document products:"), document_all[document_fields])
 
   machine_all <- c(
     # "hostname" and "working directory" are used as the display labels
@@ -106,7 +106,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   )
   machine <- .resolve_field_selection(machine, "sessionstate_machine", NULL)
   machine_fields <- .select_fields(names(machine_all), machine, "machine")
-  machine_lines <- c("Machine:", machine_all[machine_fields])
+  machine_lines <- c(.section_header("Machine:"), machine_all[machine_fields])
 
   git_all <- c(
     # "commit sha" (rather than the bare "sha") to match the descriptive
@@ -116,7 +116,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   )
   git <- .resolve_field_selection(git, "sessionstate_git", NULL)
   git_fields <- .select_fields(names(git_all), git, "git")
-  git_lines <- c("Git:", git_all[git_fields])
+  git_lines <- c(.section_header("Git:"), git_all[git_fields])
 
   timing_all <- c(
     captured_at = sprintf(" captured at              %s", format(t$captured_at, usetz = TRUE)),
@@ -124,7 +124,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   )
   timing <- .resolve_field_selection(timing, "sessionstate_timing", NULL)
   timing_fields <- .select_fields(names(timing_all), timing, "timing")
-  timing_lines <- c("Timing:", timing_all[timing_fields])
+  timing_lines <- c(.section_header("Timing:"), timing_all[timing_fields])
 
   rng_all <- c(
     kind        = sprintf(" kind            %s", r$kind),
@@ -134,11 +134,11 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   )
   rng <- .resolve_field_selection(rng, "sessionstate_rng", NULL)
   rng_fields <- .select_fields(names(rng_all), rng, "rng")
-  rng_lines <- c("RNG state:", rng_all[rng_fields])
+  rng_lines <- c(.section_header("RNG state:"), rng_all[rng_fields])
 
   libpaths <- x$libpaths
   libpaths_lines <- c(
-    sprintf("Library paths [n = %d]:", length(libpaths)),
+    .section_header(sprintf("Library paths [n = %d]:", length(libpaths))),
     paste0(" ", seq_along(libpaths), "  ", libpaths)
   )
 
@@ -151,7 +151,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   pkg_df <- pkg_df[, pkg_cols, drop = FALSE]
   if ("attached" %in% names(pkg_df)) pkg_df$attached <- ifelse(pkg_df$attached, "*", " ")
   pkg_lines <- c(
-    sprintf("Packages [n = %d] (attached + loaded via namespace):", nrow(pkg_df)),
+    .section_header(sprintf("Packages [n = %d] (attached + loaded via namespace):", nrow(pkg_df))),
     utils::capture.output(print(pkg_df, row.names = FALSE))
   )
 
@@ -170,7 +170,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   genv_df <- genv_df[seq_len(n_shown), , drop = FALSE]
   if ("size" %in% names(genv_df)) genv_df$size <- .format_object_size(genv_df$size)
   genv_lines <- c(
-    sprintf("Global environment [n = %d]:", n_total),
+    .section_header(sprintf("Global environment [n = %d]:", n_total)),
     utils::capture.output(print(genv_df, row.names = FALSE))
   )
   if (n_shown < n_total) {
@@ -182,7 +182,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   att_cols <- .select_fields(names(att_df), attachments, "attachments")
   att_df <- att_df[, att_cols, drop = FALSE]
   att_lines <- c(
-    sprintf("Attached environments [n = %d]:", nrow(att_df)),
+    .section_header(sprintf("Attached environments [n = %d]:", nrow(att_df))),
     utils::capture.output(print(att_df, row.names = FALSE))
   )
 

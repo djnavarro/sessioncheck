@@ -458,7 +458,7 @@ test_that("format.sessioncheck_sessionstate() orders globalenv rows by size rega
   x <- sessionstate()
   txt <- format(x, globalenv = "name")
   lines <- strsplit(txt, "\n")[[1]]
-  genv_start <- grep("^Global environment", lines)
+  genv_start <- grep("Global environment \\[n = ", lines)
   genv_lines <- trimws(lines[(genv_start + 2L):(genv_start + 4L)])
   expect_identical(genv_lines, c("big", "medium", "small"))
 })
@@ -507,7 +507,7 @@ test_that("format.sessioncheck_sessionstate() defaults attachments to every colu
   txt <- format(x)
   expect_match(txt, "Attached environments \\[n = ", fixed = FALSE)
   lines <- strsplit(txt, "\n")[[1]]
-  att_start <- grep("^Attached environments", lines)
+  att_start <- grep("Attached environments \\[n = ", lines)
   header_line <- lines[att_start + 1L]
   expect_match(header_line, "name", fixed = TRUE)
   expect_match(header_line, "type", fixed = TRUE)
@@ -518,7 +518,7 @@ test_that("format.sessioncheck_sessionstate() restricts attachments columns when
   x <- sessionstate()
   txt <- format(x, attachments = "name")
   lines <- strsplit(txt, "\n")[[1]]
-  att_start <- grep("^Attached environments", lines)
+  att_start <- grep("Attached environments \\[n = ", lines)
   header_line <- lines[att_start + 1L]
   expect_no_match(header_line, "type", fixed = TRUE)
 })
@@ -529,7 +529,7 @@ test_that("format.sessioncheck_sessionstate() honors sessionstate_attachments se
   x <- sessionstate()
   txt <- format(x)
   lines <- strsplit(txt, "\n")[[1]]
-  att_start <- grep("^Attached environments", lines)
+  att_start <- grep("Attached environments \\[n = ", lines)
   header_line <- lines[att_start + 1L]
   expect_no_match(header_line, "type", fixed = TRUE)
 })
@@ -558,7 +558,7 @@ test_that("format.sessioncheck_sessionstate() honors sessionstate_packages set v
   # always contains the word "attached", so restrict the check to the
   # table itself, below the heading line
   lines <- strsplit(txt, "\n")[[1]]
-  table_txt <- paste(lines[-seq_len(grep("^Packages", lines))], collapse = "\n")
+  table_txt <- paste(lines[-seq_len(grep("Packages \\[n = ", lines))], collapse = "\n")
   expect_no_match(table_txt, "attached", fixed = TRUE)
   expect_no_match(table_txt, "loaded_version", fixed = TRUE)
 })
@@ -574,7 +574,7 @@ test_that("an explicit packages argument overrides options(sessioncheck = ...)",
   # library path under macOS's .../Resources/library), which isn't the
   # "source" column this test is guarding against
   lines <- strsplit(txt, "\n")[[1]]
-  table_txt <- paste(lines[-seq_len(grep("^Packages", lines))], collapse = "\n")
+  table_txt <- paste(lines[-seq_len(grep("Packages \\[n = ", lines))], collapse = "\n")
   expect_no_match(table_txt, "source", fixed = TRUE)
 })
 

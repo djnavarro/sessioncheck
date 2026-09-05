@@ -80,6 +80,22 @@ test_that(".symbol() returns unicode glyphs when unicode is available", {
   local_mocked_bindings(.unicode_enabled = function() TRUE)
   expect_equal(.symbol("tick"), "\u2714")
   expect_equal(.symbol("cross"), "\u2716")
+  expect_equal(.symbol("bullet"), "\u2022")
+})
+
+test_that(".colored_symbol() colors the bullet blue, distinct from tick/cross", {
+  local_mocked_bindings(.ansi_enabled = function() TRUE, .unicode_enabled = function() FALSE)
+  expect_equal(.colored_symbol("bullet"), "\033[34m*\033[0m")
+})
+
+test_that(".section_header() prefixes text with a plain bullet when ansi is disabled", {
+  local_mocked_bindings(.ansi_enabled = function() FALSE, .unicode_enabled = function() FALSE)
+  expect_equal(.section_header("Platform:"), "* Platform:")
+})
+
+test_that(".section_header() prefixes text with a colored bullet when ansi is enabled", {
+  local_mocked_bindings(.ansi_enabled = function() TRUE, .unicode_enabled = function() TRUE)
+  expect_equal(.section_header("Platform:"), paste0("\033[34m", "\u2022", "\033[0m Platform:"))
 })
 
 test_that(".ansi_enabled() honors options(cli.num_colors = )", {
