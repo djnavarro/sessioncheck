@@ -58,9 +58,9 @@ fields. Ignored for other classes. See Details for how the default is
 resolved.}
 
 \item{machine}{For \code{sessioncheck_sessionstate} objects, an optional character
-vector selecting which machine fields to display (from \code{"nodename"}, \code{"user"}).
-Defaults to showing all fields. Ignored for other classes. See Details for
-how the default is resolved.}
+vector selecting which machine fields to display (from \code{"nodename"},
+\code{"user"}, \code{"cwd"}). Defaults to showing all fields. Ignored for other
+classes. See Details for how the default is resolved.}
 
 \item{timing}{For \code{sessioncheck_sessionstate} objects, an optional character
 vector selecting which timing fields to display (from \code{"captured_at"},

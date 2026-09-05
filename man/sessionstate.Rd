@@ -24,10 +24,14 @@ produce an audit log of the environment the script actually ran in.
 }
 \details{
 The \code{machine} element includes the node name and user reported by
-\code{\link[=Sys.info]{Sys.info()}}. Because this can reveal a hostname or local username, be
-mindful about where \code{sessionstate()} output is stored or shared. The same
-caution applies to the \code{ondisk_path}/\code{loaded_path} columns of \code{packages},
-since library paths often embed a home directory.
+\code{\link[=Sys.info]{Sys.info()}}, along with the working directory reported by \code{\link[=getwd]{getwd()}} at
+capture time (\code{cwd}) -- useful for a reproducibility audit since relative
+paths used elsewhere in a script only resolve correctly relative to this
+directory. Because this can reveal a hostname, local username, or
+directory structure, be mindful about where \code{sessionstate()} output is
+stored or shared. The same caution applies to the \code{ondisk_path}/
+\code{loaded_path} columns of \code{packages}, since library paths often embed a
+home directory.
 
 The \code{rng} element records \code{\link[=RNGkind]{RNGkind()}} (as \code{kind}, \code{normal_kind}, and
 \code{sample_kind}) together with \code{seed_hash}, an MD5 fingerprint of

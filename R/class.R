@@ -38,9 +38,9 @@ new_sessionstate <- function(platform, machine, timing, rng, packages, globalenv
 #' fields. Ignored for other classes. See Details for how the default is
 #' resolved.
 #' @param machine For `sessioncheck_sessionstate` objects, an optional character
-#' vector selecting which machine fields to display (from `"nodename"`, `"user"`).
-#' Defaults to showing all fields. Ignored for other classes. See Details for
-#' how the default is resolved.
+#' vector selecting which machine fields to display (from `"nodename"`,
+#' `"user"`, `"cwd"`). Defaults to showing all fields. Ignored for other
+#' classes. See Details for how the default is resolved.
 #' @param timing For `sessioncheck_sessionstate` objects, an optional character
 #' vector selecting which timing fields to display (from `"captured_at"`,
 #' `"elapsed_sec"`). Defaults to showing all fields. Ignored for other classes.
@@ -159,7 +159,8 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL,
 
   machine_all <- c(
     nodename = sprintf(" nodename        %s", m$nodename),
-    user     = sprintf(" user            %s", m$user)
+    user     = sprintf(" user            %s", m$user),
+    cwd      = sprintf(" cwd             %s", m$cwd)
   )
   machine <- .resolve_field_selection(machine, "sessionstate_machine", NULL)
   machine_fields <- .select_fields(names(machine_all), machine, "machine")

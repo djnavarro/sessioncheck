@@ -6,6 +6,7 @@ test_that("sessionstate() returns a well-formed sessioncheck_sessionstate object
   expect_true(is.list(x$machine))
   expect_true(is.list(x$timing))
   expect_true(is.list(x$rng))
+  expect_identical(x$machine$cwd, getwd())
   expect_s3_class(x$packages, "data.frame")
   expect_s3_class(x$globalenv, "data.frame")
   expect_s3_class(x$attachments, "data.frame")
@@ -130,6 +131,13 @@ test_that("format.sessioncheck_sessionstate() defaults platform/machine/timing t
   expect_match(txt, "matrix products", fixed = TRUE)
   expect_match(txt, "nodename", fixed = TRUE)
   expect_match(txt, "captured at", fixed = TRUE)
+  expect_match(txt, "cwd             ", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() restricts machine fields to exclude cwd when requested", {
+  x <- sessionstate()
+  txt <- format(x, machine = "nodename")
+  expect_no_match(txt, "cwd", fixed = TRUE)
 })
 
 test_that("format.sessioncheck_sessionstate() defaults rng to showing every field", {

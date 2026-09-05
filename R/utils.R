@@ -136,7 +136,8 @@
   info <- Sys.info()
   list(
     nodename = unname(info[["nodename"]]),
-    user     = unname(info[["user"]])
+    user     = unname(info[["user"]]),
+    cwd      = getwd()
   )
 }
 

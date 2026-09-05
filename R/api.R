@@ -18,10 +18,14 @@
 #'
 #' @details
 #' The `machine` element includes the node name and user reported by
-#' [Sys.info()]. Because this can reveal a hostname or local username, be
-#' mindful about where `sessionstate()` output is stored or shared. The same
-#' caution applies to the `ondisk_path`/`loaded_path` columns of `packages`,
-#' since library paths often embed a home directory.
+#' [Sys.info()], along with the working directory reported by [getwd()] at
+#' capture time (`cwd`) -- useful for a reproducibility audit since relative
+#' paths used elsewhere in a script only resolve correctly relative to this
+#' directory. Because this can reveal a hostname, local username, or
+#' directory structure, be mindful about where `sessionstate()` output is
+#' stored or shared. The same caution applies to the `ondisk_path`/
+#' `loaded_path` columns of `packages`, since library paths often embed a
+#' home directory.
 #'
 #' The `rng` element records [RNGkind()] (as `kind`, `normal_kind`, and
 #' `sample_kind`) together with `seed_hash`, an MD5 fingerprint of
