@@ -199,12 +199,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/docs/reference
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          0c11f4888a825a5f53ec819a8df935b0defa31d0
+#> • commit sha          90a8e825c707ab48189dfbf16a7728e62c8c5734
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-05 14:10:04 UTC
-#> • session uptime      7.146 sec
+#> • captured at         2026-09-05 14:38:07 UTC
+#> • session uptime      7.363 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -275,63 +275,63 @@ sessionstate()
 #>            xfun                    0.60
 #>            xml2                   1.6.0
 #>            yaml                  2.3.12
-#>                                                                   source
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                    local
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>  any (https://packagemanager.posit.co/cran/__linux__/noble/latest@2.2.1)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                local (.)
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                Github (djnavarro/waeponwifestre@6265365)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
+#>                                     source
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                                       base
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                                       base
+#>                             RSPM (R 4.6.0)
+#>                                       base
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                                       base
+#>                                       base
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                                       base
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                                      local
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                                  local (.)
+#>                                       base
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                                       base
+#>                                       base
+#>                             RSPM (R 4.6.0)
+#>  Github (djnavarro/waeponwifestre@6265365)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
+#>                             RSPM (R 4.6.0)
 #> 
 #> ─ Global environment [n = 1] ───────────────────────────────────────────────────
 #>          name   class   size

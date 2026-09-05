@@ -172,12 +172,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          0c11f4888a825a5f53ec819a8df935b0defa31d0
+#> • commit sha          90a8e825c707ab48189dfbf16a7728e62c8c5734
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-05 14:10:15 UTC
-#> • session uptime      1.018 sec
+#> • captured at         2026-09-05 14:38:18 UTC
+#> • session uptime      1.017 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -191,78 +191,42 @@ sessionstate()
 #> • /opt/R/4.6.1/lib/R/library
 #> 
 #> ─ Packages [n = 35] (attached + loaded via namespace) ──────────────────────────
-#>       package attached loaded_version
-#>          base        *          4.6.1
-#>         bslib                  0.12.0
-#>        cachem                   1.1.0
-#>           cli                   3.6.6
-#>      compiler                   4.6.1
-#>      datasets        *          4.6.1
-#>          desc                   1.4.3
-#>        digest                  0.6.39
-#>      evaluate                   1.0.5
-#>       fastmap                   1.2.0
-#>            fs                   2.1.0
-#>      graphics        *          4.6.1
-#>     grDevices        *          4.6.1
-#>     htmltools                   0.5.9
-#>     jquerylib                   0.1.4
-#>      jsonlite                   2.0.0
-#>         knitr                    1.51
-#>     lifecycle                   1.0.5
-#>       methods        *          4.6.1
-#>          otel                   0.2.0
-#>       pkgdown                   2.2.1
-#>            R6                   2.6.1
-#>          ragg                   1.5.2
-#>         rlang                   1.3.0
-#>     rmarkdown                    2.32
-#>          sass                  0.4.10
-#>  sessioncheck        *     0.1.1.9000
-#>   sessioninfo                   1.2.4
-#>         stats        *          4.6.1
-#>   systemfonts                   1.3.2
-#>   textshaping                   1.0.5
-#>         tools                   4.6.1
-#>         utils        *          4.6.1
-#>          xfun                    0.60
-#>          yaml                  2.3.12
-#>                                                                   source
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>  any (https://packagemanager.posit.co/cran/__linux__/noble/latest@2.2.1)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                local (.)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
+#>       package attached loaded_version         source
+#>          base        *          4.6.1           base
+#>         bslib                  0.12.0 RSPM (R 4.6.0)
+#>        cachem                   1.1.0 RSPM (R 4.6.0)
+#>           cli                   3.6.6 RSPM (R 4.6.0)
+#>      compiler                   4.6.1           base
+#>      datasets        *          4.6.1           base
+#>          desc                   1.4.3 RSPM (R 4.6.0)
+#>        digest                  0.6.39 RSPM (R 4.6.0)
+#>      evaluate                   1.0.5 RSPM (R 4.6.0)
+#>       fastmap                   1.2.0 RSPM (R 4.6.0)
+#>            fs                   2.1.0 RSPM (R 4.6.0)
+#>      graphics        *          4.6.1           base
+#>     grDevices        *          4.6.1           base
+#>     htmltools                   0.5.9 RSPM (R 4.6.0)
+#>     jquerylib                   0.1.4 RSPM (R 4.6.0)
+#>      jsonlite                   2.0.0 RSPM (R 4.6.0)
+#>         knitr                    1.51 RSPM (R 4.6.0)
+#>     lifecycle                   1.0.5 RSPM (R 4.6.0)
+#>       methods        *          4.6.1           base
+#>          otel                   0.2.0 RSPM (R 4.6.0)
+#>       pkgdown                   2.2.1 RSPM (R 4.6.0)
+#>            R6                   2.6.1 RSPM (R 4.6.0)
+#>          ragg                   1.5.2 RSPM (R 4.6.0)
+#>         rlang                   1.3.0 RSPM (R 4.6.0)
+#>     rmarkdown                    2.32 RSPM (R 4.6.0)
+#>          sass                  0.4.10 RSPM (R 4.6.0)
+#>  sessioncheck        *     0.1.1.9000      local (.)
+#>   sessioninfo                   1.2.4 RSPM (R 4.6.0)
+#>         stats        *          4.6.1           base
+#>   systemfonts                   1.3.2 RSPM (R 4.6.0)
+#>   textshaping                   1.0.5 RSPM (R 4.6.0)
+#>         tools                   4.6.1           base
+#>         utils        *          4.6.1           base
+#>          xfun                    0.60 RSPM (R 4.6.0)
+#>          yaml                  2.3.12 RSPM (R 4.6.0)
 #> 
 #> ─ Global environment [n = 1] ───────────────────────────────────────────────────
 #>          name   class   size
@@ -415,11 +379,11 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          0c11f4888a825a5f53ec819a8df935b0defa31d0
+#> • commit sha          90a8e825c707ab48189dfbf16a7728e62c8c5734
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-05 14:10:15 UTC
+#> • captured at         2026-09-05 14:38:18 UTC
 #> • session uptime      1.141 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
@@ -434,78 +398,42 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> • /opt/R/4.6.1/lib/R/library
 #> 
 #> ─ Packages [n = 35] (attached + loaded via namespace) ──────────────────────────
-#>       package attached loaded_version
-#>          base        *          4.6.1
-#>         bslib                  0.12.0
-#>        cachem                   1.1.0
-#>           cli                   3.6.6
-#>      compiler                   4.6.1
-#>      datasets        *          4.6.1
-#>          desc                   1.4.3
-#>        digest                  0.6.39
-#>      evaluate                   1.0.5
-#>       fastmap                   1.2.0
-#>            fs                   2.1.0
-#>      graphics        *          4.6.1
-#>     grDevices        *          4.6.1
-#>     htmltools                   0.5.9
-#>     jquerylib                   0.1.4
-#>      jsonlite                   2.0.0
-#>         knitr                    1.51
-#>     lifecycle                   1.0.5
-#>       methods        *          4.6.1
-#>          otel                   0.2.0
-#>       pkgdown                   2.2.1
-#>            R6                   2.6.1
-#>          ragg                   1.5.2
-#>         rlang                   1.3.0
-#>     rmarkdown                    2.32
-#>          sass                  0.4.10
-#>  sessioncheck        *     0.1.1.9000
-#>   sessioninfo                   1.2.4
-#>         stats        *          4.6.1
-#>   systemfonts                   1.3.2
-#>   textshaping                   1.0.5
-#>         tools                   4.6.1
-#>         utils        *          4.6.1
-#>          xfun                    0.60
-#>          yaml                  2.3.12
-#>                                                                   source
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>  any (https://packagemanager.posit.co/cran/__linux__/noble/latest@2.2.1)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                local (.)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
-#>                                                                     base
-#>                                                                     base
-#>                                                           RSPM (R 4.6.0)
-#>                                                           RSPM (R 4.6.0)
+#>       package attached loaded_version         source
+#>          base        *          4.6.1           base
+#>         bslib                  0.12.0 RSPM (R 4.6.0)
+#>        cachem                   1.1.0 RSPM (R 4.6.0)
+#>           cli                   3.6.6 RSPM (R 4.6.0)
+#>      compiler                   4.6.1           base
+#>      datasets        *          4.6.1           base
+#>          desc                   1.4.3 RSPM (R 4.6.0)
+#>        digest                  0.6.39 RSPM (R 4.6.0)
+#>      evaluate                   1.0.5 RSPM (R 4.6.0)
+#>       fastmap                   1.2.0 RSPM (R 4.6.0)
+#>            fs                   2.1.0 RSPM (R 4.6.0)
+#>      graphics        *          4.6.1           base
+#>     grDevices        *          4.6.1           base
+#>     htmltools                   0.5.9 RSPM (R 4.6.0)
+#>     jquerylib                   0.1.4 RSPM (R 4.6.0)
+#>      jsonlite                   2.0.0 RSPM (R 4.6.0)
+#>         knitr                    1.51 RSPM (R 4.6.0)
+#>     lifecycle                   1.0.5 RSPM (R 4.6.0)
+#>       methods        *          4.6.1           base
+#>          otel                   0.2.0 RSPM (R 4.6.0)
+#>       pkgdown                   2.2.1 RSPM (R 4.6.0)
+#>            R6                   2.6.1 RSPM (R 4.6.0)
+#>          ragg                   1.5.2 RSPM (R 4.6.0)
+#>         rlang                   1.3.0 RSPM (R 4.6.0)
+#>     rmarkdown                    2.32 RSPM (R 4.6.0)
+#>          sass                  0.4.10 RSPM (R 4.6.0)
+#>  sessioncheck        *     0.1.1.9000      local (.)
+#>   sessioninfo                   1.2.4 RSPM (R 4.6.0)
+#>         stats        *          4.6.1           base
+#>   systemfonts                   1.3.2 RSPM (R 4.6.0)
+#>   textshaping                   1.0.5 RSPM (R 4.6.0)
+#>         tools                   4.6.1           base
+#>         utils        *          4.6.1           base
+#>          xfun                    0.60 RSPM (R 4.6.0)
+#>          yaml                  2.3.12 RSPM (R 4.6.0)
 #> 
 #> ─ Global environment [n = 1] ───────────────────────────────────────────────────
 #>    class
