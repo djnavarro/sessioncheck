@@ -2,9 +2,16 @@ test_that("sessionstate() returns a well-formed sessioncheck_sessionstate object
   x <- sessionstate()
   expect_s3_class(x, "sessioncheck_sessionstate")
   expect_named(
-    x, c("platform", "machine", "git", "timing", "rng", "libpaths", "packages", "globalenv", "attachments")
+    x,
+    c(
+      "platform", "locale", "matrix", "document", "machine", "git", "timing", "rng", "libpaths",
+      "packages", "globalenv", "attachments"
+    )
   )
   expect_true(is.list(x$platform))
+  expect_true(is.list(x$locale))
+  expect_true(is.list(x$matrix))
+  expect_true(is.list(x$document))
   expect_true(is.list(x$machine))
   expect_true(is.list(x$timing))
   expect_true(is.list(x$rng))
@@ -146,16 +153,16 @@ test_that("format.sessioncheck_sessionstate() defaults packages to the curated c
 test_that("format.sessioncheck_sessionstate() defaults platform/machine/timing to showing every field", {
   x <- sessionstate()
   txt <- format(x)
-  expect_match(txt, "matrix products", fixed = TRUE)
-  expect_match(txt, "nodename", fixed = TRUE)
+  expect_match(txt, "Matrix products:", fixed = TRUE)
+  expect_match(txt, "hostname", fixed = TRUE)
   expect_match(txt, "captured at", fixed = TRUE)
-  expect_match(txt, "cwd             ", fixed = TRUE)
+  expect_match(txt, "working directory   ", fixed = TRUE)
 })
 
 test_that("format.sessioncheck_sessionstate() restricts machine fields to exclude cwd when requested", {
   x <- sessionstate()
   txt <- format(x, machine = "nodename")
-  expect_no_match(txt, "cwd", fixed = TRUE)
+  expect_no_match(txt, "working directory", fixed = TRUE)
 })
 
 test_that(".run_git_command() returns NA when git errors or exits non-zero", {
@@ -201,7 +208,7 @@ test_that("format.sessioncheck_sessionstate() defaults git to showing every fiel
   x <- sessionstate()
   txt <- format(x)
   expect_match(txt, "Git:", fixed = TRUE)
-  expect_match(txt, "sha             abc123", fixed = TRUE)
+  expect_match(txt, "commit sha      abc123", fixed = TRUE)
   expect_match(txt, "dirty           TRUE", fixed = TRUE)
 })
 
@@ -209,7 +216,7 @@ test_that("format.sessioncheck_sessionstate() restricts git fields when requeste
   local_mocked_bindings(.get_git_info = function() list(sha = "abc123", dirty = TRUE))
   x <- sessionstate()
   txt <- format(x, git = "sha")
-  expect_match(txt, "sha             abc123", fixed = TRUE)
+  expect_match(txt, "commit sha      abc123", fixed = TRUE)
   expect_no_match(txt, "dirty", fixed = TRUE)
 })
 
@@ -235,7 +242,7 @@ test_that("format.sessioncheck_sessionstate() reports placeholders when git info
   local_mocked_bindings(.get_git_info = function() list(sha = NA_character_, dirty = NA))
   x <- sessionstate()
   txt <- format(x)
-  expect_match(txt, "sha             \\(not a git repository\\)", fixed = FALSE)
+  expect_match(txt, "commit sha      \\(not a git repository\\)", fixed = FALSE)
   expect_match(txt, "dirty           \\(unknown\\)", fixed = FALSE)
 })
 
@@ -372,26 +379,25 @@ test_that(".get_quarto_version() falls back to PATH when QUARTO_PATH is unset", 
   expect_identical(.get_quarto_version(), "/usr/bin/quarto")
 })
 
-test_that(".get_platform_info() includes pandoc and quarto fields", {
-  info <- .get_platform_info()
+test_that(".get_document_info() includes pandoc and quarto fields", {
+  info <- .get_document_info()
   expect_true(all(c("pandoc", "quarto") %in% names(info)))
 })
 
-test_that("format.sessioncheck_sessionstate() shows the document products heading only when pandoc/quarto are requested", {
+test_that("format.sessioncheck_sessionstate() restricts document fields when requested", {
   x <- sessionstate()
-  txt_with <- format(x, platform = c("version", "pandoc"))
-  txt_without <- format(x, platform = "version")
-  expect_match(txt_with, "document products", fixed = TRUE)
-  expect_no_match(txt_without, "document products", fixed = TRUE)
+  txt <- format(x, document = "pandoc")
+  expect_match(txt, "pandoc", fixed = TRUE)
+  expect_no_match(txt, "quarto", fixed = TRUE)
 })
 
 test_that("format.sessioncheck_sessionstate() reports '(not found)' when pandoc/quarto are unavailable", {
   local_mocked_bindings(.get_pandoc_version = function() NA_character_)
   local_mocked_bindings(.get_quarto_version = function() NA_character_)
   x <- sessionstate()
-  txt <- format(x, platform = c("version", "pandoc", "quarto"))
-  expect_match(txt, "pandoc: \\(not found\\)", fixed = FALSE)
-  expect_match(txt, "quarto: \\(not found\\)", fixed = FALSE)
+  txt <- format(x, document = c("pandoc", "quarto"))
+  expect_match(txt, "pandoc.*\\(not found\\)", fixed = FALSE)
+  expect_match(txt, "quarto.*\\(not found\\)", fixed = FALSE)
 })
 
 test_that("format.sessioncheck_sessionstate() defaults globalenv to every column but only the 10 largest rows", {
@@ -548,8 +554,8 @@ test_that("options(sessioncheck = ...) can also set defaults for platform/machin
   on.exit(options(old), add = TRUE)
   x <- sessionstate()
   txt <- format(x)
-  expect_no_match(txt, "matrix products", fixed = TRUE)
-  expect_no_match(txt, "nodename", fixed = TRUE)
+  expect_no_match(txt, "ui ", fixed = TRUE)
+  expect_no_match(txt, "hostname", fixed = TRUE)
   # timing has no option set, so it should still fall back to "show everything"
   expect_match(txt, "captured at", fixed = TRUE)
 })
@@ -584,21 +590,26 @@ test_that("format.sessioncheck_sessionstate() restricts platform fields when req
   expect_match(txt, "version", fixed = TRUE)
   expect_match(txt, "os", fixed = TRUE)
   expect_no_match(txt, "ui ", fixed = TRUE)
-  expect_no_match(txt, "matrix products", fixed = TRUE)
 })
 
-test_that("format.sessioncheck_sessionstate() shows the matrix products heading only when blas/lapack are requested", {
+test_that("format.sessioncheck_sessionstate() restricts locale fields when requested", {
   x <- sessionstate()
-  txt_with <- format(x, platform = c("version", "blas"))
-  txt_without <- format(x, platform = "version")
-  expect_match(txt_with, "matrix products", fixed = TRUE)
-  expect_no_match(txt_without, "matrix products", fixed = TRUE)
+  txt <- format(x, locale = "collate")
+  expect_match(txt, "collate", fixed = TRUE)
+  expect_no_match(txt, "ctype", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() restricts matrix fields when requested", {
+  x <- sessionstate()
+  txt <- format(x, matrix = "blas")
+  expect_match(txt, "BLAS", fixed = TRUE)
+  expect_no_match(txt, "LAPACK", fixed = TRUE)
 })
 
 test_that("format.sessioncheck_sessionstate() restricts machine and timing fields when requested", {
   x <- sessionstate()
   txt <- format(x, machine = "user", timing = "elapsed_sec")
-  expect_no_match(txt, "nodename", fixed = TRUE)
+  expect_no_match(txt, "hostname", fixed = TRUE)
   expect_no_match(txt, "captured at", fixed = TRUE)
 })
 
@@ -612,6 +623,9 @@ test_that("format.sessioncheck_sessionstate() restricts package columns when req
 test_that("format.sessioncheck_sessionstate() errors informatively on an unknown field", {
   x <- sessionstate()
   expect_error(format(x, platform = "bogus"), "Unknown platform field")
+  expect_error(format(x, locale = "bogus"), "Unknown locale field")
+  expect_error(format(x, matrix = "bogus"), "Unknown matrix field")
+  expect_error(format(x, document = "bogus"), "Unknown document field")
   expect_error(format(x, machine = "bogus"), "Unknown machine field")
   expect_error(format(x, git = "bogus"), "Unknown git field")
   expect_error(format(x, timing = "bogus"), "Unknown timing field")
@@ -624,8 +638,9 @@ test_that("format.sessioncheck_sessionstate() defaults to showing every field wh
   expect_identical(
     format(x),
     format(
-      x, platform = NULL, machine = NULL, git = NULL, timing = NULL, rng = NULL, packages = NULL,
-      globalenv = NULL, globalenv_n = NULL, attachments = NULL
+      x, platform = NULL, locale = NULL, matrix = NULL, document = NULL, machine = NULL, git = NULL,
+      timing = NULL, rng = NULL, packages = NULL, globalenv = NULL, globalenv_n = NULL,
+      attachments = NULL
     )
   )
 })
@@ -634,15 +649,15 @@ test_that("print.sessioncheck_sessionstate() forwards field-selection arguments 
   x <- sessionstate()
   out <- capture.output(
     print(
-      x, platform = "version", machine = "user", git = "sha", timing = "elapsed_sec", rng = "kind",
-      packages = "package"
+      x, platform = "version", locale = "collate", matrix = "blas", document = "pandoc",
+      machine = "user", git = "sha", timing = "elapsed_sec", rng = "kind", packages = "package"
     )
   )
   expect_equal(
     trimws(paste(out, collapse = "\n")),
     trimws(format(
-      x, platform = "version", machine = "user", git = "sha", timing = "elapsed_sec", rng = "kind",
-      packages = "package"
+      x, platform = "version", locale = "collate", matrix = "blas", document = "pandoc",
+      machine = "user", git = "sha", timing = "elapsed_sec", rng = "kind", packages = "package"
     ))
   )
 })
@@ -758,6 +773,34 @@ test_that(".get_loaded_path() returns the loaded namespace path", {
 
 test_that(".get_ondisk_path() returns NA when the package isn't found on disk", {
   local_mocked_bindings(system.file = function(...) "", .package = "base")
+  expect_identical(.get_ondisk_path("somepkg"), NA_character_)
+})
+
+test_that(".get_ondisk_path() prefers a loaded library that isn't on .libPaths()", {
+  # mirrors library(pkg, lib.loc = <private lib>), which is how R CMD
+  # check loads the package under test: the private library is never
+  # added to .libPaths(), so without this fallback system.file() would
+  # either miss the package entirely or resolve to an unrelated, stale
+  # copy elsewhere on .libPaths()
+  local_mocked_bindings(.get_loaded_path = function(pkg) "/private/lib/somepkg")
+  local_mocked_bindings(
+    system.file = function(package, lib.loc, ...) {
+      if (identical(lib.loc[[1L]], "/private/lib")) "/private/lib/somepkg" else ""
+    },
+    .package = "base"
+  )
+  expect_identical(.get_ondisk_path("somepkg"), "/private/lib/somepkg")
+})
+
+test_that(".get_ondisk_path() leaves search order unchanged when the loaded library is already on .libPaths()", {
+  local_mocked_bindings(.get_loaded_path = function(pkg) file.path(.libPaths()[[1L]], pkg))
+  local_mocked_bindings(
+    system.file = function(package, lib.loc, ...) {
+      expect_identical(lib.loc, .libPaths())
+      ""
+    },
+    .package = "base"
+  )
   expect_identical(.get_ondisk_path("somepkg"), NA_character_)
 })
 

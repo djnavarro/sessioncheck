@@ -8,8 +8,8 @@ sessionstate()
 }
 \value{
 An object of class \code{sessioncheck_sessionstate}, a list with
-elements \code{platform}, \code{machine}, \code{git}, \code{timing}, \code{rng}, \code{libpaths},
-\code{packages}, \code{globalenv}, and \code{attachments}.
+elements \code{platform}, \code{locale}, \code{matrix}, \code{document}, \code{machine}, \code{git},
+\code{timing}, \code{rng}, \code{libpaths}, \code{packages}, \code{globalenv}, and \code{attachments}.
 }
 \description{
 \code{sessionstate()} captures a point-in-time, human-readable snapshot of the R
@@ -89,7 +89,19 @@ long-running script can accumulate many objects, the default display shows
 only the largest few (see below); the captured object itself always holds
 every object.
 
-The \code{platform} element's \code{pandoc} and \code{quarto} fields record the versions
+The \code{locale} element records \code{language}, \code{collate}, and \code{ctype}. These
+are split out from \code{platform} because they describe how text and dates
+are formatted for this session, rather than what/where/when the session
+is running.
+
+The \code{matrix} element records \code{blas} and \code{lapack}, the shared libraries
+backing R's linear algebra routines (as reported by
+\code{\link[=extSoftVersion]{extSoftVersion()}} and \code{\link[=La_library]{La_library()}}). Like \code{locale}, this is split out
+from \code{platform} -- in this case mirroring how base R's
+\code{\link[utils:sessionInfo]{utils::sessionInfo()}} treats "Matrix products" as its own block rather
+than nesting it under platform info.
+
+The \code{document} element's \code{pandoc} and \code{quarto} fields record the versions
 of those two document-rendering tools, if found (\code{NA} otherwise). Both
 checks prefer the IDE-provided location over whatever happens to be on
 \code{PATH} (\code{RSTUDIO_PANDOC} for pandoc, \code{QUARTO_PATH} for quarto), since
@@ -99,7 +111,9 @@ dependencies (e.g. LaTeX, Hugo, spatial libraries) are package-specific
 rather than session-wide, and tracking them well would mean tracking
 many of them; \code{pandoc}/\code{quarto} are included because they, like
 BLAS/LAPACK, are already tracked by \code{\link[utils:sessionInfo]{utils::sessionInfo()}} or
-\code{\link[sessioninfo:session_info]{sessioninfo::session_info()}}.
+\code{\link[sessioninfo:session_info]{sessioninfo::session_info()}}. \code{document} has no \code{sessionInfo()}
+precedent (unlike \code{matrix}), but is grouped the same way for
+consistency.
 
 The \code{attachments} element is a data frame with one row per entry on the
 search path (as returned by \code{\link[=search]{search()}}), with columns \code{name} and \code{type}
@@ -109,9 +123,9 @@ reflected in \code{packages}.
 
 \code{sessionstate()} itself always captures every field in full (\code{globalenv}
 is never truncated at capture time). To display only a subset when
-printing, pass \code{platform}/\code{machine}/\code{git}/\code{timing}/\code{rng}/\code{packages}/
-\code{globalenv}/\code{attachments} arguments to \code{print()} or \code{format()} on the
-result, or set
+printing, pass \code{platform}/\code{locale}/\code{matrix}/\code{document}/\code{machine}/\code{git}/
+\code{timing}/\code{rng}/\code{packages}/\code{globalenv}/\code{attachments} arguments to
+\code{print()} or \code{format()} on the result, or set
 defaults via \code{options(sessioncheck = list(sessionstate_packages = ...))}
 (see \link{display_methods} for the full precedence rules and option names).
 The \code{globalenv_n} argument separately controls how many rows of

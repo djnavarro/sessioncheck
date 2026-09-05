@@ -17,6 +17,9 @@
 \method{format}{sessioncheck_sessionstate}(
   x,
   platform = NULL,
+  locale = NULL,
+  matrix = NULL,
+  document = NULL,
   machine = NULL,
   git = NULL,
   timing = NULL,
@@ -35,6 +38,9 @@
 \method{print}{sessioncheck_sessionstate}(
   x,
   platform = NULL,
+  locale = NULL,
+  matrix = NULL,
+  document = NULL,
   machine = NULL,
   git = NULL,
   timing = NULL,
@@ -54,10 +60,23 @@ or \code{sessioncheck_sessionstate}}
 
 \item{platform}{For \code{sessioncheck_sessionstate} objects, an optional character
 vector selecting which platform fields to display (from \code{"version"}, \code{"os"},
-\code{"system"}, \code{"ui"}, \code{"language"}, \code{"collate"}, \code{"ctype"}, \code{"tz"}, \code{"date"},
-\code{"blas"}, \code{"lapack"}, \code{"pandoc"}, \code{"quarto"}). Defaults to showing all
-fields. Ignored for other classes. See Details for how the default is
-resolved.}
+\code{"system"}, \code{"ui"}, \code{"tz"}, \code{"date"}). Defaults to showing all fields.
+Ignored for other classes. See Details for how the default is resolved.}
+
+\item{locale}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which locale fields to display (from \code{"language"},
+\code{"collate"}, \code{"ctype"}). Defaults to showing all fields. Ignored for
+other classes. See Details for how the default is resolved.}
+
+\item{matrix}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which matrix-products fields to display (from \code{"blas"},
+\code{"lapack"}). Defaults to showing all fields. Ignored for other classes.
+See Details for how the default is resolved.}
+
+\item{document}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which document-products fields to display (from
+\code{"pandoc"}, \code{"quarto"}). Defaults to showing all fields. Ignored for
+other classes. See Details for how the default is resolved.}
 
 \item{machine}{For \code{sessioncheck_sessionstate} objects, an optional character
 vector selecting which machine fields to display (from \code{"nodename"},
@@ -109,11 +128,13 @@ Character vector
 Format and print sessioncheck objects
 }
 \details{
-For \code{sessioncheck_sessionstate} objects, the \code{platform}/\code{machine}/\code{git}/
-\code{timing}/\code{rng}/\code{packages}/\code{globalenv}/\code{globalenv_n}/\code{attachments}
+For \code{sessioncheck_sessionstate} objects, the \code{platform}/\code{locale}/\code{matrix}/
+\code{document}/\code{machine}/\code{git}/\code{timing}/\code{rng}/\code{packages}/\code{globalenv}/
+\code{globalenv_n}/\code{attachments}
 arguments are resolved through the same precedence used elsewhere in the
 package: an explicit argument always wins; otherwise,
 \code{getOption("sessioncheck")} is checked for a \code{sessionstate_platform},
+\code{sessionstate_locale}, \code{sessionstate_matrix}, \code{sessionstate_document},
 \code{sessionstate_machine}, \code{sessionstate_git}, \code{sessionstate_timing},
 \code{sessionstate_rng}, \code{sessionstate_packages}, \code{sessionstate_globalenv},
 \code{sessionstate_globalenv_n}, or \code{sessionstate_attachments} field

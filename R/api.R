@@ -13,8 +13,8 @@
 #' produce an audit log of the environment the script actually ran in.
 #'
 #' @returns An object of class `sessioncheck_sessionstate`, a list with
-#' elements `platform`, `machine`, `git`, `timing`, `rng`, `libpaths`,
-#' `packages`, `globalenv`, and `attachments`.
+#' elements `platform`, `locale`, `matrix`, `document`, `machine`, `git`,
+#' `timing`, `rng`, `libpaths`, `packages`, `globalenv`, and `attachments`.
 #'
 #' @details
 #' The `machine` element includes the node name and user reported by
@@ -84,7 +84,19 @@
 #' only the largest few (see below); the captured object itself always holds
 #' every object.
 #'
-#' The `platform` element's `pandoc` and `quarto` fields record the versions
+#' The `locale` element records `language`, `collate`, and `ctype`. These
+#' are split out from `platform` because they describe how text and dates
+#' are formatted for this session, rather than what/where/when the session
+#' is running.
+#'
+#' The `matrix` element records `blas` and `lapack`, the shared libraries
+#' backing R's linear algebra routines (as reported by
+#' [extSoftVersion()] and [La_library()]). Like `locale`, this is split out
+#' from `platform` -- in this case mirroring how base R's
+#' [utils::sessionInfo()] treats "Matrix products" as its own block rather
+#' than nesting it under platform info.
+#'
+#' The `document` element's `pandoc` and `quarto` fields record the versions
 #' of those two document-rendering tools, if found (`NA` otherwise). Both
 #' checks prefer the IDE-provided location over whatever happens to be on
 #' `PATH` (`RSTUDIO_PANDOC` for pandoc, `QUARTO_PATH` for quarto), since
@@ -94,7 +106,9 @@
 #' rather than session-wide, and tracking them well would mean tracking
 #' many of them; `pandoc`/`quarto` are included because they, like
 #' BLAS/LAPACK, are already tracked by [utils::sessionInfo()] or
-#' [sessioninfo::session_info()].
+#' [sessioninfo::session_info()]. `document` has no `sessionInfo()`
+#' precedent (unlike `matrix`), but is grouped the same way for
+#' consistency.
 #'
 #' The `attachments` element is a data frame with one row per entry on the
 #' search path (as returned by [search()]), with columns `name` and `type`
@@ -104,9 +118,9 @@
 #'
 #' `sessionstate()` itself always captures every field in full (`globalenv`
 #' is never truncated at capture time). To display only a subset when
-#' printing, pass `platform`/`machine`/`git`/`timing`/`rng`/`packages`/
-#' `globalenv`/`attachments` arguments to `print()` or `format()` on the
-#' result, or set
+#' printing, pass `platform`/`locale`/`matrix`/`document`/`machine`/`git`/
+#' `timing`/`rng`/`packages`/`globalenv`/`attachments` arguments to
+#' `print()` or `format()` on the result, or set
 #' defaults via `options(sessioncheck = list(sessionstate_packages = ...))`
 #' (see [display_methods] for the full precedence rules and option names).
 #' The `globalenv_n` argument separately controls how many rows of
@@ -124,6 +138,9 @@
 sessionstate <- function() {
   new_sessionstate(
     platform    = .get_platform_info(),
+    locale      = .get_locale_info(),
+    matrix      = .get_matrix_info(),
+    document    = .get_document_info(),
     machine     = .get_machine_info(),
     git         = .get_git_info(),
     timing      = .get_timing_info(),

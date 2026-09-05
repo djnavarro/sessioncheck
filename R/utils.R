@@ -48,28 +48,49 @@
 # sessionstate helpers ------
 
 .get_platform_info <- function() {
-  lc <- .get_locale_list()
   os <- tryCatch(utils::osVersion, error = function(e) NA_character_)
   if (is.null(os) || is.na(os) || !nzchar(os)) {
     os <- paste(Sys.info()[["sysname"]], Sys.info()[["release"]])
   }
-  ui <- .get_ui()
-  blas <- unname(extSoftVersion()[["BLAS"]])
-  lapack <- La_library()
   list(
-    version  = R.version.string,
-    os       = os,
-    system   = paste(R.version$system),
-    ui       = ui,
+    version = R.version.string,
+    os      = os,
+    system  = paste(R.version$system),
+    ui      = .get_ui(),
+    tz      = Sys.timezone(),
+    date    = as.character(Sys.Date())
+  )
+}
+
+# split out from .get_platform_info(): language/collate/ctype describe how
+# text and dates are formatted for this session, a different dimension
+# from the "what/where/when is this session running" facts platform covers
+.get_locale_info <- function() {
+  lc <- .get_locale_list()
+  list(
     language = Sys.getenv("LANGUAGE", unset = NA_character_),
     collate  = lc[["LC_COLLATE"]],
-    ctype    = lc[["LC_CTYPE"]],
-    tz       = Sys.timezone(),
-    date     = as.character(Sys.Date()),
-    blas     = blas,
-    lapack   = lapack,
-    pandoc   = .get_pandoc_version(),
-    quarto   = .get_quarto_version()
+    ctype    = lc[["LC_CTYPE"]]
+  )
+}
+
+# split out from .get_platform_info(), mirroring how base R's sessionInfo()
+# treats "Matrix products" as its own block rather than nesting it under
+# platform info
+.get_matrix_info <- function() {
+  list(
+    blas   = unname(extSoftVersion()[["BLAS"]]),
+    lapack = La_library()
+  )
+}
+
+# split out from .get_platform_info() for the same reason as
+# .get_matrix_info(): a novel addition (no sessionInfo() precedent), but
+# grouped the same way for consistency
+.get_document_info <- function() {
+  list(
+    pandoc = .get_pandoc_version(),
+    quarto = .get_quarto_version()
   )
 }
 
@@ -384,9 +405,22 @@
 }
 
 # the library path a package currently resolves to on disk, via the normal
-# search mechanism used to load packages
+# search mechanism used to load packages. When the loaded namespace's
+# library was never part of .libPaths() at all (e.g. library(pkg,
+# lib.loc = <private lib>), as R CMD check does for the package under
+# test), that library is searched first: otherwise this would report
+# drift against .libPaths() that never really happened -- the package was
+# just loaded through an out-of-band mechanism, not moved. When the
+# loaded library *is* part of .libPaths() (the ordinary case), search
+# order is left untouched, so a genuine mid-session .libPaths() change
+# that shadows the loaded copy with a different one is still detected
 .get_ondisk_path <- function(pkg) {
-  p <- system.file(package = pkg, lib.loc = .libPaths())
+  lib_loc <- .libPaths()
+  loaded_path <- .get_loaded_path(pkg)
+  if (!is.na(loaded_path) && !(dirname(loaded_path) %in% lib_loc)) {
+    lib_loc <- c(dirname(loaded_path), lib_loc)
+  }
+  p <- system.file(package = pkg, lib.loc = lib_loc)
   if (!nzchar(p)) NA_character_ else p
 }
 
