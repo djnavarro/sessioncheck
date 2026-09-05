@@ -173,25 +173,25 @@ cannot be lossless.
 ``` r
 sessionstate()
 #> ─ Platform ─────────────────────────────────────────────────────────────────────
-#> • version         R version 4.6.1 (2026-06-24)
-#> • os              Ubuntu 24.04.4 LTS
-#> • system          x86_64, linux-gnu
-#> • ui              non-interactive
-#> • tz              UTC
-#> • date            2026-09-05
+#> • version             R version 4.6.1 (2026-06-24)
+#> • os                  Ubuntu 24.04.4 LTS
+#> • system              x86_64, linux-gnu
+#> • ui                  non-interactive
+#> • tz                  UTC
+#> • date                2026-09-05
 #> 
 #> ─ Locale ───────────────────────────────────────────────────────────────────────
-#> • language        en-US
-#> • collate         C
-#> • ctype           C.UTF-8
+#> • language            en-US
+#> • collate             C
+#> • ctype               C.UTF-8
 #> 
 #> ─ Matrix products ──────────────────────────────────────────────────────────────
-#> • BLAS            /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
-#> • LAPACK          /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so
+#> • BLAS                /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
+#> • LAPACK              /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so
 #> 
 #> ─ Document products ────────────────────────────────────────────────────────────
-#> • pandoc          3.8.3
-#> • quarto          (not found)
+#> • pandoc              3.8.3
+#> • quarto              (not found)
 #> 
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> • hostname            runnervmejwal
@@ -199,18 +199,18 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/docs/reference
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha      bf2461443408c4c53341bee061baff9bbbde7b9c
-#> • dirty           FALSE
+#> • commit sha          e5d60a0884bc4d3a92863080e2d54bdcce5026f5
+#> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at              2026-09-05 13:49:35 UTC
-#> • session runtime (sec)    7.834
+#> • captured at         2026-09-05 14:08:05 UTC
+#> • session uptime      9.06 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
-#> • kind            Mersenne-Twister
-#> • normal kind     Inversion
-#> • sample kind     Rejection
-#> • seed hash       b71d56b44eb5ee9ceb53ef4cf66a2ed4
+#> • kind                Mersenne-Twister
+#> • normal kind         Inversion
+#> • sample kind         Rejection
+#> • seed hash           b71d56b44eb5ee9ceb53ef4cf66a2ed4
 #> 
 #> ─ Library paths [n = 3] ────────────────────────────────────────────────────────
 #> • /home/runner/work/_temp/Library
