@@ -1,5 +1,5 @@
 ---
-title: "sessionstate() versus sessionInfo() and session_info()"
+title: "Reporting the session state"
 ---
 
 ```{r, include = FALSE}
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 library(sessioncheck)
 ```
 
-Base R already ships a tool for reporting on the state of a session, [`utils::sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html), and the [**sessioninfo**](https://sessioninfo.r-lib.org/) package offers a more detailed replacement, `sessioninfo::session_info()`. **sessioncheck** adds a third option, `sessionstate()`. This article explains how `sessionstate()` relates to the other two, what it adds, and -- because it adds quite a lot -- what you give up in return, namely some privacy.
+In addition to tools for checking the state of an R session, **sessioncheck** also provides a `sessionstate()` function that can be used to report on the overall state of an R session. This function is similar in spirit to the [`utils::sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html) function available in base R, and also to the [**sessioninfo**](https://sessioninfo.r-lib.org/) package that offers a more detailed replacement, `sessioninfo::session_info()`. This article explains what `sessionstate()` does, and the ways in which it is similar to but also different from the existing tools. In particular, it discusses what `sessionstate()` adds over and above what the other two functions report, and -- because it does add quite a lot of new information -- what you give up in return, namely some privacy.
 
 ## Two different jobs
 
