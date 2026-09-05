@@ -1,16 +1,33 @@
 test_that("sessionstate() returns a well-formed sessioncheck_sessionstate object", {
   x <- sessionstate()
   expect_s3_class(x, "sessioncheck_sessionstate")
-  expect_named(x, c("platform", "machine", "git", "timing", "rng", "packages", "globalenv", "attachments"))
+  expect_named(
+    x, c("platform", "machine", "git", "timing", "rng", "libpaths", "packages", "globalenv", "attachments")
+  )
   expect_true(is.list(x$platform))
   expect_true(is.list(x$machine))
   expect_true(is.list(x$timing))
   expect_true(is.list(x$rng))
   expect_true(is.list(x$git))
   expect_identical(x$machine$cwd, getwd())
+  expect_true(is.character(x$libpaths))
+  expect_identical(x$libpaths, .libPaths())
   expect_s3_class(x$packages, "data.frame")
   expect_s3_class(x$globalenv, "data.frame")
   expect_s3_class(x$attachments, "data.frame")
+})
+
+test_that(".get_libpaths_info() returns .libPaths()", {
+  expect_identical(.get_libpaths_info(), .libPaths())
+})
+
+test_that("format.sessioncheck_sessionstate() lists every library path", {
+  local_mocked_bindings(.get_libpaths_info = function() c("/lib/one", "/lib/two"))
+  x <- sessionstate()
+  txt <- format(x)
+  expect_match(txt, "Library paths \\[n = 2\\]:", fixed = FALSE)
+  expect_match(txt, "1  /lib/one", fixed = TRUE)
+  expect_match(txt, "2  /lib/two", fixed = TRUE)
 })
 
 test_that(".get_rng_info() reports RNGkind() and a seed hash", {

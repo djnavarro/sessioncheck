@@ -8,8 +8,8 @@ sessionstate()
 }
 \value{
 An object of class \code{sessioncheck_sessionstate}, a list with
-elements \code{platform}, \code{machine}, \code{git}, \code{timing}, \code{rng}, \code{packages},
-\code{globalenv}, and \code{attachments}.
+elements \code{platform}, \code{machine}, \code{git}, \code{timing}, \code{rng}, \code{libpaths},
+\code{packages}, \code{globalenv}, and \code{attachments}.
 }
 \description{
 \code{sessionstate()} captures a point-in-time, human-readable snapshot of the R
@@ -55,6 +55,16 @@ printing the seed itself: for example, comparing \code{seed_hash} between two
 rendered versions of the same Quarto/R Markdown document shows whether
 an edit changed the RNG state anywhere upstream, without having to
 inspect or store the (long, not directly meaningful) seed value.
+
+The \code{libpaths} element is the character vector returned by \code{\link[=.libPaths]{.libPaths()}},
+i.e. the library locations R searches, in search order. It complements
+\code{packages}: that element records where each individual package resolved
+\emph{to} (\code{ondisk_path}), while \code{libpaths} records where R was looking in the
+first place, which matters when, e.g., a project-local library shadows a
+personal one. Unlike the other elements, there is no corresponding
+display-filtering argument for \code{libpaths}, since it is already a flat
+list of paths rather than a set of named fields or columns to choose
+among; it is always shown in full.
 
 The \code{packages} element covers every package that is either attached to
 the search path or loaded via namespace (i.e., \code{union(.packages(), loadedNamespaces())}). It has columns \code{package}, \code{attached},

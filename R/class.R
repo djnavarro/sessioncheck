@@ -14,11 +14,11 @@ new_sessioncheck <- function(...) {
   structure(list(...), class = "sessioncheck_sessioncheck")
 }
 
-new_sessionstate <- function(platform, machine, git, timing, rng, packages, globalenv, attachments) {
+new_sessionstate <- function(platform, machine, git, timing, rng, libpaths, packages, globalenv, attachments) {
   structure(
     list(
       platform = platform, machine = machine, git = git, timing = timing, rng = rng,
-      packages = packages, globalenv = globalenv, attachments = attachments
+      libpaths = libpaths, packages = packages, globalenv = globalenv, attachments = attachments
     ),
     class = "sessioncheck_sessionstate"
   )
@@ -198,6 +198,12 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL,
   rng_fields <- .select_fields(names(rng_all), rng, "rng")
   rng_lines <- c("RNG state:", rng_all[rng_fields])
 
+  libpaths <- x$libpaths
+  libpaths_lines <- c(
+    sprintf("Library paths [n = %d]:", length(libpaths)),
+    paste0(" ", seq_along(libpaths), "  ", libpaths)
+  )
+
   pkg_df <- x$packages
   packages <- .resolve_field_selection(
     packages, "sessionstate_packages",
@@ -245,7 +251,7 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL,
   paste(
     c(
       platform_lines, "", machine_lines, "", git_lines, "", timing_lines, "", rng_lines, "",
-      pkg_lines, "", genv_lines, "", att_lines
+      libpaths_lines, "", pkg_lines, "", genv_lines, "", att_lines
     ),
     collapse = "\n"
   )

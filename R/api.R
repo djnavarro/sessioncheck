@@ -13,8 +13,8 @@
 #' produce an audit log of the environment the script actually ran in.
 #'
 #' @returns An object of class `sessioncheck_sessionstate`, a list with
-#' elements `platform`, `machine`, `git`, `timing`, `rng`, `packages`,
-#' `globalenv`, and `attachments`.
+#' elements `platform`, `machine`, `git`, `timing`, `rng`, `libpaths`,
+#' `packages`, `globalenv`, and `attachments`.
 #'
 #' @details
 #' The `machine` element includes the node name and user reported by
@@ -49,6 +49,16 @@
 #' rendered versions of the same Quarto/R Markdown document shows whether
 #' an edit changed the RNG state anywhere upstream, without having to
 #' inspect or store the (long, not directly meaningful) seed value.
+#'
+#' The `libpaths` element is the character vector returned by [.libPaths()],
+#' i.e. the library locations R searches, in search order. It complements
+#' `packages`: that element records where each individual package resolved
+#' *to* (`ondisk_path`), while `libpaths` records where R was looking in the
+#' first place, which matters when, e.g., a project-local library shadows a
+#' personal one. Unlike the other elements, there is no corresponding
+#' display-filtering argument for `libpaths`, since it is already a flat
+#' list of paths rather than a set of named fields or columns to choose
+#' among; it is always shown in full.
 #'
 #' The `packages` element covers every package that is either attached to
 #' the search path or loaded via namespace (i.e., `union(.packages(),
@@ -118,6 +128,7 @@ sessionstate <- function() {
     git         = .get_git_info(),
     timing      = .get_timing_info(),
     rng         = .get_rng_info(),
+    libpaths    = .get_libpaths_info(),
     packages    = .get_package_inventory(),
     globalenv   = .get_globalenv_info(),
     attachments = .get_search_path_info()

@@ -149,6 +149,8 @@
   )
 }
 
+.get_libpaths_info <- function() .libPaths()
+
 .get_git_info <- function() {
   sha <- .run_git_command(c("rev-parse", "HEAD"))
   if (is.na(sha)) return(list(sha = NA_character_, dirty = NA))
