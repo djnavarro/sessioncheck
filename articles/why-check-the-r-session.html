@@ -220,9 +220,9 @@ contaminated environment:</p>
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Session check results:</span></span>
-<span><span class="co">#&gt; - Objects in global environment: my_data</span></span>
-<span><span class="co">#&gt; - Attached packages: sessioncheck</span></span>
-<span><span class="co">#&gt; - Attached environments: my_data</span></span></code></pre></div>
+<span><span class="co">#&gt; ✖ Objects in global environment: my_data</span></span>
+<span><span class="co">#&gt; ✖ Attached packages: sessioncheck</span></span>
+<span><span class="co">#&gt; ✖ Attached environments: my_data</span></span></code></pre></div>
 <p>If this code were placed at the top of the user script, that script
 would simply refuse to run in this contaminated environment. It would
 produce an error that indicates which checks were performed, and lists
@@ -248,9 +248,9 @@ approach, it still produces an error:</p>
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="st">"error"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Session check results:</span></span>
-<span><span class="co">#&gt; - Objects in global environment: [no issues detected]</span></span>
-<span><span class="co">#&gt; - Attached packages: sessioncheck</span></span>
-<span><span class="co">#&gt; - Attached environments: my_data</span></span></code></pre></div>
+<span><span class="co">#&gt; ✔ Objects in global environment: [no issues detected]</span></span>
+<span><span class="co">#&gt; ✖ Attached packages: sessioncheck</span></span>
+<span><span class="co">#&gt; ✖ Attached environments: my_data</span></span></code></pre></div>
 <p>Under normal circumstances the thing that the user – a human being –
 would likely do next is restart the R session, and all of these problems
 would go away. That is the intended way to use

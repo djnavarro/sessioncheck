@@ -50,6 +50,10 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="sessioncheck-development-version">sessioncheck (development version)<a class="anchor" aria-label="anchor" href="#sessioncheck-development-version"></a></h2>
 <div class="section level3">
+<h3 id="improvements-development-version">Improvements<a class="anchor" aria-label="anchor" href="#improvements-development-version"></a></h3>
+<ul><li>Formatted output (from <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code>, and messages/warnings raised by <code>action = "message"</code>/<code>"warn"</code>) is now nicer to read, with a cli-like style.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
 <ul><li>Added <code><a href="../reference/sessionstate.html">sessionstate()</a></code>, a companion to <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> intended for use at the <em>end</em> of a script as an audit log. It reports platform details (R version, OS, matrix products, locale, timezone, UI/frontend), selected machine information from <code><a href="https://rdrr.io/r/base/Sys.info.html" class="external-link">Sys.info()</a></code>, session timing, RNG state, and an inventory of attached and loaded-namespace packages, similar to <code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code>. Returns an object of class <code>sessioncheck_sessionstate</code> with <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code>, <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, and <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> methods.</li>
 </ul></div>

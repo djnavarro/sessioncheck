@@ -2,6 +2,13 @@
 
 ## sessioncheck (development version)
 
+### Improvements
+
+- Formatted output (from [`print()`](https://rdrr.io/r/base/print.html),
+  [`format()`](https://rdrr.io/r/base/format.html), and
+  messages/warnings raised by `action = "message"`/`"warn"`) is now
+  nicer to read, with a cli-like style.
+
 ### New features
 
 - Added

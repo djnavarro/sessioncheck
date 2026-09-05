@@ -50,6 +50,6 @@ will not trigger actions.
 
 ``` r
 check_attached_packages(action = "message")
-#> Attached packages: sessioncheck
+#> ✖ Attached packages: sessioncheck
  
 ```

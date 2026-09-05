@@ -169,9 +169,9 @@ is called in a contaminated environment:
 sessioncheck::sessioncheck("error")
 #> Error:
 #> ! Session check results:
-#> - Objects in global environment: my_data
-#> - Attached packages: sessioncheck
-#> - Attached environments: my_data
+#> ✖ Objects in global environment: my_data
+#> ✖ Attached packages: sessioncheck
+#> ✖ Attached environments: my_data
 ```
 
 If this code were placed at the top of the user script, that script
@@ -211,9 +211,9 @@ it still produces an error:
 sessioncheck::sessioncheck("error")
 #> Error:
 #> ! Session check results:
-#> - Objects in global environment: [no issues detected]
-#> - Attached packages: sessioncheck
-#> - Attached environments: my_data
+#> ✔ Objects in global environment: [no issues detected]
+#> ✖ Attached packages: sessioncheck
+#> ✖ Attached environments: my_data
 ```
 
 Under normal circumstances the thing that the user – a human being –

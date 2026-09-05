@@ -137,7 +137,7 @@ function created the status object.</li>
 the user in any message, warning, or error:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pkg_status</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Attached packages: sessioncheck</span></span></code></pre></div>
+<span><span class="co">#&gt; ✖ Attached packages: sessioncheck</span></span></code></pre></div>
 <p>As a convenience, an <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> method is also
 supplied:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -199,9 +199,9 @@ are used to construct the text to be displayed to the user:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">session_check</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Session check results:</span></span>
-<span><span class="co">#&gt; - Objects in global environment: obj_status, pkg_status</span></span>
-<span><span class="co">#&gt; - Attached packages: sessioncheck</span></span>
-<span><span class="co">#&gt; - Attached environments: [no issues detected]</span></span></code></pre></div>
+<span><span class="co">#&gt; ✖ Objects in global environment: obj_status, pkg_status</span></span>
+<span><span class="co">#&gt; ✖ Attached packages: sessioncheck</span></span>
+<span><span class="co">#&gt; ✔ Attached environments: [no issues detected]</span></span></code></pre></div>
 <p>Similarly, there is an <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> method provided
 as a convenience:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -265,49 +265,49 @@ component, plus <code>globalenv_n</code>) that select which fields or
 columns to display, without touching the underlying object:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">session_state</span>, packages <span class="op">=</span> <span class="st">"package"</span>, globalenv <span class="op">=</span> <span class="st">"class"</span>, machine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Platform:</span></span>
-<span><span class="co">#&gt;  version         R version 4.6.1 (2026-06-24)</span></span>
-<span><span class="co">#&gt;  os              Ubuntu 24.04.4 LTS</span></span>
-<span><span class="co">#&gt;  system          x86_64, linux-gnu</span></span>
-<span><span class="co">#&gt;  ui              non-interactive</span></span>
-<span><span class="co">#&gt;  tz              UTC</span></span>
-<span><span class="co">#&gt;  date            2026-09-05</span></span>
+<span><span class="co">#&gt; ─ Platform ─────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • version         R version 4.6.1 (2026-06-24)</span></span>
+<span><span class="co">#&gt; • os              Ubuntu 24.04.4 LTS</span></span>
+<span><span class="co">#&gt; • system          x86_64, linux-gnu</span></span>
+<span><span class="co">#&gt; • ui              non-interactive</span></span>
+<span><span class="co">#&gt; • tz              UTC</span></span>
+<span><span class="co">#&gt; • date            2026-09-05</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Locale:</span></span>
-<span><span class="co">#&gt;  language        en-US</span></span>
-<span><span class="co">#&gt;  collate         C.UTF-8</span></span>
-<span><span class="co">#&gt;  ctype           C.UTF-8</span></span>
+<span><span class="co">#&gt; ─ Locale ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • language        en-US</span></span>
+<span><span class="co">#&gt; • collate         C.UTF-8</span></span>
+<span><span class="co">#&gt; • ctype           C.UTF-8</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Matrix products:</span></span>
-<span><span class="co">#&gt;  BLAS            /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3</span></span>
-<span><span class="co">#&gt;  LAPACK          /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so</span></span>
+<span><span class="co">#&gt; ─ Matrix products ──────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • BLAS            /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3</span></span>
+<span><span class="co">#&gt; • LAPACK          /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Document products:</span></span>
-<span><span class="co">#&gt;  pandoc          3.8.3</span></span>
-<span><span class="co">#&gt;  quarto          (not found)</span></span>
+<span><span class="co">#&gt; ─ Document products ────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • pandoc          3.8.3</span></span>
+<span><span class="co">#&gt; • quarto          (not found)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Machine:</span></span>
+<span><span class="co">#&gt; ─ Machine ──────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Git:</span></span>
-<span><span class="co">#&gt;  commit sha      d189028879a88b309e82625b5be80018f7e2f16c</span></span>
-<span><span class="co">#&gt;  dirty           FALSE</span></span>
+<span><span class="co">#&gt; ─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • commit sha      e9b01e150baf84de167b7e21de9630947f83e519</span></span>
+<span><span class="co">#&gt; • dirty           FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Timing:</span></span>
-<span><span class="co">#&gt;  captured at              2026-09-05 11:58:39 UTC</span></span>
-<span><span class="co">#&gt;  session runtime (sec)    0.852</span></span>
+<span><span class="co">#&gt; ─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • captured at              2026-09-05 13:43:53 UTC</span></span>
+<span><span class="co">#&gt; • session runtime (sec)    0.818</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; RNG state:</span></span>
-<span><span class="co">#&gt;  kind            Mersenne-Twister</span></span>
-<span><span class="co">#&gt;  normal kind     Inversion</span></span>
-<span><span class="co">#&gt;  sample kind     Rejection</span></span>
-<span><span class="co">#&gt;  seed hash       b71d56b44eb5ee9ceb53ef4cf66a2ed4</span></span>
+<span><span class="co">#&gt; ─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • kind            Mersenne-Twister</span></span>
+<span><span class="co">#&gt; • normal kind     Inversion</span></span>
+<span><span class="co">#&gt; • sample kind     Rejection</span></span>
+<span><span class="co">#&gt; • seed hash       b71d56b44eb5ee9ceb53ef4cf66a2ed4</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Library paths [n = 3]:</span></span>
-<span><span class="co">#&gt;  1  /home/runner/work/_temp/Library</span></span>
-<span><span class="co">#&gt;  2  /opt/R/4.6.1/lib/R/site-library</span></span>
-<span><span class="co">#&gt;  3  /opt/R/4.6.1/lib/R/library</span></span>
+<span><span class="co">#&gt; ─ Library paths [n = 3] ────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • /home/runner/work/_temp/Library</span></span>
+<span><span class="co">#&gt; • /opt/R/4.6.1/lib/R/site-library</span></span>
+<span><span class="co">#&gt; • /opt/R/4.6.1/lib/R/library</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Packages [n = 34] (attached + loaded via namespace):</span></span>
+<span><span class="co">#&gt; ─ Packages [n = 34] (attached + loaded via namespace) ──────────────────────────</span></span>
 <span><span class="co">#&gt;       package</span></span>
 <span><span class="co">#&gt;          base</span></span>
 <span><span class="co">#&gt;         bslib</span></span>
@@ -344,14 +344,14 @@ columns to display, without touching the underlying object:</p>
 <span><span class="co">#&gt;          xfun</span></span>
 <span><span class="co">#&gt;          yaml</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Global environment [n = 4]:</span></span>
+<span><span class="co">#&gt; ─ Global environment [n = 4] ───────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;                      class</span></span>
 <span><span class="co">#&gt;  sessioncheck_sessioncheck</span></span>
 <span><span class="co">#&gt;                    integer</span></span>
 <span><span class="co">#&gt;        sessioncheck_status</span></span>
 <span><span class="co">#&gt;        sessioncheck_status</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attached environments [n = 11]:</span></span>
+<span><span class="co">#&gt; ─ Attached environments [n = 11] ───────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;                  name    type</span></span>
 <span><span class="co">#&gt;            .GlobalEnv   other</span></span>
 <span><span class="co">#&gt;  package:sessioncheck package</span></span>

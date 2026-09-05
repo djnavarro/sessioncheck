@@ -172,52 +172,52 @@ cannot be lossless.
 
 ``` r
 sessionstate()
-#> Platform:
-#>  version         R version 4.6.1 (2026-06-24)
-#>  os              Ubuntu 24.04.4 LTS
-#>  system          x86_64, linux-gnu
-#>  ui              non-interactive
-#>  tz              UTC
-#>  date            2026-09-05
+#> ─ Platform ─────────────────────────────────────────────────────────────────────
+#> • version         R version 4.6.1 (2026-06-24)
+#> • os              Ubuntu 24.04.4 LTS
+#> • system          x86_64, linux-gnu
+#> • ui              non-interactive
+#> • tz              UTC
+#> • date            2026-09-05
 #> 
-#> Locale:
-#>  language        en-US
-#>  collate         C
-#>  ctype           C.UTF-8
+#> ─ Locale ───────────────────────────────────────────────────────────────────────
+#> • language        en-US
+#> • collate         C
+#> • ctype           C.UTF-8
 #> 
-#> Matrix products:
-#>  BLAS            /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
-#>  LAPACK          /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so
+#> ─ Matrix products ──────────────────────────────────────────────────────────────
+#> • BLAS            /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
+#> • LAPACK          /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so
 #> 
-#> Document products:
-#>  pandoc          3.8.3
-#>  quarto          (not found)
+#> ─ Document products ────────────────────────────────────────────────────────────
+#> • pandoc          3.8.3
+#> • quarto          (not found)
 #> 
-#> Machine:
-#>  hostname            runnervmejwal
-#>  user                runner
-#>  working directory   /home/runner/work/sessioncheck/sessioncheck/docs/reference
+#> ─ Machine ──────────────────────────────────────────────────────────────────────
+#> • hostname            runnervmejwal
+#> • user                runner
+#> • working directory   /home/runner/work/sessioncheck/sessioncheck/docs/reference
 #> 
-#> Git:
-#>  commit sha      d189028879a88b309e82625b5be80018f7e2f16c
-#>  dirty           FALSE
+#> ─ Git ──────────────────────────────────────────────────────────────────────────
+#> • commit sha      e9b01e150baf84de167b7e21de9630947f83e519
+#> • dirty           FALSE
 #> 
-#> Timing:
-#>  captured at              2026-09-05 11:58:32 UTC
-#>  session runtime (sec)    7.715
+#> ─ Timing ───────────────────────────────────────────────────────────────────────
+#> • captured at              2026-09-05 13:43:46 UTC
+#> • session runtime (sec)    8.362
 #> 
-#> RNG state:
-#>  kind            Mersenne-Twister
-#>  normal kind     Inversion
-#>  sample kind     Rejection
-#>  seed hash       b71d56b44eb5ee9ceb53ef4cf66a2ed4
+#> ─ RNG state ────────────────────────────────────────────────────────────────────
+#> • kind            Mersenne-Twister
+#> • normal kind     Inversion
+#> • sample kind     Rejection
+#> • seed hash       b71d56b44eb5ee9ceb53ef4cf66a2ed4
 #> 
-#> Library paths [n = 3]:
-#>  1  /home/runner/work/_temp/Library
-#>  2  /opt/R/4.6.1/lib/R/site-library
-#>  3  /opt/R/4.6.1/lib/R/library
+#> ─ Library paths [n = 3] ────────────────────────────────────────────────────────
+#> • /home/runner/work/_temp/Library
+#> • /opt/R/4.6.1/lib/R/site-library
+#> • /opt/R/4.6.1/lib/R/library
 #> 
-#> Packages [n = 56] (attached + loaded via namespace):
+#> ─ Packages [n = 56] (attached + loaded via namespace) ──────────────────────────
 #>         package attached loaded_version
 #>              R6                   2.6.1
 #>         askpass                   1.2.1
@@ -333,11 +333,11 @@ sessionstate()
 #>                                                           RSPM (R 4.6.0)
 #>                                                           RSPM (R 4.6.0)
 #> 
-#> Global environment [n = 1]:
+#> ─ Global environment [n = 1] ───────────────────────────────────────────────────
 #>          name   class   size
 #>  .Random.seed integer 2.5 Kb
 #> 
-#> Attached environments [n = 10]:
+#> ─ Attached environments [n = 10] ───────────────────────────────────────────────
 #>                  name    type
 #>            .GlobalEnv   other
 #>  package:sessioncheck package

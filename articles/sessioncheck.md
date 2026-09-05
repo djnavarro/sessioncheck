@@ -97,9 +97,9 @@ visible_2 <- "so will this"
 
 sessioncheck::sessioncheck()
 #> Warning: Session check results:
-#> - Objects in global environment: visible_1, visible_2
-#> - Attached packages: [no issues detected]
-#> - Attached environments: [no issues detected]
+#> ✖ Objects in global environment: visible_1, visible_2
+#> ✔ Attached packages: [no issues detected]
+#> ✔ Attached environments: [no issues detected]
 ```
 
 The first line of this output indicates that the script has detected
@@ -113,9 +113,9 @@ refuse to run if the R session is not deemed to be clean:
 sessioncheck::sessioncheck(action = "error")
 #> Error:
 #> ! Session check results:
-#> - Objects in global environment: visible_1, visible_2
-#> - Attached packages: [no issues detected]
-#> - Attached environments: [no issues detected]
+#> ✖ Objects in global environment: visible_1, visible_2
+#> ✔ Attached packages: [no issues detected]
+#> ✔ Attached environments: [no issues detected]
 ```
 
 By default,
@@ -139,9 +139,9 @@ attach(iris)   # attached data frames are detected
 
 sessioncheck::sessioncheck()
 #> Warning: Session check results:
-#> - Objects in global environment: visible_1, visible_2
-#> - Attached packages: knitr
-#> - Attached environments: iris
+#> ✖ Objects in global environment: visible_1, visible_2
+#> ✖ Attached packages: knitr
+#> ✖ Attached environments: iris
 ```
 
 To an experienced R user it will likely be obvious that these three

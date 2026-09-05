@@ -41,5 +41,5 @@ Invisibly returns an object of class `sessioncheck_status`.
 
 ``` r
 check_required_options(action = "message", required_options = list(scipen = 0L, max.print = 50L))
-#> Unexpected options: max.print
+#> ✖ Unexpected options: max.print
 ```

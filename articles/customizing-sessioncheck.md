@@ -60,7 +60,7 @@ sessioncheck::sessioncheck(
   checks = "loaded_namespaces"
 )
 #> Warning: Session check results:
-#> - Loaded namespaces: digest, desc, R6, fastmap, and 20 more
+#> ✖ Loaded namespaces: digest, desc, R6, fastmap, and 20 more
 ```
 
 The individual checks can themselves be customized. Each check function
@@ -77,8 +77,8 @@ sessioncheck::sessioncheck(
   required_options = list(scipen = 0L, max.print = 50L)
 )
 #> Warning: Session check results:
-#> - Loaded namespaces: digest, desc, R6, fastmap, and 18 more
-#> - Unexpected options: max.print
+#> ✖ Loaded namespaces: digest, desc, R6, fastmap, and 18 more
+#> ✖ Unexpected options: max.print
 ```
 
 The relevant arguments that can be passed via `...` are as follows:
@@ -124,8 +124,8 @@ will now use these values:
 
 sessioncheck::sessioncheck()
 #> Session check results:
-#> - Loaded namespaces: digest, desc, R6, fastmap, and 18 more
-#> - Unexpected options: max.print
+#> ✖ Loaded namespaces: digest, desc, R6, fastmap, and 18 more
+#> ✖ Unexpected options: max.print
 ```
 
 For more information on the specifics of each check, please see the

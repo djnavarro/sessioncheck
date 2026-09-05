@@ -41,5 +41,5 @@ Invisibly returns an object of class `sessioncheck_status`.
 
 ``` r
 check_required_locale(action = "message", required_locale = list(LC_TIME = "en_US.UTF-8"))
-#> Unexpected locale settings: LC_TIME
+#> ✖ Unexpected locale settings: LC_TIME
 ```

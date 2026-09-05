@@ -133,7 +133,7 @@ corresponds to this:</p>
 <span>  checks <span class="op">=</span> <span class="st">"loaded_namespaces"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Session check results:</span></span>
-<span><span class="co">#&gt; - Loaded namespaces: digest, desc, R6, fastmap, and 20 more</span></span></code></pre></div>
+<span><span class="co">#&gt; ✖ Loaded namespaces: digest, desc, R6, fastmap, and 20 more</span></span></code></pre></div>
 <p>The individual checks can themselves be customized. Each check
 function has one extra argument that is used to control its behavior,
 and these can be passed to the check function via <code>...</code>. For
@@ -146,8 +146,8 @@ example, you can do this:</p>
 <span>  required_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>scipen <span class="op">=</span> <span class="fl">0L</span>, max.print <span class="op">=</span> <span class="fl">50L</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Session check results:</span></span>
-<span><span class="co">#&gt; - Loaded namespaces: digest, desc, R6, fastmap, and 18 more</span></span>
-<span><span class="co">#&gt; - Unexpected options: max.print</span></span></code></pre></div>
+<span><span class="co">#&gt; ✖ Loaded namespaces: digest, desc, R6, fastmap, and 18 more</span></span>
+<span><span class="co">#&gt; ✖ Unexpected options: max.print</span></span></code></pre></div>
 <p>The relevant arguments that can be passed via <code>...</code> are as
 follows:</p>
 <ul>
@@ -201,8 +201,8 @@ values:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sessioncheck</span><span class="fu">::</span><span class="fu"><a href="../reference/sessioncheck.html">sessioncheck</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Session check results:</span></span>
-<span><span class="co">#&gt; - Loaded namespaces: digest, desc, R6, fastmap, and 18 more</span></span>
-<span><span class="co">#&gt; - Unexpected options: max.print</span></span></code></pre></div>
+<span><span class="co">#&gt; ✖ Loaded namespaces: digest, desc, R6, fastmap, and 18 more</span></span>
+<span><span class="co">#&gt; ✖ Unexpected options: max.print</span></span></code></pre></div>
 <p>For more information on the specifics of each check, please see the
 documentation of the relevant check function or the article on <a href="https://sessioncheck.djnavarro.net/articles/individual-checks.html">individual
 checks</a>.</p>

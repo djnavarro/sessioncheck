@@ -42,5 +42,5 @@ Invisibly returns an object of class `sessioncheck_status`.
 
 ``` r
 check_required_sysenv(action = "message", required_sysenv = list(R_TEST = "value"))
-#> Unexpected system environment variables: R_TEST
+#> ✖ Unexpected system environment variables: R_TEST
 ```

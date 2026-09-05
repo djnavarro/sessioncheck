@@ -68,8 +68,8 @@ Other arguments are ignored.
 ``` r
 sessioncheck(action = "message")
 #> Session check results:
-#> - Objects in global environment: [no issues detected]
-#> - Attached packages: sessioncheck
-#> - Attached environments: [no issues detected]
+#> ✔ Objects in global environment: [no issues detected]
+#> ✖ Attached packages: sessioncheck
+#> ✔ Attached environments: [no issues detected]
  
 ```
