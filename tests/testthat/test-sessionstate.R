@@ -1025,6 +1025,84 @@ test_that(".get_package_source() classifies renv-restored CRAN packages", {
   expect_identical(.get_package_source("brio"), "RSPM (R 4.6.0)")
 })
 
+test_that(".get_package_source() treats RemoteType 'any' like an ordinary install", {
+  # pak's any::pkg syntax (e.g. "extra-packages: any::pkgdown" in
+  # r-lib/actions/setup-r-dependencies) records RemoteType = "any" for what
+  # is still an ordinary CRAN-like install. Field values below match an
+  # actual `pak::pkg_install("any::processx")` DESCRIPTION: RemoteSha is
+  # just the plain package version (not a git ref), RemoteRepos is a
+  # repository mirror URL (not the RemoteUrl field genuine URL remotes use),
+  # and RemotePkgRef/RemoteRef retain the "any::pkg" spec rather than
+  # identifying a real remote host -- none of that should prevent this from
+  # being classified as an ordinary repository install, same as "standard"
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) {
+      list(
+        Repository = "RSPM",
+        RemoteType = "any",
+        RemotePkgRef = "any::pkgdown",
+        RemoteRef = "any::pkgdown",
+        RemoteRepos = "https://packagemanager.posit.co/cran/__linux__/noble/latest",
+        RemotePkgPlatform = "x86_64-pc-linux-gnu-ubuntu-24.04",
+        RemoteSha = "2.2.1",
+        Built = "R 4.6.0; x86_64-pc-linux-gnu; unix"
+      )
+    },
+    .package = "utils"
+  )
+  expect_identical(.get_package_source("pkgdown"), "RSPM (R 4.6.0)")
+})
+
+test_that(".get_package_source() treats RemoteType 'cran' like an ordinary install", {
+  # pak's cran::pkg syntax (e.g. requesting a CRAN-only, not-also-Bioconductor
+  # install) records RemoteType = "cran". Field values below match an actual
+  # `pak::pkg_install("cran::withr")` DESCRIPTION
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) {
+      list(
+        Repository = "RSPM",
+        RemoteType = "cran",
+        RemotePkgRef = "cran::withr",
+        RemoteRef = "cran::withr",
+        RemoteRepos = "https://packagemanager.rstudio.com/cran/__linux__/jammy/latest",
+        RemotePkgPlatform = "x86_64-pc-linux-gnu-ubuntu-24.04",
+        RemoteSha = "3.0.3",
+        Built = "R 4.6.0; ; unix"
+      )
+    },
+    .package = "utils"
+  )
+  expect_identical(.get_package_source("withr"), "RSPM (R 4.6.0)")
+})
+
+test_that(".get_package_source() treats RemoteType 'bioc' like an ordinary install", {
+  # pak's bioc::pkg syntax records RemoteType = "bioc" for an ordinary
+  # Bioconductor repository install (distinct from remotes::install_bioc(),
+  # which uses the genuinely git-based "bioc_git2r"/"bioc_xgit" RemoteTypes
+  # handled elsewhere). Field values below match an actual
+  # `pak::pkg_install("bioc::BiocGenerics")` DESCRIPTION; nulling RemoteType
+  # here lets the biocViews check below classify it correctly, rather than
+  # falling through to the Repository field (which would otherwise report
+  # the Bioconductor release version redundantly, e.g. "Bioconductor 3.23")
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) {
+      list(
+        biocViews = "Infrastructure",
+        Repository = "Bioconductor 3.23",
+        RemoteType = "bioc",
+        RemotePkgRef = "bioc::BiocGenerics",
+        RemoteRef = "bioc::BiocGenerics",
+        RemoteRepos = "https://bioconductor.posit.co/packages/3.23/bioc",
+        RemotePkgPlatform = "source",
+        RemoteSha = "0.58.1",
+        Built = "R 4.6.1; ; unix"
+      )
+    },
+    .package = "utils"
+  )
+  expect_identical(.get_package_source("BiocGenerics"), "Bioconductor (R 4.6.1)")
+})
+
 test_that(".get_package_source() classifies renv-restored GitHub packages", {
   # renv::install("user/repo") records the same Remote* fields as
   # remotes/pak for GitHub installs.

@@ -473,9 +473,22 @@ sessionstate <- function() {
   }
 
   # pak/renv mark ordinary (non-remote) installs with RemoteType = "standard";
-  # treat that the same as no RemoteType at all
+  # pak's other explicit package-source prefixes for CRAN-like/Bioconductor
+  # repositories -- any::pkg (e.g. the "extra-packages: any::pkgdown" idiom
+  # used by r-lib/actions/setup-r-dependencies, including this package's own
+  # pkgdown deploy workflow), cran::pkg, and bioc::pkg -- record RemoteType
+  # as "any"/"cran"/"bioc" respectively for what is still an ordinary
+  # repository install, confirmed by installing via each prefix and
+  # inspecting the resulting DESCRIPTION: RemoteSha is just the plain
+  # package version, not a git commit, and RemotePkgRef/RemoteRef retain the
+  # "<prefix>::pkg" spec rather than identifying a real remote host. All
+  # four sentinels are therefore treated the same as no RemoteType at all,
+  # so classification instead falls through to the Repository/biocViews
+  # checks below
   remote_type <- desc$RemoteType
-  if (!is.null(remote_type) && identical(remote_type, "standard")) remote_type <- NULL
+  if (!is.null(remote_type) && remote_type %in% c("standard", "any", "cran", "bioc")) {
+    remote_type <- NULL
+  }
   if (!is.null(remote_type) && nzchar(remote_type)) {
     return(.format_remote_source(remote_type, desc))
   }
