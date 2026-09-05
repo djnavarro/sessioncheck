@@ -14,10 +14,10 @@ new_sessioncheck <- function(...) {
   structure(list(...), class = "sessioncheck_sessioncheck")
 }
 
-new_sessionstate <- function(platform, machine, timing, packages, globalenv, attachments) {
+new_sessionstate <- function(platform, machine, timing, rng, packages, globalenv, attachments) {
   structure(
     list(
-      platform = platform, machine = machine, timing = timing, packages = packages,
+      platform = platform, machine = machine, timing = timing, rng = rng, packages = packages,
       globalenv = globalenv, attachments = attachments
     ),
     class = "sessioncheck_sessionstate"
@@ -45,6 +45,11 @@ new_sessionstate <- function(platform, machine, timing, packages, globalenv, att
 #' vector selecting which timing fields to display (from `"captured_at"`,
 #' `"elapsed_sec"`). Defaults to showing all fields. Ignored for other classes.
 #' See Details for how the default is resolved.
+#' @param rng For `sessioncheck_sessionstate` objects, an optional character
+#' vector selecting which RNG fields to display (from `"kind"`,
+#' `"normal_kind"`, `"sample_kind"`, `"seed_hash"`). Defaults to showing all
+#' fields. Ignored for other classes. See Details for how the default is
+#' resolved.
 #' @param packages For `sessioncheck_sessionstate` objects, an optional character
 #' vector selecting which package inventory columns to display (see
 #' [sessionstate()] for the full list of columns). Defaults to
@@ -69,14 +74,15 @@ new_sessionstate <- function(platform, machine, timing, packages, globalenv, att
 #'
 #' @details
 #' For `sessioncheck_sessionstate` objects, the `platform`/`machine`/`timing`/
-#' `packages`/`globalenv`/`globalenv_n`/`attachments` arguments are resolved
-#' through the same precedence used elsewhere in the package: an explicit
-#' argument always wins; otherwise, `getOption("sessioncheck")` is checked
-#' for a `sessionstate_platform`, `sessionstate_machine`,
-#' `sessionstate_timing`, `sessionstate_packages`, `sessionstate_globalenv`,
-#' `sessionstate_globalenv_n`, or `sessionstate_attachments` field
-#' (respectively); if neither is set, a built-in default is used (showing
-#' every field/column, except for `packages`, which defaults to
+#' `rng`/`packages`/`globalenv`/`globalenv_n`/`attachments` arguments are
+#' resolved through the same precedence used elsewhere in the package: an
+#' explicit argument always wins; otherwise, `getOption("sessioncheck")` is
+#' checked for a `sessionstate_platform`, `sessionstate_machine`,
+#' `sessionstate_timing`, `sessionstate_rng`, `sessionstate_packages`,
+#' `sessionstate_globalenv`, `sessionstate_globalenv_n`, or
+#' `sessionstate_attachments` field (respectively); if neither is set, a
+#' built-in default is used (showing every field/column, except for
+#' `packages`, which defaults to
 #' `c("package", "attached", "loaded_version", "source")`, and
 #' `globalenv_n`, which defaults to `10`). This selection only affects what
 #' is displayed; it never changes the underlying object, so
@@ -114,10 +120,11 @@ format.sessioncheck_sessioncheck <- function(x, ...) {
 
 #' @rdname display_methods
 #' @exportS3Method base::format
-format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL, globalenv = NULL, globalenv_n = NULL, attachments = NULL, ...) {
+format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, timing = NULL, rng = NULL, packages = NULL, globalenv = NULL, globalenv_n = NULL, attachments = NULL, ...) {
   p <- x$platform
   m <- x$machine
   t <- x$timing
+  r <- x$rng
 
   platform_all <- c(
     version  = sprintf(" version         %s", p$version),
@@ -166,6 +173,16 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL,
   timing_fields <- .select_fields(names(timing_all), timing, "timing")
   timing_lines <- c("Timing:", timing_all[timing_fields])
 
+  rng_all <- c(
+    kind        = sprintf(" kind            %s", r$kind),
+    normal_kind = sprintf(" normal kind     %s", r$normal_kind),
+    sample_kind = sprintf(" sample kind     %s", r$sample_kind),
+    seed_hash   = sprintf(" seed hash       %s", if (is.na(r$seed_hash)) "(not set)" else r$seed_hash)
+  )
+  rng <- .resolve_field_selection(rng, "sessionstate_rng", NULL)
+  rng_fields <- .select_fields(names(rng_all), rng, "rng")
+  rng_lines <- c("RNG state:", rng_all[rng_fields])
+
   pkg_df <- x$packages
   packages <- .resolve_field_selection(
     packages, "sessionstate_packages",
@@ -212,8 +229,8 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL,
 
   paste(
     c(
-      platform_lines, "", machine_lines, "", timing_lines, "", pkg_lines, "",
-      genv_lines, "", att_lines
+      platform_lines, "", machine_lines, "", timing_lines, "", rng_lines, "",
+      pkg_lines, "", genv_lines, "", att_lines
     ),
     collapse = "\n"
   )
@@ -235,10 +252,10 @@ print.sessioncheck_sessioncheck <- function(x, ...) {
 
 #' @rdname display_methods
 #' @exportS3Method base::print
-print.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, timing = NULL, packages = NULL, globalenv = NULL, globalenv_n = NULL, attachments = NULL, ...) {
+print.sessioncheck_sessionstate <- function(x, platform = NULL, machine = NULL, timing = NULL, rng = NULL, packages = NULL, globalenv = NULL, globalenv_n = NULL, attachments = NULL, ...) {
   cat(
     format(
-      x, platform = platform, machine = machine, timing = timing, packages = packages,
+      x, platform = platform, machine = machine, timing = timing, rng = rng, packages = packages,
       globalenv = globalenv, globalenv_n = globalenv_n, attachments = attachments, ...
     ),
     "\n"

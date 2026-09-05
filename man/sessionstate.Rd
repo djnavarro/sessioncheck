@@ -8,8 +8,8 @@ sessionstate()
 }
 \value{
 An object of class \code{sessioncheck_sessionstate}, a list with
-elements \code{platform}, \code{machine}, \code{timing}, \code{packages}, \code{globalenv}, and
-\code{attachments}.
+elements \code{platform}, \code{machine}, \code{timing}, \code{rng}, \code{packages}, \code{globalenv},
+and \code{attachments}.
 }
 \description{
 \code{sessionstate()} captures a point-in-time, human-readable snapshot of the R
@@ -28,6 +28,19 @@ The \code{machine} element includes the node name and user reported by
 mindful about where \code{sessionstate()} output is stored or shared. The same
 caution applies to the \code{ondisk_path}/\code{loaded_path} columns of \code{packages},
 since library paths often embed a home directory.
+
+The \code{rng} element records \code{\link[=RNGkind]{RNGkind()}} (as \code{kind}, \code{normal_kind}, and
+\code{sample_kind}) together with \code{seed_hash}, an MD5 fingerprint of
+\code{.Random.seed} (via \code{\link[tools:md5sum]{tools::md5sum()}}, since base R has no in-memory
+hashing function). \code{seed_hash} is \code{NA} if the RNG hasn't been used yet
+this session (nothing has consumed a random draw, so \code{.Random.seed}
+doesn't exist); \code{sessionstate()} never forces this into existence, since
+doing so would itself consume a draw as a side effect of an audit call.
+The hash exists to make RNG state comparable across renders without
+printing the seed itself: for example, comparing \code{seed_hash} between two
+rendered versions of the same Quarto/R Markdown document shows whether
+an edit changed the RNG state anywhere upstream, without having to
+inspect or store the (long, not directly meaningful) seed value.
 
 The \code{packages} element covers every package that is either attached to
 the search path or loaded via namespace (i.e., \code{union(.packages(), loadedNamespaces())}). It has columns \code{package}, \code{attached},
@@ -72,7 +85,7 @@ reflected in \code{packages}.
 
 \code{sessionstate()} itself always captures every field in full (\code{globalenv}
 is never truncated at capture time). To display only a subset when
-printing, pass \code{platform}/\code{machine}/\code{timing}/\code{packages}/\code{globalenv}/
+printing, pass \code{platform}/\code{machine}/\code{timing}/\code{rng}/\code{packages}/\code{globalenv}/
 \code{attachments} arguments to \code{print()} or \code{format()} on the result, or set
 defaults via \code{options(sessioncheck = list(sessionstate_packages = ...))}
 (see \link{display_methods} for the full precedence rules and option names).

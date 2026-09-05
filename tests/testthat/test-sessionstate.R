@@ -1,13 +1,46 @@
 test_that("sessionstate() returns a well-formed sessioncheck_sessionstate object", {
   x <- sessionstate()
   expect_s3_class(x, "sessioncheck_sessionstate")
-  expect_named(x, c("platform", "machine", "timing", "packages", "globalenv", "attachments"))
+  expect_named(x, c("platform", "machine", "timing", "rng", "packages", "globalenv", "attachments"))
   expect_true(is.list(x$platform))
   expect_true(is.list(x$machine))
   expect_true(is.list(x$timing))
+  expect_true(is.list(x$rng))
   expect_s3_class(x$packages, "data.frame")
   expect_s3_class(x$globalenv, "data.frame")
   expect_s3_class(x$attachments, "data.frame")
+})
+
+test_that(".get_rng_info() reports RNGkind() and a seed hash", {
+  set.seed(4821)
+  info <- .get_rng_info()
+  expect_named(info, c("kind", "normal_kind", "sample_kind", "seed_hash"))
+  expect_identical(unname(unlist(info[c("kind", "normal_kind", "sample_kind")])), RNGkind())
+  expect_identical(info$seed_hash, .hash_random_seed())
+})
+
+test_that(".hash_random_seed() is stable for an unchanged seed and changes after a draw", {
+  set.seed(9137)
+  h1 <- .hash_random_seed()
+  h2 <- .hash_random_seed()
+  expect_identical(h1, h2)
+  runif(1)
+  h3 <- .hash_random_seed()
+  expect_false(identical(h1, h3))
+})
+
+test_that(".hash_random_seed() is reproducible after resetting the same seed", {
+  set.seed(9137)
+  h1 <- .hash_random_seed()
+  runif(1)
+  set.seed(9137)
+  h2 <- .hash_random_seed()
+  expect_identical(h1, h2)
+})
+
+test_that(".hash_random_seed() returns NA when .Random.seed doesn't exist", {
+  local_mocked_bindings(exists = function(...) FALSE, .package = "base")
+  expect_identical(.hash_random_seed(), NA_character_)
 })
 
 test_that(".get_globalenv_info() captures every object in .GlobalEnv, never values", {
@@ -97,6 +130,57 @@ test_that("format.sessioncheck_sessionstate() defaults platform/machine/timing t
   expect_match(txt, "matrix products", fixed = TRUE)
   expect_match(txt, "nodename", fixed = TRUE)
   expect_match(txt, "captured at", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() defaults rng to showing every field", {
+  set.seed(2024)
+  x <- sessionstate()
+  txt <- format(x)
+  expect_match(txt, "RNG state:", fixed = TRUE)
+  expect_match(txt, "kind            Mersenne-Twister", fixed = TRUE)
+  expect_match(txt, "normal kind     Inversion", fixed = TRUE)
+  expect_match(txt, "sample kind     Rejection", fixed = TRUE)
+  expect_match(txt, "seed hash       ", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() restricts rng fields when requested", {
+  set.seed(2024)
+  x <- sessionstate()
+  txt <- format(x, rng = "kind")
+  expect_match(txt, "kind            Mersenne-Twister", fixed = TRUE)
+  expect_no_match(txt, "seed hash", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() honors sessionstate_rng set via options(sessioncheck = ...)", {
+  set.seed(2024)
+  old <- options(sessioncheck = list(sessionstate_rng = "kind"))
+  on.exit(options(old), add = TRUE)
+  x <- sessionstate()
+  txt <- format(x)
+  expect_no_match(txt, "seed hash", fixed = TRUE)
+})
+
+test_that("an explicit rng argument overrides options(sessioncheck = ...)", {
+  set.seed(2024)
+  old <- options(sessioncheck = list(sessionstate_rng = "kind"))
+  on.exit(options(old), add = TRUE)
+  x <- sessionstate()
+  txt <- format(x, rng = c("kind", "seed_hash"))
+  expect_match(txt, "seed hash", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() reports '(not set)' when seed_hash is NA", {
+  local_mocked_bindings(.get_rng_info = function() {
+    list(kind = "Mersenne-Twister", normal_kind = "Inversion", sample_kind = "Rejection", seed_hash = NA_character_)
+  })
+  x <- sessionstate()
+  txt <- format(x)
+  expect_match(txt, "seed hash       \\(not set\\)", fixed = FALSE)
+})
+
+test_that("format.sessioncheck_sessionstate() errors informatively on an unknown rng field", {
+  x <- sessionstate()
+  expect_error(format(x, rng = "bogus"), "Unknown rng field")
 })
 
 test_that(".run_version_command() returns NA when the path is empty or missing", {
@@ -418,6 +502,7 @@ test_that("format.sessioncheck_sessionstate() errors informatively on an unknown
   expect_error(format(x, platform = "bogus"), "Unknown platform field")
   expect_error(format(x, machine = "bogus"), "Unknown machine field")
   expect_error(format(x, timing = "bogus"), "Unknown timing field")
+  expect_error(format(x, rng = "bogus"), "Unknown rng field")
   expect_error(format(x, packages = "bogus"), "Unknown packages field")
 })
 
@@ -426,7 +511,7 @@ test_that("format.sessioncheck_sessionstate() defaults to showing every field wh
   expect_identical(
     format(x),
     format(
-      x, platform = NULL, machine = NULL, timing = NULL, packages = NULL,
+      x, platform = NULL, machine = NULL, timing = NULL, rng = NULL, packages = NULL,
       globalenv = NULL, globalenv_n = NULL, attachments = NULL
     )
   )
@@ -434,10 +519,12 @@ test_that("format.sessioncheck_sessionstate() defaults to showing every field wh
 
 test_that("print.sessioncheck_sessionstate() forwards field-selection arguments to format()", {
   x <- sessionstate()
-  out <- capture.output(print(x, platform = "version", machine = "user", timing = "elapsed_sec", packages = "package"))
+  out <- capture.output(
+    print(x, platform = "version", machine = "user", timing = "elapsed_sec", rng = "kind", packages = "package")
+  )
   expect_equal(
     trimws(paste(out, collapse = "\n")),
-    trimws(format(x, platform = "version", machine = "user", timing = "elapsed_sec", packages = "package"))
+    trimws(format(x, platform = "version", machine = "user", timing = "elapsed_sec", rng = "kind", packages = "package"))
   )
 })
 

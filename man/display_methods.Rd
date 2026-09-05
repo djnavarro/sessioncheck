@@ -19,6 +19,7 @@
   platform = NULL,
   machine = NULL,
   timing = NULL,
+  rng = NULL,
   packages = NULL,
   globalenv = NULL,
   globalenv_n = NULL,
@@ -35,6 +36,7 @@
   platform = NULL,
   machine = NULL,
   timing = NULL,
+  rng = NULL,
   packages = NULL,
   globalenv = NULL,
   globalenv_n = NULL,
@@ -64,6 +66,12 @@ how the default is resolved.}
 vector selecting which timing fields to display (from \code{"captured_at"},
 \code{"elapsed_sec"}). Defaults to showing all fields. Ignored for other classes.
 See Details for how the default is resolved.}
+
+\item{rng}{For \code{sessioncheck_sessionstate} objects, an optional character
+vector selecting which RNG fields to display (from \code{"kind"},
+\code{"normal_kind"}, \code{"sample_kind"}, \code{"seed_hash"}). Defaults to showing all
+fields. Ignored for other classes. See Details for how the default is
+resolved.}
 
 \item{packages}{For \code{sessioncheck_sessionstate} objects, an optional character
 vector selecting which package inventory columns to display (see
@@ -95,14 +103,15 @@ Format and print sessioncheck objects
 }
 \details{
 For \code{sessioncheck_sessionstate} objects, the \code{platform}/\code{machine}/\code{timing}/
-\code{packages}/\code{globalenv}/\code{globalenv_n}/\code{attachments} arguments are resolved
-through the same precedence used elsewhere in the package: an explicit
-argument always wins; otherwise, \code{getOption("sessioncheck")} is checked
-for a \code{sessionstate_platform}, \code{sessionstate_machine},
-\code{sessionstate_timing}, \code{sessionstate_packages}, \code{sessionstate_globalenv},
-\code{sessionstate_globalenv_n}, or \code{sessionstate_attachments} field
-(respectively); if neither is set, a built-in default is used (showing
-every field/column, except for \code{packages}, which defaults to
+\code{rng}/\code{packages}/\code{globalenv}/\code{globalenv_n}/\code{attachments} arguments are
+resolved through the same precedence used elsewhere in the package: an
+explicit argument always wins; otherwise, \code{getOption("sessioncheck")} is
+checked for a \code{sessionstate_platform}, \code{sessionstate_machine},
+\code{sessionstate_timing}, \code{sessionstate_rng}, \code{sessionstate_packages},
+\code{sessionstate_globalenv}, \code{sessionstate_globalenv_n}, or
+\code{sessionstate_attachments} field (respectively); if neither is set, a
+built-in default is used (showing every field/column, except for
+\code{packages}, which defaults to
 \code{c("package", "attached", "loaded_version", "source")}, and
 \code{globalenv_n}, which defaults to \code{10}). This selection only affects what
 is displayed; it never changes the underlying object, so

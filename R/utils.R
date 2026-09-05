@@ -148,6 +148,36 @@
   )
 }
 
+.get_rng_info <- function() {
+  kind <- RNGkind()
+  list(
+    kind        = kind[[1L]],
+    normal_kind = kind[[2L]],
+    sample_kind = kind[[3L]],
+    seed_hash   = .hash_random_seed()
+  )
+}
+
+# fingerprints .Random.seed so two renders of a document (e.g. before/after
+# a small edit) can be compared for whether the edit perturbed the RNG
+# state, without printing the seed itself (which is long and not
+# meaningful to read directly). Returns NA if the RNG hasn't been
+# initialized yet this session (i.e. nothing has consumed a random number,
+# so .Random.seed doesn't exist) -- deliberately not forced into existence,
+# since doing so would consume a draw as a side effect of an audit call
+.hash_random_seed <- function() {
+  if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) return(NA_character_)
+  seed <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+  tmp <- tempfile()
+  on.exit(unlink(tmp))
+  # tools::md5sum() only operates on files; there is no base R function for
+  # hashing an in-memory object directly, and adding a dependency (e.g.
+  # digest) purely for this would violate the zero-dependency design. tools
+  # is a base-priority package, so this stays dependency-free
+  writeBin(as.integer(seed), tmp)
+  unname(tools::md5sum(tmp))
+}
+
 .get_globalenv_info <- function() {
   objs <- ls(envir = .GlobalEnv, all.names = TRUE)
   cls <- vapply(

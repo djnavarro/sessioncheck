@@ -13,8 +13,8 @@
 #' produce an audit log of the environment the script actually ran in.
 #'
 #' @returns An object of class `sessioncheck_sessionstate`, a list with
-#' elements `platform`, `machine`, `timing`, `packages`, `globalenv`, and
-#' `attachments`.
+#' elements `platform`, `machine`, `timing`, `rng`, `packages`, `globalenv`,
+#' and `attachments`.
 #'
 #' @details
 #' The `machine` element includes the node name and user reported by
@@ -22,6 +22,19 @@
 #' mindful about where `sessionstate()` output is stored or shared. The same
 #' caution applies to the `ondisk_path`/`loaded_path` columns of `packages`,
 #' since library paths often embed a home directory.
+#'
+#' The `rng` element records [RNGkind()] (as `kind`, `normal_kind`, and
+#' `sample_kind`) together with `seed_hash`, an MD5 fingerprint of
+#' `.Random.seed` (via [tools::md5sum()], since base R has no in-memory
+#' hashing function). `seed_hash` is `NA` if the RNG hasn't been used yet
+#' this session (nothing has consumed a random draw, so `.Random.seed`
+#' doesn't exist); `sessionstate()` never forces this into existence, since
+#' doing so would itself consume a draw as a side effect of an audit call.
+#' The hash exists to make RNG state comparable across renders without
+#' printing the seed itself: for example, comparing `seed_hash` between two
+#' rendered versions of the same Quarto/R Markdown document shows whether
+#' an edit changed the RNG state anywhere upstream, without having to
+#' inspect or store the (long, not directly meaningful) seed value.
 #'
 #' The `packages` element covers every package that is either attached to
 #' the search path or loaded via namespace (i.e., `union(.packages(),
@@ -67,7 +80,7 @@
 #'
 #' `sessionstate()` itself always captures every field in full (`globalenv`
 #' is never truncated at capture time). To display only a subset when
-#' printing, pass `platform`/`machine`/`timing`/`packages`/`globalenv`/
+#' printing, pass `platform`/`machine`/`timing`/`rng`/`packages`/`globalenv`/
 #' `attachments` arguments to `print()` or `format()` on the result, or set
 #' defaults via `options(sessioncheck = list(sessionstate_packages = ...))`
 #' (see [display_methods] for the full precedence rules and option names).
@@ -88,6 +101,7 @@ sessionstate <- function() {
     platform    = .get_platform_info(),
     machine     = .get_machine_info(),
     timing      = .get_timing_info(),
+    rng         = .get_rng_info(),
     packages    = .get_package_inventory(),
     globalenv   = .get_globalenv_info(),
     attachments = .get_search_path_info()
