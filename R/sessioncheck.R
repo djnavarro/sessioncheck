@@ -1,160 +1,4 @@
 
-#' @title Report the current state of the R session
-#'
-#' @description
-#' `sessionstate()` captures a point-in-time, human-readable snapshot of the R
-#' session: platform details, selected machine information, session timing,
-#' an inventory of attached and loaded-namespace packages (including remote
-#' source tracking for packages installed from GitHub), the contents of the
-#' global environment, and the non-package entries on the search path. It is
-#' intended as a companion to [sessioncheck()]: where `sessioncheck()` is
-#' typically called at the *start* of a script to check for a clean session,
-#' `sessionstate()` is intended to be called at the *end* of a script to
-#' produce an audit log of the environment the script actually ran in.
-#'
-#' @returns An object of class `sessioncheck_sessionstate`, a list with
-#' elements `platform`, `locale`, `matrix`, `document`, `machine`, `git`,
-#' `timing`, `rng`, `libpaths`, `packages`, `globalenv`, and `attachments`.
-#'
-#' @details
-#' The `machine` element includes the node name and user reported by
-#' [Sys.info()], along with the working directory reported by [getwd()] at
-#' capture time (`cwd`) -- useful for a reproducibility audit since relative
-#' paths used elsewhere in a script only resolve correctly relative to this
-#' directory. Because this can reveal a hostname, local username, or
-#' directory structure, be mindful about where `sessionstate()` output is
-#' stored or shared. The same caution applies to the `ondisk_path`/
-#' `loaded_path` columns of `packages`, since library paths often embed a
-#' home directory.
-#'
-#' The `git` element records `sha`, the current commit
-#' (`git rev-parse HEAD`, run in the working directory captured as
-#' `machine$cwd`), and `dirty`, whether the working tree has uncommitted
-#' changes (`git status --porcelain` is non-empty). Both are `NA` if the
-#' working directory isn't inside a git repository, or if `git` itself
-#' isn't installed. This is arguably the single most useful field for
-#' reproducing a script's output later: `sha` identifies exactly which
-#' version of the code ran, and `dirty` flags whether that identification is
-#' trustworthy (a `TRUE` means the code that ran may not match any commit).
-#'
-#' The `rng` element records [RNGkind()] (as `kind`, `normal_kind`, and
-#' `sample_kind`) together with `seed_hash`, an MD5 fingerprint of
-#' `.Random.seed` (via [tools::md5sum()], since base R has no in-memory
-#' hashing function). `seed_hash` is `NA` if the RNG hasn't been used yet
-#' this session (nothing has consumed a random draw, so `.Random.seed`
-#' doesn't exist); `sessionstate()` never forces this into existence, since
-#' doing so would itself consume a draw as a side effect of an audit call.
-#' The hash exists to make RNG state comparable across renders without
-#' printing the seed itself: for example, comparing `seed_hash` between two
-#' rendered versions of the same Quarto/R Markdown document shows whether
-#' an edit changed the RNG state anywhere upstream, without having to
-#' inspect or store the (long, not directly meaningful) seed value.
-#'
-#' The `libpaths` element is the character vector returned by [.libPaths()],
-#' i.e. the library locations R searches, in search order. It complements
-#' `packages`: that element records where each individual package resolved
-#' *to* (`ondisk_path`), while `libpaths` records where R was looking in the
-#' first place, which matters when, e.g., a project-local library shadows a
-#' personal one. Unlike the other elements, there is no corresponding
-#' display-filtering argument for `libpaths`, since it is already a flat
-#' list of paths rather than a set of named fields or columns to choose
-#' among; it is always shown in full.
-#'
-#' The `packages` element covers every package that is either attached to
-#' the search path or loaded via namespace (i.e., `union(.packages(),
-#' loadedNamespaces())`). It has columns `package`, `attached`,
-#' `ondisk_version` (the version recorded in the installed package's
-#' `DESCRIPTION` file), `loaded_version` (the version of the namespace
-#' actually loaded into memory), `version_mismatch` (`TRUE` when the two
-#' disagree, e.g. because the package was updated on disk after this
-#' session loaded it), `ondisk_path` and `loaded_path` (the library paths a
-#' package currently resolves to versus where its loaded namespace actually
-#' came from), `path_mismatch` (`TRUE` when both exist but disagree, e.g.
-#' after a `.libPaths()` change mid-session), `removed_from_disk` (`TRUE`
-#' when the namespace is loaded but no longer found on disk at all), and
-#' `source`, which classifies each package as `"base"`, `"CRAN (R x.y.z)"`,
-#' `"Github (user/repo@sha)"`, another remote type, or `"local"` when no
-#' remote metadata is available.
-#'
-#' The `globalenv` element is a data frame with one row per object in
-#' `.GlobalEnv` (including dot-prefixed objects), with columns `name`,
-#' `class`, and `size` (in bytes, as reported by [utils::object.size()]). Only
-#' object names, classes, and sizes are captured, never values. Because a
-#' long-running script can accumulate many objects, the default display shows
-#' only the largest few (see below); the captured object itself always holds
-#' every object.
-#'
-#' The `locale` element records `language`, `collate`, and `ctype`. These
-#' are split out from `platform` because they describe how text and dates
-#' are formatted for this session, rather than what/where/when the session
-#' is running.
-#'
-#' The `matrix` element records `blas` and `lapack`, the shared libraries
-#' backing R's linear algebra routines (as reported by
-#' [extSoftVersion()] and [La_library()]). Like `locale`, this is split out
-#' from `platform` -- in this case mirroring how base R's
-#' [utils::sessionInfo()] treats "Matrix products" as its own block rather
-#' than nesting it under platform info.
-#'
-#' The `document` element's `pandoc` and `quarto` fields record the versions
-#' of those two document-rendering tools, if found (`NA` otherwise). Both
-#' checks prefer the IDE-provided location over whatever happens to be on
-#' `PATH` (`RSTUDIO_PANDOC` for pandoc, `QUARTO_PATH` for quarto), since
-#' RStudio/Positron bundle their own copies that may differ from a
-#' separately installed one. Deliberately not tracked: other system
-#' dependencies (e.g. LaTeX, Hugo, spatial libraries) are package-specific
-#' rather than session-wide, and tracking them well would mean tracking
-#' many of them; `pandoc`/`quarto` are included because they, like
-#' BLAS/LAPACK, are already tracked by [utils::sessionInfo()] or
-#' [sessioninfo::session_info()]. `document` has no `sessionInfo()`
-#' precedent (unlike `matrix`), but is grouped the same way for
-#' consistency.
-#'
-#' The `attachments` element is a data frame with one row per entry on the
-#' search path (as returned by [search()]), with columns `name` and `type`
-#' (`"package"` or `"other"`). This surfaces non-package attachments (e.g.
-#' `tools:rstudio`, or environments added via [attach()]) that aren't
-#' reflected in `packages`.
-#'
-#' `sessionstate()` itself always captures every field in full (`globalenv`
-#' is never truncated at capture time). To display only a subset when
-#' printing, pass `platform`/`locale`/`matrix`/`document`/`machine`/`git`/
-#' `timing`/`rng`/`packages`/`globalenv`/`attachments` arguments to
-#' `print()` or `format()` on the result, or set
-#' defaults via `options(sessioncheck = list(sessionstate_packages = ...))`
-#' (see [display_methods] for the full precedence rules and option names).
-#' The `globalenv_n` argument separately controls how many rows of
-#' `globalenv` are shown (largest objects first), independent of which
-#' columns are selected. None of this affects the underlying object, so
-#' `x$globalenv`/`x$attachments` always return their full data frames.
-#' Separately, `as.data.frame()` returns one of the three tables captured by
-#' `sessionstate()` (`packages`, `globalenv`, or `attachments`, selected via
-#' its `which` argument); see [coercion_methods] for why this coercion,
-#' unlike the one for [sessioncheck()], cannot be lossless.
-#'
-#' @examples
-#' sessionstate()
-#'
-#' @seealso [sessioncheck()]
-#'
-#' @export
-sessionstate <- function() {
-  new_sessionstate(
-    platform    = .get_platform_info(),
-    locale      = .get_locale_info(),
-    matrix      = .get_matrix_info(),
-    document    = .get_document_info(),
-    machine     = .get_machine_info(),
-    git         = .get_git_info(),
-    timing      = .get_timing_info(),
-    rng         = .get_rng_info(),
-    libpaths    = .get_libpaths_info(),
-    packages    = .get_package_inventory(),
-    globalenv   = .get_globalenv_info(),
-    attachments = .get_search_path_info()
-  )
-}
-
 #' @title Checks the overall status of the R session
 #' 
 #' @description
@@ -506,4 +350,141 @@ check_required_sysenv <- function(action = "warn", required_sysenv = NULL) {
   .validate_required(required_sysenv)
   status <- .get_sysenv_status(required_sysenv)
   .action(action, status)
+}
+
+# status checkers: packages and namespaces ------
+
+.get_namespace_status <- function(allow) {
+  if (is.null(allow)) allow <- character(0L)
+  allow <- union(allow, "sessioncheck")
+  status <- vapply(
+    loadedNamespaces(), 
+    function(x) !(identical(utils::packageDescription(x)$Priority, "base") | x %in% allow), 
+    logical(1L)
+  )
+  new_status(status, type = "namespace")
+}
+
+.get_package_status <- function(allow) {
+  if (is.null(allow)) allow <- character(0L)
+  status <- vapply(
+    .packages(), 
+    function(x) !(identical(utils::packageDescription(x)$Priority, "base") | x %in% allow), 
+    logical(1L)
+  )
+  new_status(status, type = "package")
+}
+
+# status checkers: global environment and attachments ------
+
+.get_globalenv_status <- function(allow) {
+  obj <- ls(envir = .GlobalEnv, all.names = TRUE)
+  if (is.null(allow)) allow <- obj[grepl(pattern = "^\\.", x = obj)]
+  status <- !(obj %in% allow)
+  names(status) <- obj
+  new_status(status, type = "globalenv")
+}
+
+.get_attachment_status <- function(allow) {
+  if (is.null(allow)) allow <- c("tools:rstudio", "tools:positron", "tools:callr", "Autoloads")
+  allow <- union(".GlobalEnv", allow)
+  attached <- search()
+  is_pkg <- vapply(
+    seq_along(attached),
+    function(ind) !is.null(attr(as.environment(ind), "path")) | ind == length(attached),
+    logical(1L)
+  )
+  status <- !(is_pkg | attached %in% allow)
+  names(status) <- attached
+  new_status(status, type = "attachment")
+}
+
+# status checkers: session time ------
+
+.get_sessiontime_status <- function(tol) {
+  if (is.null(tol)) tol <- 300
+  pt <- proc.time()
+  elapsed <- pt["elapsed"]
+  status <- elapsed > tol
+  names(status) <- paste(elapsed, "sec elapsed")
+  new_status(status, type = "sessiontime")
+}
+
+# status checkers: options, locale, and system env variables ------
+
+.get_options_status <- function(required) {
+  if (is.null(required)) required <- list()
+  opts <- options()
+  status <- .get_xiny_status(x = required, y = opts)
+  new_status(status, type = "options")
+}
+
+.get_sysenv_status <- function(required) {
+  if (is.null(required)) required <- list()
+  env <- as.list(Sys.getenv())
+  status <- .get_xiny_status(x = required, y = env)
+  new_status(status, type = "sysenv")
+}
+
+.get_locale_status <- function(required) {
+  if (is.null(required)) required <- list()
+  lc <- .get_locale_list()
+  status <- .get_xiny_status(x = required, y = lc)
+  new_status(status, type = "locale")
+}
+
+# actions and messages ------
+
+.message_text <- function(prefix, status, max_len = 4L) {
+  lst <- names(status[status])
+  len <- length(lst)
+  if (len == 0L) return(paste(prefix, "[no issues detected]"))
+  if (len <= max_len) {
+    txt <- paste(lst, collapse = ", ")
+  } else {
+    lst <- lst[1:max_len]
+    txt <- paste(lst, collapse = ", ")
+    txt <- paste0(txt, ", and ", len - max_len, " more")
+  }
+  paste(prefix, txt)
+}
+
+.action <- function(action, status) {
+  if (action == "none") return(invisible(status)) 
+  if (inherits(status, "sessioncheck_status")) {
+    is_ok <- !any(status$status)
+  } else if (inherits(status, "sessioncheck_sessioncheck")) {
+    is_ok <- all(vapply(status, function(s) !any(s$status), logical(1L)))
+  } else {
+    stop("unexpected status class: ", paste(class(status), collapse = ", "), call. = FALSE)
+  }
+  if (is_ok) return(invisible(status))
+  msg <- format(status)
+  if (action == "message") {
+    message(msg)
+    return(invisible(status))
+  } 
+  if (action == "warn") {
+    warning(msg, call. = FALSE)
+    return(invisible(status))
+  }
+  stop(msg, call. = FALSE)
+}
+
+.parse_args <- function(...) {
+  args <- list(...)
+  opts_args <- getOption("sessioncheck")
+  if (is.list(opts_args)) {
+    if (is.null(args$action)) args$action <- opts_args$action
+    if (is.null(args$checks)) args$checks <- opts_args$checks
+    if (is.null(args$allow_globalenv_objects)) args$allow_globalenv_objects <- opts_args$allow_globalenv_objects
+    if (is.null(args$allow_attached_packages)) args$allow_attached_packages <- opts_args$allow_attached_packages
+    if (is.null(args$allow_loaded_namespaces)) args$allow_loaded_namespaces <- opts_args$allow_loaded_namespaces
+    if (is.null(args$allow_attached_environments)) args$allow_attached_environments <- opts_args$allow_attached_environments
+    if (is.null(args$max_sessiontime)) args$max_sessiontime <- opts_args$max_sessiontime
+    if (is.null(args$required_options)) args$required_options <- opts_args$required_options
+    if (is.null(args$required_locale)) args$required_locale <- opts_args$required_locale
+    if (is.null(args$required_sysenv)) args$required_sysenv <- opts_args$required_sysenv 
+  }
+  args
 }
