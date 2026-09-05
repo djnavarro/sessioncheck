@@ -162,8 +162,8 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
 
   locale_all <- c(
     language = sprintf(" language        %s", if (is.na(loc$language)) "(unset)" else loc$language),
-    collate  = sprintf(" collate         %s", loc$collate),
-    ctype    = sprintf(" ctype           %s", loc$ctype)
+    collate  = sprintf(" collate         %s", if (is.na(loc$collate)) "(unknown)" else loc$collate),
+    ctype    = sprintf(" ctype           %s", if (is.na(loc$ctype)) "(unknown)" else loc$ctype)
   )
   locale <- .resolve_field_selection(locale, "sessionstate_locale", NULL)
   locale_fields <- .select_fields(names(locale_all), locale, "locale")

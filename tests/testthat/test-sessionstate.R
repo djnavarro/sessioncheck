@@ -41,7 +41,10 @@ test_that(".get_rng_info() reports RNGkind() and a seed hash", {
   set.seed(4821)
   info <- .get_rng_info()
   expect_named(info, c("kind", "normal_kind", "sample_kind", "seed_hash"))
-  expect_identical(unname(unlist(info[c("kind", "normal_kind", "sample_kind")])), RNGkind())
+  # RNGkind() has grown a 4th ("sample kind for discrete distributions")
+  # component on newer R versions; sessionstate() only ever reports the
+  # first three, so compare against those rather than the full vector
+  expect_identical(unname(unlist(info[c("kind", "normal_kind", "sample_kind")])), RNGkind()[1:3])
   expect_identical(info$seed_hash, .hash_random_seed())
 })
 

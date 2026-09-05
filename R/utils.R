@@ -67,10 +67,13 @@
 # from the "what/where/when is this session running" facts platform covers
 .get_locale_info <- function() {
   lc <- .get_locale_list()
+  # Sys.getlocale() doesn't always report LC_COLLATE/LC_CTYPE as "NAME=value"
+  # pairs (e.g. observed on macOS CI runners returning a bare locale string);
+  # fall back to NA rather than silently dropping the field
   list(
     language = Sys.getenv("LANGUAGE", unset = NA_character_),
-    collate  = lc[["LC_COLLATE"]],
-    ctype    = lc[["LC_CTYPE"]]
+    collate  = if (is.null(lc[["LC_COLLATE"]])) NA_character_ else lc[["LC_COLLATE"]],
+    ctype    = if (is.null(lc[["LC_CTYPE"]])) NA_character_ else lc[["LC_CTYPE"]]
   )
 }
 
