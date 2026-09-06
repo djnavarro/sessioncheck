@@ -16,7 +16,8 @@ check_working_directory(
 
 \item{required_wd}{A single character path giving the working directory the
 session is expected to be in. If any other directory is currently in use,
-an action is triggered.}
+an action is triggered. The default is \code{required_wd = NULL}, which means
+there is nothing to compare against, so the check always passes.}
 
 \item{action_on_pass}{Behavior to take if the status is clean. Possible values
 are "message" and "none". The default is \code{action_on_pass = "none"}.}

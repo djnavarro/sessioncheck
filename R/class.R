@@ -26,9 +26,47 @@ new_sessionstate <- function(platform, locale, matrix, document, machine, git, t
 }
 
 
+# status message tables ------
+
+# fail-state prefix and pass-state message for each check type, keyed so
+# that a failing check always reads "Unexpected <thing>:" followed by its
+# summary, and a passing check always reads "No unexpected <thing>"
+# instead of the uninformative, one-size-fits-all "[no issues detected]"
+# (see #5 follow-up discussion on message framing consistency)
+.status_prefix <- c(
+  namespace   = "Unexpected namespaces:",
+  package     = "Unexpected packages:",
+  globalenv   = "Unexpected objects in global environment:",
+  attachment  = "Unexpected environments attached:",
+  sessiontime = "Session runtime exceeded:",
+  options     = "Unexpected options:",
+  sysenv      = "Unexpected system environment variables:",
+  locale      = "Unexpected locale settings:",
+  working_directory = "Unexpected working directory:"
+)
+
+.status_clean_message <- c(
+  namespace   = "No unexpected namespaces loaded",
+  package     = "No unexpected packages attached",
+  globalenv   = "No unexpected objects in global environment",
+  attachment  = "No unexpected environments attached",
+  sessiontime = "Session runtime within limits",
+  options     = "No unexpected options detected",
+  sysenv      = "No unexpected system environment variables detected",
+  locale      = "No unexpected locale settings detected",
+  working_directory = "Working directory as expected"
+)
+
 # methods --------
 
 #' Format and print sessioncheck objects
+#'
+#' @description
+#' S3 `format()`/`print()` methods for the three classes this package
+#' defines. `sessioncheck_status`/`sessioncheck_sessioncheck` objects render
+#' as a one-line-per-check status summary; `sessioncheck_sessionstate`
+#' objects render as a multi-section report, and the arguments below let
+#' that report be filtered down to specific fields or columns per section.
 #'
 #' @param x An object of class `sessioncheck_status`, `sessioncheck_sessioncheck`,
 #' or `sessioncheck_sessionstate`
@@ -104,40 +142,11 @@ new_sessionstate <- function(platform, locale, matrix, document, machine, git, t
 #' `c("package", "attached", "loaded_version", "source")`, and
 #' `globalenv_n`, which defaults to `10`). This selection only affects what
 #' is displayed; it never changes the underlying object, so
-#' `as.data.frame()` always returns the full package inventory, and
-#' `x$globalenv`/`x$attachments` always return their full data frames,
-#' regardless of any selection in effect.
+#' [`as.data.frame()`][coercion_methods] always returns the full package
+#' inventory, and `x$globalenv`/`x$attachments` always return their full
+#' data frames, regardless of any selection in effect.
 #'
 #' @name display_methods
-
-# fail-state prefix and pass-state message for each check type, keyed so
-# that a failing check always reads "Unexpected <thing>:" followed by its
-# summary, and a passing check always reads "No unexpected <thing>"
-# instead of the uninformative, one-size-fits-all "[no issues detected]"
-# (see #5 follow-up discussion on message framing consistency)
-.status_prefix <- c(
-  namespace   = "Unexpected namespaces:",
-  package     = "Unexpected packages:",
-  globalenv   = "Unexpected objects in global environment:",
-  attachment  = "Unexpected environments attached:",
-  sessiontime = "Session runtime exceeded:",
-  options     = "Unexpected options:",
-  sysenv      = "Unexpected system environment variables:",
-  locale      = "Unexpected locale settings:",
-  working_directory = "Unexpected working directory:"
-)
-
-.status_clean_message <- c(
-  namespace   = "No unexpected namespaces loaded",
-  package     = "No unexpected packages attached",
-  globalenv   = "No unexpected objects in global environment",
-  attachment  = "No unexpected environments attached",
-  sessiontime = "Session runtime within limits",
-  options     = "No unexpected options detected",
-  sysenv      = "No unexpected system environment variables detected",
-  locale      = "No unexpected locale settings detected",
-  working_directory = "Working directory as expected"
-)
 
 #' @rdname display_methods
 #' @exportS3Method base::format
@@ -187,6 +196,11 @@ print.sessioncheck_sessioncheck <- function(x, ...) {
 
 #' Coerce session check object to a data frame
 #'
+#' @description
+#' S3 `as.data.frame()` methods for the three classes this package defines,
+#' letting each be dropped into ordinary data frame workflows (filtering,
+#' joining, export) instead of only being inspected via `print()`/`format()`.
+#'
 #' @param x An object of class `sessioncheck_status`, `sessioncheck_sessioncheck`,
 #' or `sessioncheck_sessionstate`
 #' @param row.names Ignored
@@ -202,7 +216,7 @@ print.sessioncheck_sessioncheck <- function(x, ...) {
 #' For `sessioncheck_status` and `sessioncheck_sessioncheck` objects, this
 #' coercion is lossless: every entity and status recorded in `x` appears as a
 #' row in the result. That guarantee does not extend to
-#' `sessioncheck_sessionstate` objects: `sessionstate()` captures more than
+#' `sessioncheck_sessionstate` objects: [sessionstate()] captures more than
 #' any single rectangular table can hold, mixing scalar fields (`platform`,
 #' `locale`, `matrix`, `document`, `machine`, `git`, `timing`, `rng`), a bare
 #' character vector (`libpaths`), and three differently-shaped tables

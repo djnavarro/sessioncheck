@@ -16,7 +16,46 @@
 #' elements `platform`, `locale`, `matrix`, `document`, `machine`, `git`,
 #' `timing`, `rng`, `libpaths`, `packages`, `globalenv`, and `attachments`.
 #'
-#' @details
+#' @section Platform:
+#' The `platform` element records `version` (the running R version, via
+#' `R.version.string`), `os` (the operating system, preferring
+#' [utils::osVersion()] when available and falling back to [Sys.info()]),
+#' `system` (the R build's `R.version$system`), `ui` (the interface running
+#' the session -- `"non-interactive"` when [interactive()] is `FALSE`,
+#' otherwise the frontend reported by `.Platform$GUI`, e.g. `"RStudio"` or
+#' `"Positron"`), `tz` (the session timezone via [Sys.timezone()]), and
+#' `date` (the capture date).
+#'
+#' @section Locale:
+#' The `locale` element records `language`, `collate`, and `ctype`. These
+#' are split out from `platform` because they describe how text and dates
+#' are formatted for this session, rather than what/where/when the session
+#' is running.
+#'
+#' @section Matrix:
+#' The `matrix` element records `blas` and `lapack`, the shared libraries
+#' backing R's linear algebra routines (as reported by
+#' [extSoftVersion()] and [La_library()]). Like `locale`, this is split out
+#' from `platform` -- in this case mirroring how base R's
+#' [utils::sessionInfo()] treats "Matrix products" as its own block rather
+#' than nesting it under platform info.
+#'
+#' @section Document:
+#' The `document` element's `pandoc` and `quarto` fields record the versions
+#' of those two document-rendering tools, if found (`NA` otherwise). Both
+#' checks prefer the IDE-provided location over whatever happens to be on
+#' `PATH` (`RSTUDIO_PANDOC` for pandoc, `QUARTO_PATH` for quarto), since
+#' RStudio/Positron bundle their own copies that may differ from a
+#' separately installed one. Deliberately not tracked: other system
+#' dependencies (e.g. LaTeX, Hugo, spatial libraries) are package-specific
+#' rather than session-wide, and tracking them well would mean tracking
+#' many of them; `pandoc`/`quarto` are included because they, like
+#' BLAS/LAPACK, are already tracked by [utils::sessionInfo()] or
+#' [sessioninfo::session_info()]. `document` has no `sessionInfo()`
+#' precedent (unlike `matrix`), but is grouped the same way for
+#' consistency.
+#'
+#' @section Machine:
 #' The `machine` element includes the node name and user reported by
 #' [Sys.info()], along with the working directory reported by [getwd()] at
 #' capture time (`cwd`) -- useful for a reproducibility audit since relative
@@ -27,6 +66,7 @@
 #' `loaded_path` columns of `packages`, since library paths often embed a
 #' home directory.
 #'
+#' @section Git:
 #' The `git` element records `sha`, the current commit
 #' (`git rev-parse HEAD`, run in the working directory captured as
 #' `machine$cwd`), and `dirty`, whether the working tree has uncommitted
@@ -37,6 +77,14 @@
 #' version of the code ran, and `dirty` flags whether that identification is
 #' trustworthy (a `TRUE` means the code that ran may not match any commit).
 #'
+#' @section Timing:
+#' The `timing` element records `captured_at`, the capture time reported by
+#' [Sys.time()], and `elapsed_sec`, the session's elapsed run time in
+#' seconds (the `"elapsed"` component of `proc.time()`). Together they let
+#' an audit log show both when a snapshot was taken and how long the
+#' session had already been running at that point.
+#'
+#' @section RNG:
 #' The `rng` element records [RNGkind()] (as `kind`, `normal_kind`, and
 #' `sample_kind`) together with `seed_hash`, an MD5 fingerprint of
 #' `.Random.seed` (via [tools::md5sum()], since base R has no in-memory
@@ -50,6 +98,7 @@
 #' an edit changed the RNG state anywhere upstream, without having to
 #' inspect or store the (long, not directly meaningful) seed value.
 #'
+#' @section Library paths:
 #' The `libpaths` element is the character vector returned by [.libPaths()],
 #' i.e. the library locations R searches, in search order. It complements
 #' `packages`: that element records where each individual package resolved
@@ -60,6 +109,7 @@
 #' list of paths rather than a set of named fields or columns to choose
 #' among; it is always shown in full.
 #'
+#' @section Packages:
 #' The `packages` element covers every package that is either attached to
 #' the search path or loaded via namespace (i.e., `union(.packages(),
 #' loadedNamespaces())`). It has columns `package`, `attached`,
@@ -76,46 +126,23 @@
 #' `"Github (user/repo@sha)"`, another remote type, or `"local"` when no
 #' remote metadata is available.
 #'
+#' @section Global environment:
 #' The `globalenv` element is a data frame with one row per object in
 #' `.GlobalEnv` (including dot-prefixed objects), with columns `name`,
 #' `class`, and `size` (in bytes, as reported by [utils::object.size()]). Only
 #' object names, classes, and sizes are captured, never values. Because a
 #' long-running script can accumulate many objects, the default display shows
-#' only the largest few (see below); the captured object itself always holds
-#' every object.
+#' only the largest few (see "Selecting which elements are displayed"
+#' below); the captured object itself always holds every object.
 #'
-#' The `locale` element records `language`, `collate`, and `ctype`. These
-#' are split out from `platform` because they describe how text and dates
-#' are formatted for this session, rather than what/where/when the session
-#' is running.
-#'
-#' The `matrix` element records `blas` and `lapack`, the shared libraries
-#' backing R's linear algebra routines (as reported by
-#' [extSoftVersion()] and [La_library()]). Like `locale`, this is split out
-#' from `platform` -- in this case mirroring how base R's
-#' [utils::sessionInfo()] treats "Matrix products" as its own block rather
-#' than nesting it under platform info.
-#'
-#' The `document` element's `pandoc` and `quarto` fields record the versions
-#' of those two document-rendering tools, if found (`NA` otherwise). Both
-#' checks prefer the IDE-provided location over whatever happens to be on
-#' `PATH` (`RSTUDIO_PANDOC` for pandoc, `QUARTO_PATH` for quarto), since
-#' RStudio/Positron bundle their own copies that may differ from a
-#' separately installed one. Deliberately not tracked: other system
-#' dependencies (e.g. LaTeX, Hugo, spatial libraries) are package-specific
-#' rather than session-wide, and tracking them well would mean tracking
-#' many of them; `pandoc`/`quarto` are included because they, like
-#' BLAS/LAPACK, are already tracked by [utils::sessionInfo()] or
-#' [sessioninfo::session_info()]. `document` has no `sessionInfo()`
-#' precedent (unlike `matrix`), but is grouped the same way for
-#' consistency.
-#'
+#' @section Attachments:
 #' The `attachments` element is a data frame with one row per entry on the
 #' search path (as returned by [search()]), with columns `name` and `type`
 #' (`"package"` or `"other"`). This surfaces non-package attachments (e.g.
 #' `tools:rstudio`, or environments added via [attach()]) that aren't
 #' reflected in `packages`.
 #'
+#' @section Selecting which elements are displayed:
 #' `sessionstate()` itself always captures every field in full (`globalenv`
 #' is never truncated at capture time). To display only a subset when
 #' printing, pass `platform`/`locale`/`matrix`/`document`/`machine`/`git`/

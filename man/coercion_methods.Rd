@@ -31,13 +31,15 @@ or \code{"attachments"}. Ignored for other classes.}
 A data frame
 }
 \description{
-Coerce session check object to a data frame
+S3 \code{as.data.frame()} methods for the three classes this package defines,
+letting each be dropped into ordinary data frame workflows (filtering,
+joining, export) instead of only being inspected via \code{print()}/\code{format()}.
 }
 \details{
 For \code{sessioncheck_status} and \code{sessioncheck_sessioncheck} objects, this
 coercion is lossless: every entity and status recorded in \code{x} appears as a
 row in the result. That guarantee does not extend to
-\code{sessioncheck_sessionstate} objects: \code{sessionstate()} captures more than
+\code{sessioncheck_sessionstate} objects: \code{\link[=sessionstate]{sessionstate()}} captures more than
 any single rectangular table can hold, mixing scalar fields (\code{platform},
 \code{locale}, \code{matrix}, \code{document}, \code{machine}, \code{git}, \code{timing}, \code{rng}), a bare
 character vector (\code{libpaths}), and three differently-shaped tables

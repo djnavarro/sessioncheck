@@ -15,7 +15,9 @@ check_globalenv_objects(
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
 \item{allow_globalenv_objects}{Character vector containing names of objects
-that are "allowed", and will not trigger an action.}
+that are "allowed", and will not trigger an action. The default is
+\code{allow_globalenv_objects = NULL}, in which case dot-prefixed objects (e.g.
+\code{.Random.seed}) are allowed.}
 
 \item{action_on_pass}{Behavior to take if the status is clean. Possible values
 are "message" and "none". The default is \code{action_on_pass = "none"}.}
@@ -24,9 +26,9 @@ are "message" and "none". The default is \code{action_on_pass = "none"}.}
 Invisibly returns an object of class \code{sessioncheck_status}.
 }
 \description{
-Individual session check functions that inspect the contents of the global
-environment and the names of attached non-package environments. Session checkers
-can produce errors, warnings, or messages if requested.
+Individual session check function that inspects the contents of the global
+environment. Session checkers can produce errors, warnings, or messages if
+requested.
 }
 \details{
 This checker inspects the state of the global environment and takes action based

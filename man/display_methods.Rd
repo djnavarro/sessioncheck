@@ -2,7 +2,6 @@
 % Please edit documentation in R/class.R, R/sessionstate-format.R
 \name{display_methods}
 \alias{display_methods}
-\alias{.status_prefix}
 \alias{format.sessioncheck_status}
 \alias{format.sessioncheck_sessioncheck}
 \alias{print.sessioncheck_status}
@@ -11,8 +10,6 @@
 \alias{print.sessioncheck_sessionstate}
 \title{Format and print sessioncheck objects}
 \usage{
-.status_prefix
-
 \method{format}{sessioncheck_status}(x, ...)
 
 \method{format}{sessioncheck_sessioncheck}(x, ...)
@@ -128,7 +125,11 @@ other classes. See Details for how the default is resolved.}
 Character vector
 }
 \description{
-Format and print sessioncheck objects
+S3 \code{format()}/\code{print()} methods for the three classes this package
+defines. \code{sessioncheck_status}/\code{sessioncheck_sessioncheck} objects render
+as a one-line-per-check status summary; \code{sessioncheck_sessionstate}
+objects render as a multi-section report, and the arguments below let
+that report be filtered down to specific fields or columns per section.
 }
 \details{
 For \code{sessioncheck_sessionstate} objects, the \code{platform}/\code{locale}/\code{matrix}/
@@ -147,7 +148,7 @@ built-in default is used (showing every field/column, except for
 \code{c("package", "attached", "loaded_version", "source")}, and
 \code{globalenv_n}, which defaults to \code{10}). This selection only affects what
 is displayed; it never changes the underlying object, so
-\code{as.data.frame()} always returns the full package inventory, and
-\code{x$globalenv}/\code{x$attachments} always return their full data frames,
-regardless of any selection in effect.
+\code{\link[=coercion_methods]{as.data.frame()}} always returns the full package
+inventory, and \code{x$globalenv}/\code{x$attachments} always return their full
+data frames, regardless of any selection in effect.
 }

@@ -15,7 +15,9 @@ check_loaded_namespaces(
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
 \item{allow_loaded_namespaces}{Character vector containing names of packages that
-are "allowed", and will not trigger an action if loaded via namespace.}
+are "allowed", and will not trigger an action if loaded via namespace. The
+default is \code{allow_loaded_namespaces = NULL}, in which case only base-priority
+packages and the \strong{sessioncheck} namespace itself are allowed.}
 
 \item{action_on_pass}{Behavior to take if the status is clean. Possible values
 are "message" and "none". The default is \code{action_on_pass = "none"}.}
