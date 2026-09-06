@@ -588,6 +588,54 @@ test_that("an explicit packages argument overrides options(sessioncheck = ...)",
   expect_no_match(table_txt, "source", fixed = TRUE)
 })
 
+test_that(".abbrev_long_sha() shortens a full 40-character SHA to 7 characters", {
+  full <- "Github (someuser/somerepo@abcdef01234567890123456789abcdef01234567)"
+  expect_identical(.abbrev_long_sha(full), "Github (someuser/somerepo@abcdef0)")
+})
+
+test_that(".abbrev_long_sha() leaves short refs/shas and non-remote sources untouched", {
+  expect_identical(.abbrev_long_sha("local"), "local")
+  expect_identical(.abbrev_long_sha("CRAN (R 4.6.0)"), "CRAN (R 4.6.0)")
+  expect_identical(.abbrev_long_sha("Github (r-pkgs/desc@main)"), "Github (r-pkgs/desc@main)")
+})
+
+test_that("format.sessioncheck_sessionstate() abbreviates a long remote SHA in the printed packages table", {
+  local_mocked_bindings(
+    .get_package_inventory = function() {
+      data.frame(
+        package = "somepkg",
+        attached = FALSE,
+        loaded_version = "1.0.0",
+        source = "Github (someuser/somerepo@abcdef01234567890123456789abcdef01234567)",
+        stringsAsFactors = FALSE
+      )
+    }
+  )
+  x <- sessionstate()
+  txt <- format(x)
+  expect_match(txt, "Github (someuser/somerepo@abcdef0)", fixed = TRUE)
+  expect_no_match(txt, "abcdef01234567890123456789abcdef01234567", fixed = TRUE)
+})
+
+test_that("the full SHA is preserved in x$packages$source even though print() abbreviates it", {
+  local_mocked_bindings(
+    .get_package_inventory = function() {
+      data.frame(
+        package = "somepkg",
+        attached = FALSE,
+        loaded_version = "1.0.0",
+        source = "Github (someuser/somerepo@abcdef01234567890123456789abcdef01234567)",
+        stringsAsFactors = FALSE
+      )
+    }
+  )
+  x <- sessionstate()
+  expect_identical(
+    x$packages$source,
+    "Github (someuser/somerepo@abcdef01234567890123456789abcdef01234567)"
+  )
+})
+
 test_that("options(sessioncheck = ...) can also set defaults for platform/machine/timing", {
   old <- options(sessioncheck = list(sessionstate_platform = "version", sessionstate_machine = "user"))
   on.exit(options(old), add = TRUE)
@@ -933,17 +981,37 @@ test_that(".get_package_inventory() flags removed_from_disk when the namespace i
   expect_false(any(df$path_mismatch))
 })
 
-test_that(".get_built_rversion() falls back to the current R version when Built is missing or unparseable", {
-  expect_identical(.get_built_rversion(list()), paste(getRversion()))
-  expect_identical(.get_built_rversion(list(Built = "not a version string")), paste(getRversion()))
+test_that(".get_built_rversion() returns NA when Built is missing or unparseable", {
+  # fabricating the *current* R version here would misrepresent a
+  # build-time fact that was never actually recorded in the package's
+  # DESCRIPTION; the current session's R version is already captured
+  # separately in sessionstate()$platform$version
+  expect_identical(.get_built_rversion(list()), NA_character_)
+  expect_identical(.get_built_rversion(list(Built = "not a version string")), NA_character_)
+})
+
+test_that(".format_with_built_rversion() omits the parenthetical when Built is missing", {
+  expect_identical(.format_with_built_rversion("CRAN", list()), "CRAN")
+  expect_identical(
+    .format_with_built_rversion("CRAN", list(Built = "R 4.6.0; x86_64; unix")),
+    "CRAN (R 4.6.0)"
+  )
+})
+
+test_that(".get_package_source() omits the R version for a CRAN package with no Built field", {
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) list(Repository = "CRAN"),
+    .package = "utils"
+  )
+  expect_identical(.get_package_source("somepkg"), "CRAN")
 })
 
 test_that(".get_remote_ref() falls back to RemoteRef when RemoteSha is absent", {
   expect_identical(.get_remote_ref(list(RemoteRef = "main")), "main")
 })
 
-test_that(".get_remote_ref() falls back to 'unknown' when neither RemoteSha nor RemoteRef is set", {
-  expect_identical(.get_remote_ref(list()), "unknown")
+test_that(".get_remote_ref() returns NULL when neither RemoteSha nor RemoteRef is set", {
+  expect_null(.get_remote_ref(list()))
 })
 
 test_that(".get_package_source() returns 'unknown' for a package with no DESCRIPTION metadata", {
@@ -980,7 +1048,7 @@ test_that(".get_package_source() classifies GitHub remotes", {
     },
     .package = "utils"
   )
-  expect_identical(.get_package_source("somepkg"), "Github (someuser/somerepo@abcdef1)")
+  expect_identical(.get_package_source("somepkg"), "Github (someuser/somerepo@abcdef1234567890)")
 })
 
 test_that(".get_package_source() classifies packages with no remote or repository metadata as local", {
@@ -1120,7 +1188,7 @@ test_that(".get_package_source() classifies renv-restored GitHub packages", {
     },
     .package = "utils"
   )
-  expect_identical(.get_package_source("etal"), "Github (djnavarro/etal@e8fafef)")
+  expect_identical(.get_package_source("etal"), "Github (djnavarro/etal@e8fafefd5927138efda95939ed7b25f36103f131)")
 })
 
 test_that(".get_package_source() classifies r-universe packages", {
@@ -1135,6 +1203,24 @@ test_that(".get_package_source() classifies r-universe packages", {
     .package = "utils"
   )
   expect_identical(.get_package_source("somepkg"), "r-universe (R 4.6.1)")
+})
+
+test_that(".get_package_source() prefers Repository = 'CRAN' over a non-empty biocViews field", {
+  # a package can carry a non-empty biocViews field while still being an
+  # ordinary CRAN install (CRAN ignores biocViews); the explicit
+  # Repository = "CRAN" signal should win rather than misclassifying the
+  # package as Bioconductor
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) {
+      list(
+        biocViews = "Software",
+        Repository = "CRAN",
+        Built = "R 4.6.0; x86_64; unix"
+      )
+    },
+    .package = "utils"
+  )
+  expect_identical(.get_package_source("somepkg"), "CRAN (R 4.6.0)")
 })
 
 test_that(".get_package_source() classifies Bioconductor packages via biocViews", {
@@ -1167,7 +1253,7 @@ test_that(".get_package_source() classifies remotes::install_bioc() git2r remote
     },
     .package = "utils"
   )
-  expect_identical(.get_package_source("Biobase"), "Bioconductor (Biobase@65ae7a9)")
+  expect_identical(.get_package_source("Biobase"), "Bioconductor (Biobase@65ae7a98395e50568bfb7a6b6367dcd967d89e1a)")
 })
 
 test_that(".get_package_source() classifies remotes::install_bioc() xgit remotes", {
@@ -1188,7 +1274,7 @@ test_that(".get_package_source() classifies remotes::install_bioc() xgit remotes
     },
     .package = "utils"
   )
-  expect_identical(.get_package_source("Biobase"), "Bioconductor (Biobase@65ae7a9)")
+  expect_identical(.get_package_source("Biobase"), "Bioconductor (Biobase@65ae7a98395e50568bfb7a6b6367dcd967d89e1a)")
 })
 
 test_that(".get_package_source() classifies GitLab remotes", {
@@ -1203,7 +1289,7 @@ test_that(".get_package_source() classifies GitLab remotes", {
     },
     .package = "utils"
   )
-  expect_identical(.get_package_source("somepkg"), "GitLab (someuser/somerepo@0123456)")
+  expect_identical(.get_package_source("somepkg"), "GitLab (someuser/somerepo@0123456789abcdef)")
 })
 
 test_that(".get_package_source() classifies Bitbucket remotes", {
@@ -1218,7 +1304,7 @@ test_that(".get_package_source() classifies Bitbucket remotes", {
     },
     .package = "utils"
   )
-  expect_identical(.get_package_source("somepkg"), "Bitbucket (someuser/somerepo@abcdef0)")
+  expect_identical(.get_package_source("somepkg"), "Bitbucket (someuser/somerepo@abcdef0123456789)")
 })
 
 test_that(".get_package_source() classifies generic git remotes (e.g. Codeberg) by URL", {
@@ -1234,7 +1320,7 @@ test_that(".get_package_source() classifies generic git remotes (e.g. Codeberg) 
   )
   expect_identical(
     .get_package_source("somepkg"),
-    "Git (https://codeberg.org/someuser/somerepo@fedcba9)"
+    "Git (https://codeberg.org/someuser/somerepo@fedcba9876543210)"
   )
 })
 
@@ -1271,7 +1357,7 @@ test_that(".get_package_source() classifies legacy devtools::install_github() in
     },
     .package = "utils"
   )
-  expect_identical(.get_package_source("somepkg"), "Github (someuser/somerepo@abcdef1)")
+  expect_identical(.get_package_source("somepkg"), "Github (someuser/somerepo@abcdef1234567890)")
 })
 
 test_that(".get_package_source() classifies devtools::load_all() packages", {
@@ -1290,5 +1376,43 @@ test_that(".get_package_source() falls back to the raw RemoteType label when unr
     },
     .package = "utils"
   )
-  expect_identical(.get_package_source("somepkg"), "some_future_type (1112223)")
+  expect_identical(.get_package_source("somepkg"), "some_future_type (1112223334445556)")
+})
+
+test_that(".get_package_source() omits the ref suffix for a remote with no RemoteSha or RemoteRef", {
+  # mirrors sessioninfo's "remote repo, but no RemoteSha" test fixture: a
+  # RemoteType with RemoteUsername/RemoteRepo but no sha/ref recorded at
+  # all should not fabricate a placeholder ref
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) {
+      list(
+        RemoteType = "github",
+        RemoteUsername = "r-pkgs",
+        RemoteRepo = "desc"
+      )
+    },
+    .package = "utils"
+  )
+  expect_identical(.get_package_source("somepkg"), "Github (r-pkgs/desc)")
+})
+
+test_that(".get_package_source() returns the bare label for a remote with no identifying metadata at all", {
+  # mirrors sessioninfo's "no RemoteRepo" test fixture: a RemoteType with no
+  # RemoteUsername/RemoteRepo/RemoteUrl/RemotePkgRef/RemoteSha/RemoteRef
+  # should render as the bare label, not "(unknown)"
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) list(RemoteType = "github"),
+    .package = "utils"
+  )
+  expect_identical(.get_package_source("somepkg"), "Github")
+})
+
+test_that(".get_package_source() still shows a ref-only remote when no repo/url/pkg_ref is set", {
+  local_mocked_bindings(
+    packageDescription = function(pkg, ...) {
+      list(RemoteType = "github", RemoteRef = "main")
+    },
+    .package = "utils"
+  )
+  expect_identical(.get_package_source("somepkg"), "Github (main)")
 })

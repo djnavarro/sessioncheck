@@ -388,9 +388,20 @@ sessionstate <- function() {
 
 .get_built_rversion <- function(desc) {
   built <- desc$Built
-  rver <- if (!is.null(built)) sub("^R ([0-9.]+);.*$", "\\1", built) else NA_character_
-  if (is.na(rver) || identical(rver, built)) rver <- paste(getRversion())
-  rver
+  if (is.null(built)) return(NA_character_)
+  rver <- sub("^R ([0-9.]+);.*$", "\\1", built)
+  if (identical(rver, built)) NA_character_ else rver
+}
+
+# formats a package-source label together with its recorded on-disk build
+# R version, e.g. "CRAN (R 4.6.0)". Falls back to the bare label (no
+# parenthetical) when Built is missing or unparseable, rather than
+# fabricating a build-time R version that was never recorded -- the
+# current session's R version is already captured separately, in
+# sessionstate()$platform$version
+.format_with_built_rversion <- function(label, desc) {
+  rver <- .get_built_rversion(desc)
+  if (is.na(rver)) label else sprintf("%s (R %s)", label, rver)
 }
 
 # labels for known remotes::install_*() RemoteType values; anything else
@@ -410,12 +421,20 @@ sessionstate <- function() {
   bioc_xgit  = "Bioconductor"
 )
 
+# returns NULL (rather than a fabricated placeholder) when neither field is
+# set, so .format_remote_source() can omit the "@ref" suffix entirely
+# instead of inventing one -- matching how sessioninfo handles remotes with
+# no recorded sha/ref (e.g. a RemoteType with RemoteRepo but no RemoteSha).
+# The full RemoteSha is kept as-is (not truncated) so the captured `source`
+# value stays useful programmatically, e.g. for looking up the exact commit
+# later; display-time abbreviation to a short, human-readable form happens
+# separately in .abbrev_long_sha(), used only when printing/formatting
 .get_remote_ref <- function(desc) {
   sha <- desc$RemoteSha
-  if (!is.null(sha) && nzchar(sha)) return(substr(sha, 1L, 7L))
+  if (!is.null(sha) && nzchar(sha)) return(sha)
   ref <- desc$RemoteRef
   if (!is.null(ref) && nzchar(ref)) return(ref)
-  "unknown"
+  NULL
 }
 
 .format_remote_source <- function(remote_type, desc) {
@@ -425,23 +444,25 @@ sessionstate <- function() {
     remote_type
   }
   ref <- .get_remote_ref(desc)
+  ref_suffix <- if (!is.null(ref)) paste0("@", ref) else ""
   user <- desc$RemoteUsername
   repo <- desc$RemoteRepo
-  # host-based remotes (Github, GitLab, Bitbucket, ...) report user/repo@ref
+  # host-based remotes (Github, GitLab, Bitbucket, ...) report user/repo@ref,
+  # or bare user/repo when no sha/ref was recorded at all
   if (!is.null(user) && nzchar(user) && !is.null(repo) && nzchar(repo)) {
-    return(sprintf("%s (%s/%s@%s)", label, user, repo, ref))
+    return(sprintf("%s (%s/%s%s)", label, user, repo, ref_suffix))
   }
   # remotes::install_bioc()'s bioc_git2r/bioc_xgit remotes set RemoteRepo
   # (the package name) and RemoteMirror, but no RemoteUsername
   if (!is.null(repo) && nzchar(repo)) {
-    return(sprintf("%s (%s@%s)", label, repo, ref))
+    return(sprintf("%s (%s%s)", label, repo, ref_suffix))
   }
   # generic git/svn/url/local remotes (e.g. Codeberg, self-hosted Gitea,
   # remotes::install_git()/install_local() with an arbitrary URL or path)
   # report the URL/path instead, since there is no user/repo pair to show
   url <- desc$RemoteUrl
   if (!is.null(url) && nzchar(url)) {
-    return(sprintf("%s (%s@%s)", label, url, ref))
+    return(sprintf("%s (%s%s)", label, url, ref_suffix))
   }
   # pak's local installs (e.g. pak::local_install(), pak::pkg_install()
   # with a "local::<path>" spec) do not set RemoteUrl at all; the path is
@@ -451,7 +472,11 @@ sessionstate <- function() {
     path <- sub("^local::", "", pkg_ref)
     return(sprintf("%s (%s)", label, path))
   }
-  sprintf("%s (%s)", label, ref)
+  # no user/repo, repo, url, or pkg_ref to report at all: show a
+  # parenthesised ref if one exists, otherwise the bare label rather than
+  # fabricating a placeholder like "(unknown)"
+  if (!is.null(ref)) return(sprintf("%s (%s)", label, ref))
+  label
 }
 
 .get_package_source <- function(pkg) {
@@ -493,25 +518,33 @@ sessionstate <- function() {
     return(.format_remote_source(remote_type, desc))
   }
 
+  repo <- desc$Repository
+
+  # Repository = "CRAN" is authoritative and takes priority over biocViews:
+  # a package can legitimately carry a non-empty biocViews field (CRAN
+  # ignores it) while still being an ordinary CRAN install, and Repository
+  # being explicitly "CRAN" is a stronger signal than the biocViews
+  # heuristic below, which exists to catch packages that *don't* set
+  # Repository at all
+  if (!is.null(repo) && identical(repo, "CRAN")) {
+    return(.format_with_built_rversion("CRAN", desc))
+  }
+
   # biocViews is a mandatory field in every Bioconductor package's
   # DESCRIPTION, so it is a more reliable signal than Repository, which
   # BiocManager-installed packages do not consistently set
   if (!is.null(desc$biocViews) && nzchar(desc$biocViews)) {
-    return(sprintf("Bioconductor (R %s)", .get_built_rversion(desc)))
+    return(.format_with_built_rversion("Bioconductor", desc))
   }
 
-  repo <- desc$Repository
   if (!is.null(repo) && nzchar(repo)) {
-    if (identical(repo, "CRAN")) {
-      return(sprintf("CRAN (R %s)", .get_built_rversion(desc)))
-    }
     if (grepl("r-universe", repo, ignore.case = TRUE)) {
-      return(sprintf("r-universe (R %s)", .get_built_rversion(desc)))
+      return(.format_with_built_rversion("r-universe", desc))
     }
     # any other named repository (e.g. an RSPM mirror, an internal package
     # manager repo, etc.) - report the repository name rather than
     # mislabeling it as "CRAN"
-    return(sprintf("%s (R %s)", repo, .get_built_rversion(desc)))
+    return(.format_with_built_rversion(repo, desc))
   }
 
   # a package with no remote/repository/biocViews metadata at all is either

@@ -33,6 +33,17 @@
   all_names[all_names %in% requested]
 }
 
+# abbreviates a full 40-character git SHA embedded in a `source` string
+# (e.g. "Github (user/repo@abcdef0123456789abcdef0123456789abcdef01)") down
+# to the usual 7-character short form for display, mirroring
+# sessioninfo::abbrev_long_sha(). The underlying `packages$source` data
+# always keeps the full SHA (see .get_remote_ref() in sessionstate.R);
+# this abbreviation is applied only when printing/formatting, never at
+# capture time
+.abbrev_long_sha <- function(x) {
+  sub("([0-9a-f]{7})[0-9a-f]{33}", "\\1", x)
+}
+
 # formats raw byte counts (as captured by .get_globalenv_info()) into
 # human-readable units for display, reusing base R's object_size formatting
 # rather than hand-rolling KB/MB thresholds
@@ -157,6 +168,9 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   pkg_cols <- .select_fields(names(pkg_df), packages, "packages")
   pkg_df <- pkg_df[, pkg_cols, drop = FALSE]
   if ("attached" %in% names(pkg_df)) pkg_df$attached <- ifelse(pkg_df$attached, "*", " ")
+  # abbreviate any full-length remote SHA for display; x$packages$source
+  # itself always retains the full SHA
+  if ("source" %in% names(pkg_df)) pkg_df$source <- .abbrev_long_sha(pkg_df$source)
   pkg_lines <- c(
     .rule(sprintf("Packages [n = %d] (attached + loaded via namespace)", nrow(pkg_df))),
     utils::capture.output(print(pkg_df, row.names = FALSE))
