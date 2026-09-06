@@ -55,9 +55,25 @@
   ...
 )
 
-\method{format}{sessioncheck_sessionstatediff}(x, changed_only = NULL, ...)
+\method{format}{sessioncheck_sessionstatediff}(
+  x,
+  changed_only = NULL,
+  packages = NULL,
+  globalenv = NULL,
+  attachments = NULL,
+  max_rows = NULL,
+  ...
+)
 
-\method{print}{sessioncheck_sessionstatediff}(x, changed_only = NULL, ...)
+\method{print}{sessioncheck_sessionstatediff}(
+  x,
+  changed_only = NULL,
+  packages = NULL,
+  globalenv = NULL,
+  attachments = NULL,
+  max_rows = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{An object of class \code{sessioncheck_status}, \code{sessioncheck_sessioncheck},
@@ -109,16 +125,24 @@ resolved.}
 \item{packages}{For \code{sessioncheck_sessionstate} objects, an optional character
 vector selecting which package inventory columns to display (see
 \code{\link[=sessionstate]{sessionstate()}} for the full list of columns). Defaults to
-\code{c("package", "attached", "loaded_version", "source")}. Ignored for other
-classes. See Details for how the default is resolved.}
+\code{c("package", "attached", "loaded_version", "source")}. For
+\code{sessioncheck_sessionstatediff} objects, the same column selection and
+default apply to the \code{added}/\code{removed} blocks of the "Packages" section
+(the \code{modified} block always shows its own fixed \code{field}/\code{old}/\code{new}
+columns, so \code{packages} does not affect it). Ignored for other classes.
+See Details for how the default is resolved.}
 
 \item{globalenv}{For \code{sessioncheck_sessionstate} objects, an optional
 character vector selecting which global environment columns to display
 (from \code{"name"}, \code{"class"}, \code{"size"}, \code{"hash"}). Defaults to
 \code{c("name", "class", "size")} (omitting \code{"hash"}, a long fingerprint
 mainly useful programmatically -- see \code{\link[=compare_sessionstates]{compare_sessionstates()}}).
-Ignored for other classes. See Details for how the default is resolved,
-and for how \code{globalenv_n} separately controls the number of rows shown.}
+For \code{sessioncheck_sessionstatediff} objects, the same column selection
+and default apply to the \code{added}/\code{removed} blocks of the "Global
+environment" section (the \code{modified} block is unaffected -- see
+\code{packages} above). Ignored for other classes. See Details for how the
+default is resolved, and for how \code{globalenv_n} separately controls the
+number of rows shown for \code{sessioncheck_sessionstate} objects.}
 
 \item{globalenv_n}{For \code{sessioncheck_sessionstate} objects, an optional
 single number giving the maximum number of \code{globalenv} rows to display,
@@ -127,13 +151,23 @@ Details for how the default is resolved.}
 
 \item{attachments}{For \code{sessioncheck_sessionstate} objects, an optional
 character vector selecting which attached-environment columns to display
-(from \code{"name"}, \code{"type"}). Defaults to showing all columns. Ignored for
-other classes. See Details for how the default is resolved.}
+(from \code{"name"}, \code{"type"}). Defaults to showing all columns. For
+\code{sessioncheck_sessionstatediff} objects, the same column selection
+applies to the \code{added}/\code{removed} blocks of the "Attached environments"
+section (which has no \code{modified} block at all -- see
+\code{\link[=compare_sessionstates]{compare_sessionstates()}}). Ignored for other classes. See Details for
+how the default is resolved.}
 
 \item{changed_only}{For \code{sessioncheck_sessionstatediff} objects, whether to
 collapse sections/fields with no detected change down to a single "(no
 changes)" line (\code{TRUE} by default) or always show every field. Ignored
 for other classes. See Details for how the default is resolved.}
+
+\item{max_rows}{For \code{sessioncheck_sessionstatediff} objects, an optional
+single number giving the maximum number of rows to display in each
+\code{added}/\code{removed}/\code{modified} block of the "Packages", "Global
+environment", and "Attached environments" sections. Defaults to \code{10}.
+Ignored for other classes. See Details for how the default is resolved.}
 }
 \value{
 Character vector
@@ -167,9 +201,17 @@ is displayed; it never changes the underlying object, so
 inventory, and \code{x$globalenv}/\code{x$attachments} always return their full
 data frames, regardless of any selection in effect.
 
-For \code{sessioncheck_sessionstatediff} objects, \code{changed_only} is resolved
-through the same precedence: an explicit argument always wins; otherwise
+For \code{sessioncheck_sessionstatediff} objects, \code{changed_only}/\code{packages}/
+\code{globalenv}/\code{attachments}/\code{max_rows} are resolved through the same
+precedence: an explicit argument always wins; otherwise
 \code{getOption("sessioncheck")} is checked for a
-\code{sessionstatediff_changed_only} field; if neither is set, it defaults to
-\code{TRUE}.
+\code{sessionstatediff_changed_only}, \code{sessionstatediff_packages},
+\code{sessionstatediff_globalenv}, \code{sessionstatediff_attachments}, or
+\code{sessionstatediff_max_rows} field (respectively); if neither is set, a
+built-in default is used: \code{TRUE} for \code{changed_only}, \code{10} for
+\code{max_rows}, and the same \code{packages}/\code{globalenv}/\code{attachments} defaults
+as \code{sessioncheck_sessionstate} objects use (see above). \code{max_rows}
+applies independently to every \code{added}/\code{removed}/\code{modified} block, and
+does not affect the underlying object -- \code{as.data.frame()} on a
+\code{sessioncheck_sessionstatediff} always returns every row.
 }

@@ -121,23 +121,40 @@ new_sessionstatediff <- function(platform, locale, matrix, document, machine, gi
 #' @param packages For `sessioncheck_sessionstate` objects, an optional character
 #' vector selecting which package inventory columns to display (see
 #' [sessionstate()] for the full list of columns). Defaults to
-#' `c("package", "attached", "loaded_version", "source")`. Ignored for other
-#' classes. See Details for how the default is resolved.
+#' `c("package", "attached", "loaded_version", "source")`. For
+#' `sessioncheck_sessionstatediff` objects, the same column selection and
+#' default apply to the `added`/`removed` blocks of the "Packages" section
+#' (the `modified` block always shows its own fixed `field`/`old`/`new`
+#' columns, so `packages` does not affect it). Ignored for other classes.
+#' See Details for how the default is resolved.
 #' @param globalenv For `sessioncheck_sessionstate` objects, an optional
 #' character vector selecting which global environment columns to display
 #' (from `"name"`, `"class"`, `"size"`, `"hash"`). Defaults to
 #' `c("name", "class", "size")` (omitting `"hash"`, a long fingerprint
 #' mainly useful programmatically -- see [compare_sessionstates()]).
-#' Ignored for other classes. See Details for how the default is resolved,
-#' and for how `globalenv_n` separately controls the number of rows shown.
+#' For `sessioncheck_sessionstatediff` objects, the same column selection
+#' and default apply to the `added`/`removed` blocks of the "Global
+#' environment" section (the `modified` block is unaffected -- see
+#' `packages` above). Ignored for other classes. See Details for how the
+#' default is resolved, and for how `globalenv_n` separately controls the
+#' number of rows shown for `sessioncheck_sessionstate` objects.
 #' @param globalenv_n For `sessioncheck_sessionstate` objects, an optional
 #' single number giving the maximum number of `globalenv` rows to display,
 #' largest objects first. Defaults to `10`. Ignored for other classes. See
 #' Details for how the default is resolved.
 #' @param attachments For `sessioncheck_sessionstate` objects, an optional
 #' character vector selecting which attached-environment columns to display
-#' (from `"name"`, `"type"`). Defaults to showing all columns. Ignored for
-#' other classes. See Details for how the default is resolved.
+#' (from `"name"`, `"type"`). Defaults to showing all columns. For
+#' `sessioncheck_sessionstatediff` objects, the same column selection
+#' applies to the `added`/`removed` blocks of the "Attached environments"
+#' section (which has no `modified` block at all -- see
+#' [compare_sessionstates()]). Ignored for other classes. See Details for
+#' how the default is resolved.
+#' @param max_rows For `sessioncheck_sessionstatediff` objects, an optional
+#' single number giving the maximum number of rows to display in each
+#' `added`/`removed`/`modified` block of the "Packages", "Global
+#' environment", and "Attached environments" sections. Defaults to `10`.
+#' Ignored for other classes. See Details for how the default is resolved.
 #' @param ... Ignored
 #'
 #' @returns Character vector
@@ -164,11 +181,19 @@ new_sessionstatediff <- function(platform, locale, matrix, document, machine, gi
 #' inventory, and `x$globalenv`/`x$attachments` always return their full
 #' data frames, regardless of any selection in effect.
 #'
-#' For `sessioncheck_sessionstatediff` objects, `changed_only` is resolved
-#' through the same precedence: an explicit argument always wins; otherwise
+#' For `sessioncheck_sessionstatediff` objects, `changed_only`/`packages`/
+#' `globalenv`/`attachments`/`max_rows` are resolved through the same
+#' precedence: an explicit argument always wins; otherwise
 #' `getOption("sessioncheck")` is checked for a
-#' `sessionstatediff_changed_only` field; if neither is set, it defaults to
-#' `TRUE`.
+#' `sessionstatediff_changed_only`, `sessionstatediff_packages`,
+#' `sessionstatediff_globalenv`, `sessionstatediff_attachments`, or
+#' `sessionstatediff_max_rows` field (respectively); if neither is set, a
+#' built-in default is used: `TRUE` for `changed_only`, `10` for
+#' `max_rows`, and the same `packages`/`globalenv`/`attachments` defaults
+#' as `sessioncheck_sessionstate` objects use (see above). `max_rows`
+#' applies independently to every `added`/`removed`/`modified` block, and
+#' does not affect the underlying object -- `as.data.frame()` on a
+#' `sessioncheck_sessionstatediff` always returns every row.
 #'
 #' @name display_methods
 
