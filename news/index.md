@@ -15,7 +15,8 @@
   consistent across checkers, including a clearer distinction between
   “missing” and “mismatched” for the options/locale/sysenv checks, and a
   dedicated message for
-  [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md).
+  [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md)
+  ([\#5](https://github.com/djnavarro/sessioncheck/issues/5)).
 
 ### New features
 
@@ -41,6 +42,17 @@
   [`print()`](https://rdrr.io/r/base/print.html), and
   [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
   methods.
+
+### Bug fixes
+
+- Fixed `.get_locale_list()` (used by
+  [`check_required_locale()`](https://sessioncheck.djnavarro.net/reference/check_required_locale.md))
+  to handle the case where
+  [`Sys.getlocale()`](https://rdrr.io/r/base/locales.html) returns a
+  single unprefixed value instead of the usual `"CATEGORY=value;..."`
+  format, which happens when every locale category shares the same
+  setting. Previously this caused every requested category to be
+  misreported as missing.
 
 ## sessioncheck 0.1.1
 
