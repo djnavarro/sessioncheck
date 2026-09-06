@@ -15,7 +15,9 @@ check_attached_packages(
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
 \item{allow_attached_packages}{Character vector containing names of packages that
-are "allowed", and will not trigger an action if attached to the search path.}
+are "allowed", and will not trigger an action if attached to the search path. The
+default is \code{allow_attached_packages = NULL}, in which case only base-priority
+packages are allowed.}
 
 \item{action_on_pass}{Behavior to take if the status is clean. Possible values
 are "message" and "none". The default is \code{action_on_pass = "none"}.}

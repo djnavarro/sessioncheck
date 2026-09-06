@@ -15,7 +15,10 @@ check_attached_environments(
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
 \item{allow_attached_environments}{Character vector containing names of environments
-that are "allowed", and will not trigger an action if attached to the search path.}
+that are "allowed", and will not trigger an action if attached to the search path.
+The default is \code{allow_attached_environments = NULL}, in which case package
+environments and a set of known IDE-injected environments (e.g. "tools:rstudio")
+are allowed.}
 
 \item{action_on_pass}{Behavior to take if the status is clean. Possible values
 are "message" and "none". The default is \code{action_on_pass = "none"}.}

@@ -15,7 +15,7 @@ check_sessiontime(
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
 \item{max_sessiontime}{Maximum session time permitted in seconds before the checker
-takes action}
+takes action. The default is \code{max_sessiontime = 300}.}
 
 \item{action_on_pass}{Behavior to take if the status is clean. Possible values
 are "message" and "none". The default is \code{action_on_pass = "none"}.}

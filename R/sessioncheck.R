@@ -98,7 +98,9 @@ sessioncheck <- function(
 #' @param action Behavior to take if the status is not clean. Possible values are 
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param allow_attached_packages Character vector containing names of packages that 
-#' are "allowed", and will not trigger an action if attached to the search path.
+#' are "allowed", and will not trigger an action if attached to the search path. The
+#' default is `allow_attached_packages = NULL`, in which case only base-priority
+#' packages are allowed.
 #' @param action_on_pass Behavior to take if the status is clean. Possible values
 #' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
@@ -152,7 +154,9 @@ check_attached_packages <- function(action = "warn", allow_attached_packages = N
 #' @param action Behavior to take if the status is not clean. Possible values are 
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param allow_loaded_namespaces Character vector containing names of packages that 
-#' are "allowed", and will not trigger an action if loaded via namespace.
+#' are "allowed", and will not trigger an action if loaded via namespace. The
+#' default is `allow_loaded_namespaces = NULL`, in which case only base-priority
+#' packages and the **sessioncheck** namespace itself are allowed.
 #' @param action_on_pass Behavior to take if the status is clean. Possible values
 #' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
@@ -199,14 +203,16 @@ check_loaded_namespaces <- function(action = "warn", allow_loaded_namespaces = N
 #' @title Check global environment objects
 #' 
 #' @description
-#' Individual session check functions that inspect the contents of the global 
-#' environment and the names of attached non-package environments. Session checkers 
-#' can produce errors, warnings, or messages if requested.
+#' Individual session check function that inspects the contents of the global 
+#' environment. Session checkers can produce errors, warnings, or messages if
+#' requested.
 #' 
 #' @param action Behavior to take if the status is not clean. Possible values are 
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param allow_globalenv_objects Character vector containing names of objects
-#' that are "allowed", and will not trigger an action.
+#' that are "allowed", and will not trigger an action. The default is
+#' `allow_globalenv_objects = NULL`, in which case dot-prefixed objects (e.g.
+#' `.Random.seed`) are allowed.
 #' @param action_on_pass Behavior to take if the status is clean. Possible values
 #' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
@@ -259,6 +265,9 @@ check_globalenv_objects <- function(action = "warn", allow_globalenv_objects = N
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param allow_attached_environments Character vector containing names of environments
 #' that are "allowed", and will not trigger an action if attached to the search path.
+#' The default is `allow_attached_environments = NULL`, in which case package
+#' environments and a set of known IDE-injected environments (e.g. "tools:rstudio")
+#' are allowed.
 #' @param action_on_pass Behavior to take if the status is clean. Possible values
 #' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
@@ -312,7 +321,7 @@ check_attached_environments <- function(action = "warn", allow_attached_environm
 #' @param action Behavior to take if the status is not clean. Possible values are 
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param max_sessiontime Maximum session time permitted in seconds before the checker 
-#' takes action
+#' takes action. The default is `max_sessiontime = 300`.
 #' @param action_on_pass Behavior to take if the status is clean. Possible values
 #' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
