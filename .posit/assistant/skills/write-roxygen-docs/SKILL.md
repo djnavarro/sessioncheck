@@ -32,7 +32,12 @@ into the wrong one:
   re-target the description; the tell is a description that reads correctly
   for the *family* of functions but never actually says what this specific
   function does (that's a sign the real description got left in `@details`
-  instead).
+  instead). It's just as easy to skip the description paragraph entirely —
+  roxygen2 doesn't warn you, it silently reuses the title as the
+  description, which is *always* a restatement by construction. If a topic
+  documents several functions/methods together (via `@name`/`@rdname`, e.g.
+  a shared `print()`/`format()` topic), write a description that names what
+  the group has in common, not just a copy of the shared title.
 - **`@details`**: everything else — default behavior, edge cases, how an
   argument being `NULL` is treated, interactions with `sessioncheck()`. It's
   fine for this to be a few sentences to a short paragraph. Details render
@@ -42,6 +47,11 @@ into the wrong one:
   has a fixed set of values (like `action`), what they are. State the
   default inline (e.g. "The default is `action = \"warn\"`") since the usage
   block and the argument description are far apart on the rendered page.
+  When the default is a sentinel like `NULL` whose *effect* isn't obvious
+  from the value itself, say what it does rather than just naming it (e.g.
+  "Defaults to showing all fields" reads better than "the default is
+  `platform = NULL`", which tells the reader nothing until they go read
+  `@details` too).
 - **`@returns`**: the shape of the return value — here, always "Invisibly
   returns an object of class `sessioncheck_status`" (or
   `sessioncheck_sessioncheck` for the orchestrator). Every exported function
@@ -106,7 +116,21 @@ skill), and a couple of sessioncheck-specific ones:
   `[check_globalenv_objects()]` (or `[pkg::fn()]` for another package) is
   what roxygen2/pkgdown turn into an actual hyperlink. A backtick-only
   mention anywhere a function is referenced — in `@details`, `@seealso`, or
-  prose — is a broken cross-reference, not a stylistic choice.
+  prose — is a broken cross-reference, not a stylistic choice. When the
+  natural link text is a function call but the useful target is a
+  different topic (e.g. mentioning `as.data.frame()` where the real
+  explanation lives on the `coercion_methods` topic), use
+  `` [`as.data.frame()`][coercion_methods] `` for custom link text rather
+  than linking to the (less useful) base generic's own page.
+- **Check the compiled `.Rd` for stray aliases, not just the prose.** A
+  `@name`/`@rdname` block (shared docs for several functions/methods)
+  attaches to whichever R object immediately follows it in the file. If an
+  internal, unrelated object — e.g. a private lookup table — sits between
+  the block and its intended first function, roxygen2 silently attaches the
+  block to that object instead and gives it a public `\alias`, which can
+  surface as nonsense in the rendered `\usage{}`. Reading the roxygen
+  comments won't reveal this; open the generated `man/*.Rd` and check that
+  every `\alias{}` is something the topic is actually meant to document.
 
 ## Checklist before finishing a roxygen block
 
@@ -115,6 +139,9 @@ skill), and a couple of sessioncheck-specific ones:
 - [ ] Description actually describes *this* function, not a template
       inherited from a sibling function that describes the family in
       general instead.
+- [ ] An explicit `@description` paragraph was actually written, distinct
+      from the title — not left to roxygen2's default of silently reusing
+      the title verbatim.
 - [ ] Everything in `@details` is genuinely additional to the description,
       not filler to make the section non-empty.
 - [ ] If `@details` covers more than three or four sub-topics, it's broken
@@ -131,5 +158,10 @@ skill), and a couple of sessioncheck-specific ones:
       other agent/contributor-facing material.
 - [ ] No description of implementation details a user would need `:::` to
       verify — only observable inputs/outputs/behavior.
+- [ ] For `@name`/`@rdname` topics, every `\alias{}` in the compiled
+      `man/*.Rd` is something the topic is actually meant to document — no
+      internal object picked up by accident.
 - [ ] Ran `devtools::document()` and skimmed the rendered `man/*.Rd` (or
-      `?function` output) rather than just the roxygen comment source.
+      `?function` output) rather than just the roxygen comment source. If
+      the fix touched code (not just comments) — e.g. reordering
+      definitions to fix an alias leak — also ran `devtools::test()`.
