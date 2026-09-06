@@ -8,8 +8,8 @@ sessioncheck(action = NULL, checks = NULL, action_on_pass = NULL, ...)
 }
 \arguments{
 \item{action}{Behavior to take if the status is not clean. Possible values are
-"error", "warn", "message", and "none". If the user does not specify an action
-the default to set \code{action = "warn"}.}
+"error", "warn", "message", and "none". If the user does not specify an
+action, the default is \code{action = "warn"}.}
 
 \item{checks}{Character vector listing the checks to run. If the user does not
 specify the checks, the default is to run
@@ -25,23 +25,24 @@ is \code{action_on_pass = "none"}.}
 Invisibly returns an object of class \code{sessioncheck_sessioncheck}.
 }
 \description{
-Individual session check functions that each inspect one way in which an R
-session could be considered not to be "clean". Session checkers can produce
-errors, warnings, or messages if requested.
+\code{sessioncheck()} is the top-level orchestrator for this package's
+individual session checks: it runs one or more \verb{check_*()} functions
+(e.g. \code{\link[=check_attached_packages]{check_attached_packages()}}, \code{\link[=check_globalenv_objects]{check_globalenv_objects()}}) in a
+single call and combines their results. Like the individual checks it
+wraps, it can produce errors, warnings, or messages if requested.
 }
 \details{
-\code{sessioncheck()} allows the user to apply multiple session checks in a single function.
 The following arguments are recognized via \code{...}:
 \itemize{
-\item \code{allow_globalenv_objects} is passed to \code{check_globalenv_objects()}
-\item \code{allow_attached_packages} is passed to \code{check_attached_packages()}
-\item \code{allow_attached_environments} is passed to \code{check_attached_environments()}
-\item \code{allow_loaded_namespaces} is passed to \code{check_loaded_namespaces()}
-\item \code{max_sessiontime} is passed to \code{check_sessiontime()}
-\item \code{required_options} is passed to \code{check_required_options()}
-\item \code{required_locale} is passed to \code{check_required_locale()}
-\item \code{required_sysenv} is passed to \code{check_required_sysenv()}
-\item \code{required_wd} is passed to \code{check_working_directory()}
+\item \code{allow_globalenv_objects} is passed to \code{\link[=check_globalenv_objects]{check_globalenv_objects()}}
+\item \code{allow_attached_packages} is passed to \code{\link[=check_attached_packages]{check_attached_packages()}}
+\item \code{allow_attached_environments} is passed to \code{\link[=check_attached_environments]{check_attached_environments()}}
+\item \code{allow_loaded_namespaces} is passed to \code{\link[=check_loaded_namespaces]{check_loaded_namespaces()}}
+\item \code{max_sessiontime} is passed to \code{\link[=check_sessiontime]{check_sessiontime()}}
+\item \code{required_options} is passed to \code{\link[=check_required_options]{check_required_options()}}
+\item \code{required_locale} is passed to \code{\link[=check_required_locale]{check_required_locale()}}
+\item \code{required_sysenv} is passed to \code{\link[=check_required_sysenv]{check_required_sysenv()}}
+\item \code{required_wd} is passed to \code{\link[=check_working_directory]{check_working_directory()}}
 }
 
 Other arguments are ignored.
@@ -60,4 +61,15 @@ sessioncheck(
   action_on_pass = "message"
 )
  
+}
+\seealso{
+\code{\link[=check_attached_packages]{check_attached_packages()}},
+\code{\link[=check_loaded_namespaces]{check_loaded_namespaces()}},
+\code{\link[=check_globalenv_objects]{check_globalenv_objects()}},
+\code{\link[=check_attached_environments]{check_attached_environments()}},
+\code{\link[=check_sessiontime]{check_sessiontime()}},
+\code{\link[=check_required_options]{check_required_options()}},
+\code{\link[=check_required_locale]{check_required_locale()}},
+\code{\link[=check_required_sysenv]{check_required_sysenv()}},
+\code{\link[=check_working_directory]{check_working_directory()}}
 }

@@ -2,13 +2,15 @@
 #' @title Checks the overall status of the R session
 #' 
 #' @description
-#' Individual session check functions that each inspect one way in which an R
-#' session could be considered not to be "clean". Session checkers can produce
-#' errors, warnings, or messages if requested.
+#' `sessioncheck()` is the top-level orchestrator for this package's
+#' individual session checks: it runs one or more `check_*()` functions
+#' (e.g. [check_attached_packages()], [check_globalenv_objects()]) in a
+#' single call and combines their results. Like the individual checks it
+#' wraps, it can produce errors, warnings, or messages if requested.
 #' 
 #' @param action Behavior to take if the status is not clean. Possible values are 
-#' "error", "warn", "message", and "none". If the user does not specify an action 
-#' the default to set `action = "warn"`.
+#' "error", "warn", "message", and "none". If the user does not specify an
+#' action, the default is `action = "warn"`.
 #' @param checks Character vector listing the checks to run. If the user does not 
 #' specify the checks, the default is to run
 #' `checks = c("globalenv_objects", "attached_packages", "attached_environments")`.
@@ -34,20 +36,31 @@
 #' )
 #'  
 #' @details
-#' `sessioncheck()` allows the user to apply multiple session checks in a single function. 
 #' The following arguments are recognized via `...`:
 #' 
-#' - `allow_globalenv_objects` is passed to `check_globalenv_objects()`
-#' - `allow_attached_packages` is passed to `check_attached_packages()`
-#' - `allow_attached_environments` is passed to `check_attached_environments()`
-#' - `allow_loaded_namespaces` is passed to `check_loaded_namespaces()`
-#' - `max_sessiontime` is passed to `check_sessiontime()`
-#' - `required_options` is passed to `check_required_options()`
-#' - `required_locale` is passed to `check_required_locale()`
-#' - `required_sysenv` is passed to `check_required_sysenv()`
-#' - `required_wd` is passed to `check_working_directory()`
+#' - `allow_globalenv_objects` is passed to [check_globalenv_objects()]
+#' - `allow_attached_packages` is passed to [check_attached_packages()]
+#' - `allow_attached_environments` is passed to [check_attached_environments()]
+#' - `allow_loaded_namespaces` is passed to [check_loaded_namespaces()]
+#' - `max_sessiontime` is passed to [check_sessiontime()]
+#' - `required_options` is passed to [check_required_options()]
+#' - `required_locale` is passed to [check_required_locale()]
+#' - `required_sysenv` is passed to [check_required_sysenv()]
+#' - `required_wd` is passed to [check_working_directory()]
 #' 
 #' Other arguments are ignored.
+#' 
+#' @seealso 
+#' [check_attached_packages()],
+#' [check_loaded_namespaces()],
+#' [check_globalenv_objects()],
+#' [check_attached_environments()],
+#' [check_sessiontime()],
+#' [check_required_options()],
+#' [check_required_locale()],
+#' [check_required_sysenv()],
+#' [check_working_directory()]
+#' 
 #' @export
 sessioncheck <- function(
   action = NULL, 
