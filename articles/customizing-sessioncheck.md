@@ -41,6 +41,9 @@ Several other options can be specified:
 - `"sessiontime"` indicates that
   [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md)
   should be used
+- `"working_directory"` indicates that
+  [`check_working_directory()`](https://sessioncheck.djnavarro.net/reference/check_working_directory.md)
+  should be used
 - `"required_options"` indicates that
   [`check_required_options()`](https://sessioncheck.djnavarro.net/reference/check_required_options.md)
   should be used
@@ -94,6 +97,8 @@ The relevant arguments that can be passed via `...` are as follows:
   [`check_loaded_namespaces()`](https://sessioncheck.djnavarro.net/reference/check_loaded_namespaces.md)
 - `max_sessiontime` is passed to
   [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md)
+- `required_wd` is passed to
+  [`check_working_directory()`](https://sessioncheck.djnavarro.net/reference/check_working_directory.md)
 - `required_options` is passed to
   [`check_required_options()`](https://sessioncheck.djnavarro.net/reference/check_required_options.md)
 - `required_locale` is passed to

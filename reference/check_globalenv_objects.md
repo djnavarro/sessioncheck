@@ -52,7 +52,8 @@ will not trigger an action if the name starts with a dot. For example,
 [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md),
 [`check_required_options()`](https://sessioncheck.djnavarro.net/reference/check_required_options.md),
 [`check_required_locale()`](https://sessioncheck.djnavarro.net/reference/check_required_locale.md),
-[`check_required_sysenv()`](https://sessioncheck.djnavarro.net/reference/check_required_sysenv.md)
+[`check_required_sysenv()`](https://sessioncheck.djnavarro.net/reference/check_required_sysenv.md),
+[`check_working_directory()`](https://sessioncheck.djnavarro.net/reference/check_working_directory.md)
 
 ## Examples
 

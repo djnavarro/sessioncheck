@@ -90,6 +90,7 @@ are:</p>
 <li><code><a href="../reference/check_attached_environments.html">check_attached_environments()</a></code></li>
 <li><code><a href="../reference/check_loaded_namespaces.html">check_loaded_namespaces()</a></code></li>
 <li><code><a href="../reference/check_sessiontime.html">check_sessiontime()</a></code></li>
+<li><code><a href="../reference/check_working_directory.html">check_working_directory()</a></code></li>
 <li><code><a href="../reference/check_required_options.html">check_required_options()</a></code></li>
 <li><code><a href="../reference/check_required_locale.html">check_required_locale()</a></code></li>
 <li><code><a href="../reference/check_required_sysenv.html">check_required_sysenv()</a></code></li>
@@ -349,9 +350,38 @@ action is triggered. If no value is supplied, it defaults to 300
 seconds. The customization is illustrated below:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_sessiontime.html">check_sessiontime</a></span><span class="op">(</span>max_sessiontime <span class="op">=</span> <span class="fl">.0001</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: ✖ Session runtime (1.8 secs) exceeds threshold of 0 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: ✖ Session runtime (1.71 secs) exceeds threshold of 0 secs</span></span></code></pre></div>
 <p>Note that this check is not one of the default checks performed by
 the <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> function.</p>
+</div>
+<div class="section level3">
+<h3 id="check-the-working-directory">Check the working directory<a class="anchor" aria-label="anchor" href="#check-the-working-directory"></a>
+</h3>
+<p>The <code><a href="../reference/check_working_directory.html">check_working_directory()</a></code> function checks whether
+the current working directory, as returned by <code><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd()</a></code>,
+matches an expected path. Unlike the other checks discussed so far,
+there is no sensible default to compare against, so when
+<code>required_wd = NULL</code> (the default) the check always passes
+and no comparison is attempted:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_working_directory.html">check_working_directory</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>To make use of the check, supply the expected path via
+<code>required_wd</code>. If it matches the current working directory,
+the check passes silently:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_working_directory.html">check_working_directory</a></span><span class="op">(</span>required_wd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>If the paths don’t match, a warning is triggered, reporting both the
+actual and expected paths:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_working_directory.html">check_working_directory</a></span><span class="op">(</span>required_wd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: ✖ Working directory</span></span>
+<span><span class="co">#&gt; (/home/runner/work/sessioncheck/sessioncheck/vignettes/articles) does not match</span></span>
+<span><span class="co">#&gt; required path (/tmp/Rtmp75Cq30)</span></span></code></pre></div>
+<p>Both paths are passed through <code><a href="https://rdrr.io/r/base/normalizePath.html" class="external-link">normalizePath()</a></code> before
+comparison, so differences in trailing slashes, or relative versus
+absolute forms, do not produce false positives. As with
+<code><a href="../reference/check_sessiontime.html">check_sessiontime()</a></code>, this check is not one of the default
+checks performed by <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code>.</p>
 </div>
 <div class="section level3">
 <h3 id="other-checks">Other checks<a class="anchor" aria-label="anchor" href="#other-checks"></a>
@@ -364,7 +394,7 @@ They can be used as a way to require a specific value for an option, a
 locale setting, or an environment variable, and not much else. By
 default, all three of these checks do nothing: the user must manually
 specify the precise check that should be performed.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_required_options.html">check_required_options</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/check_required_locale.html">check_required_locale</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/check_required_sysenv.html">check_required_sysenv</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>

@@ -23,6 +23,8 @@ Individual session check functions
   : Check loaded namespaces
 - [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md)
   : Check session run time
+- [`check_working_directory()`](https://sessioncheck.djnavarro.net/reference/check_working_directory.md)
+  : Check the working directory
 - [`check_required_options()`](https://sessioncheck.djnavarro.net/reference/check_required_options.md)
   : Check required values for options
 - [`check_required_locale()`](https://sessioncheck.djnavarro.net/reference/check_required_locale.md)

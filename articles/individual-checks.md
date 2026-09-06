@@ -11,6 +11,7 @@ functions. Currently available checks are:
 - [`check_attached_environments()`](https://sessioncheck.djnavarro.net/reference/check_attached_environments.md)
 - [`check_loaded_namespaces()`](https://sessioncheck.djnavarro.net/reference/check_loaded_namespaces.md)
 - [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md)
+- [`check_working_directory()`](https://sessioncheck.djnavarro.net/reference/check_working_directory.md)
 - [`check_required_options()`](https://sessioncheck.djnavarro.net/reference/check_required_options.md)
 - [`check_required_locale()`](https://sessioncheck.djnavarro.net/reference/check_required_locale.md)
 - [`check_required_sysenv()`](https://sessioncheck.djnavarro.net/reference/check_required_sysenv.md)
@@ -327,12 +328,54 @@ illustrated below:
 ``` r
 
 check_sessiontime(max_sessiontime = .0001)
-#> Warning: ✖ Session runtime (1.8 secs) exceeds threshold of 0 secs
+#> Warning: ✖ Session runtime (1.71 secs) exceeds threshold of 0 secs
 ```
 
 Note that this check is not one of the default checks performed by the
 [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
 function.
+
+### Check the working directory
+
+The
+[`check_working_directory()`](https://sessioncheck.djnavarro.net/reference/check_working_directory.md)
+function checks whether the current working directory, as returned by
+[`getwd()`](https://rdrr.io/r/base/getwd.html), matches an expected
+path. Unlike the other checks discussed so far, there is no sensible
+default to compare against, so when `required_wd = NULL` (the default)
+the check always passes and no comparison is attempted:
+
+``` r
+
+check_working_directory()
+```
+
+To make use of the check, supply the expected path via `required_wd`. If
+it matches the current working directory, the check passes silently:
+
+``` r
+
+check_working_directory(required_wd = getwd())
+```
+
+If the paths don’t match, a warning is triggered, reporting both the
+actual and expected paths:
+
+``` r
+
+check_working_directory(required_wd = tempdir())
+#> Warning: ✖ Working directory
+#> (/home/runner/work/sessioncheck/sessioncheck/vignettes/articles) does not match
+#> required path (/tmp/Rtmp75Cq30)
+```
+
+Both paths are passed through
+[`normalizePath()`](https://rdrr.io/r/base/normalizePath.html) before
+comparison, so differences in trailing slashes, or relative versus
+absolute forms, do not produce false positives. As with
+[`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md),
+this check is not one of the default checks performed by
+[`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md).
 
 ### Other checks
 

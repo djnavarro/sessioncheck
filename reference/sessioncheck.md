@@ -67,6 +67,9 @@ single function. The following arguments are recognized via `...`:
 - `required_sysenv` is passed to
   [`check_required_sysenv()`](https://sessioncheck.djnavarro.net/reference/check_required_sysenv.md)
 
+- `required_wd` is passed to
+  [`check_working_directory()`](https://sessioncheck.djnavarro.net/reference/check_working_directory.md)
+
 Other arguments are ignored.
 
 ## Examples

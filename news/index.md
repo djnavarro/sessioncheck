@@ -20,6 +20,11 @@
 
 ### New features
 
+- Added
+  [`check_working_directory()`](https://sessioncheck.djnavarro.net/reference/check_working_directory.md),
+  which checks the session’s working directory against an expected path
+  ([\#11](https://github.com/djnavarro/sessioncheck/issues/11)).
+
 - Added an `action_on_pass` argument to
   [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
   and the individual `check_*()` functions, allowing a clean result to
