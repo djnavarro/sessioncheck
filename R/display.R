@@ -109,6 +109,57 @@
   paste(.colored_symbol("bullet"), text)
 }
 
+# formats a single expected/actual value for display in
+# .message_text_detail(); option/locale/sysenv values aren't guaranteed to
+# be simple length-1 strings (an option can hold an arbitrary R object), so
+# this degrades gracefully instead of assuming format() always returns
+# something short and readable
+.format_compare_value <- function(v) {
+  if (is.null(v)) return("NULL")
+  if (!is.atomic(v)) return(paste0("<", class(v)[1L], ">"))
+  if (length(v) != 1L) return(paste0("c(", paste(format(v), collapse = ", "), ")"))
+  format(v)
+}
+
+# like .message_text(), but for checks where a problem can mean either
+# "missing" or "present with the wrong value" (options/locale/sysenv --
+# see #5). Uses the "expected"/"actual"/"present" attributes attached by
+# .get_xiny_status() to say which, and to report the value(s) involved,
+# rather than just naming the offending entry. Falls back to
+# .message_text()'s plain name list when those attributes aren't present
+# (e.g. a sessioncheck_status of type "options" built by hand rather than
+# via .get_options_status()).
+.message_text_detail <- function(prefix, status, max_len = 4L) {
+  expected <- attr(status, "expected")
+  actual <- attr(status, "actual")
+  present <- attr(status, "present")
+  if (is.null(expected) || is.null(actual) || is.null(present)) {
+    return(.message_text(prefix, status, max_len))
+  }
+
+  bad <- names(status[status])
+  len <- length(bad)
+  symbol <- .colored_symbol(if (len == 0L) "tick" else "cross")
+  if (len == 0L) return(paste(symbol, prefix, "[no issues detected]"))
+
+  shown <- if (len <= max_len) bad else bad[seq_len(max_len)]
+  detail <- vapply(
+    shown,
+    function(nn) {
+      exp_txt <- .format_compare_value(expected[[nn]])
+      if (!isTRUE(present[[nn]])) {
+        sprintf("%s: missing (expected %s)", nn, exp_txt)
+      } else {
+        sprintf("%s: expected %s, got %s", nn, exp_txt, .format_compare_value(actual[[nn]]))
+      }
+    },
+    character(1L)
+  )
+  lines <- paste0("    ", detail)
+  if (len > max_len) lines <- c(lines, sprintf("    ... and %d more", len - max_len))
+  paste(c(paste(symbol, prefix), lines), collapse = "\n")
+}
+
 # draws a horizontal rule with a left-aligned title, used as a section
 # heading in format.sessioncheck_sessionstate() -- similar in spirit to the
 # section dividers in sessioninfo::session_info() and to mcli_rule() from

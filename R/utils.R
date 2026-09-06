@@ -22,18 +22,37 @@
 # status code:
 # FALSE = exists in both and matches
 # TRUE  = mismatched value or not in y
-# (not included) = does not exist in x 
-.get_xiny_status <- function(x, y) (
-  vapply(
-    names(x),
+# (not included) = does not exist in x
+#
+# in addition to the status vector itself, this attaches "expected"/
+# "actual"/"present" attributes recording, for each entry in `x`, the
+# required value, the value actually found in `y` (if any), and whether it
+# was found at all. This lets format.sessioncheck_status() tell a missing
+# option/locale/sysenv value apart from one with the wrong value, rather
+# than lumping both into the same "unexpected" label (see #5). The
+# attributes are additive -- the status vector itself is unchanged from
+# before, so any code that only looks at names/values of the vector
+# continues to work as it did.
+.get_xiny_status <- function(x, y) {
+  nms <- names(x)
+  present <- nms %in% names(y)
+  names(present) <- nms
+  status <- vapply(
+    nms,
     function(nn) {
-      if (!(nn %in% names(y))) return(c(nn = TRUE))
+      if (!present[[nn]]) return(c(nn = TRUE))
       if (identical(x[[nn]], y[[nn]])) return(c(nn = FALSE))
       c(nn = TRUE)
     },
     logical(1L)
   )
-)
+  actual <- lapply(nms, function(nn) if (present[[nn]]) y[[nn]] else NULL)
+  names(actual) <- nms
+  attr(status, "expected") <- x
+  attr(status, "actual") <- actual
+  attr(status, "present") <- present
+  status
+}
 
 .get_locale_list <- function() {
   lc_vec <- strsplit(Sys.getlocale(), ";")[[1]]

@@ -92,10 +92,17 @@ test_that("sessioncheck `checks` argument returns expected results", {
     required_sysenv = sysenv_check 
   )
 
+  # .get_options_status()/.get_sysenv_status() now attach expected/actual/
+  # present detail attributes (see #5) that aren't relevant to this test
+  options_status <- res$options$status
+  attributes(options_status)[c("expected", "actual", "present")] <- NULL
+  sysenv_status <- res$sysenv$status
+  attributes(sysenv_status)[c("expected", "actual", "present")] <- NULL
+
   expect_equal(res$sessiontime$status, sessiontime_res)
-  expect_equal(res$options$status, opts_res)
+  expect_equal(options_status, opts_res)
   expect_equal(res$locale, mock_locale_status)
-  expect_equal(res$sysenv$status, sysenv_res)
+  expect_equal(sysenv_status, sysenv_res)
 }
 )
 

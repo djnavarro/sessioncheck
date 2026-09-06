@@ -309,10 +309,59 @@ test_that(".colored_symbol() returns a plain symbol when ansi is disabled", {
 test_that(".get_xiny_status() returns expected integer status", {
   x <- list(a = 1L, b = 2L, c = 3L)
   y <- list(a = 1L, b = "", d = 3L)
-  expect_equal(
-    .get_xiny_status(x, y),
-    c(a = FALSE, b = TRUE, c = TRUE)
+  status <- .get_xiny_status(x, y)
+  attributes(status)[c("expected", "actual", "present")] <- NULL
+  expect_equal(status, c(a = FALSE, b = TRUE, c = TRUE))
+})
+
+test_that(".get_xiny_status() attaches expected/actual/present detail (#5)", {
+  x <- list(a = 1L, b = 2L, c = 3L)
+  y <- list(a = 1L, b = "", d = 3L)
+  status <- .get_xiny_status(x, y)
+
+  expect_equal(attr(status, "expected"), x)
+  expect_equal(attr(status, "actual"), list(a = 1L, b = "", c = NULL))
+  expect_equal(attr(status, "present"), c(a = TRUE, b = TRUE, c = FALSE))
+})
+
+test_that(".message_text_detail() distinguishes missing from mismatched entries", {
+  status <- .get_xiny_status(
+    x = list(scipen = 5L, OutDec = "."),
+    y = list(scipen = 0L)
   )
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_detail("Unexpected options:", status)
+
+  expect_match(msg, "scipen: expected 5, got 0", fixed = TRUE)
+  expect_match(msg, "OutDec: missing (expected .)", fixed = TRUE)
+})
+
+test_that(".message_text_detail() reports no issues when nothing is flagged", {
+  status <- .get_xiny_status(x = list(scipen = 0L), y = list(scipen = 0L))
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  expect_equal(.message_text_detail("Unexpected options:", status), "v Unexpected options: [no issues detected]")
+})
+
+test_that(".message_text_detail() truncates long lists like .message_text()", {
+  x <- list(a = 1L, b = 2L, c = 3L, d = 4L, e = 5L)
+  status <- .get_xiny_status(x, y = list())
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_detail("Unexpected options:", status, max_len = 2L)
+
+  expect_match(msg, "a: missing", fixed = TRUE)
+  expect_match(msg, "b: missing", fixed = TRUE)
+  expect_match(msg, "... and 3 more", fixed = TRUE)
+  expect_no_match(msg, "c: missing")
+})
+
+test_that(".message_text_detail() falls back to .message_text() without detail attributes", {
+  status <- c(a = FALSE, b = TRUE, c = TRUE, d = TRUE)
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  expect_equal(.message_text_detail("hi", status, 5L), .message_text("hi", status, 5L))
 })
 
 test_that(".session_snapshot works", {

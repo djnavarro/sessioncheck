@@ -121,6 +121,9 @@ format.sessioncheck_status <- function(x, ...) {
   if (x$type == "options")     prefix <- "Unexpected options:"
   if (x$type == "sysenv")      prefix <- "Unexpected system environment variables:"
   if (x$type == "locale")      prefix <- "Unexpected locale settings:"
+  if (x$type %in% c("options", "sysenv", "locale")) {
+    return(.message_text_detail(prefix, x$status))
+  }
   .message_text(prefix, x$status)
 }
 
