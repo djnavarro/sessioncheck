@@ -26,7 +26,8 @@ check_required_sysenv(
 
   A named list of required system environment variables. If any of these
   variables are missing or have different values to the required values,
-  an action is triggered.
+  an action is triggered. The default is `required_sysenv = NULL`, which
+  means there is nothing to compare against, so the check always passes.
 
 - action_on_pass:
 

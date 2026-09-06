@@ -24,7 +24,9 @@ check_loaded_namespaces(
 - allow_loaded_namespaces:
 
   Character vector containing names of packages that are "allowed", and
-  will not trigger an action if loaded via namespace.
+  will not trigger an action if loaded via namespace. The default is
+  `allow_loaded_namespaces = NULL`, in which case only base-priority
+  packages and the **sessioncheck** namespace itself are allowed.
 
 - action_on_pass:
 

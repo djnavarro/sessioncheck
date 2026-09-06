@@ -75,7 +75,9 @@ Session checkers can produce errors, warnings, or messages if requested.</p>
 
 <dt id="arg-allow-attached-packages">allow_attached_packages<a class="anchor" aria-label="anchor" href="#arg-allow-attached-packages"></a></dt>
 <dd><p>Character vector containing names of packages that
-are "allowed", and will not trigger an action if attached to the search path.</p></dd>
+are "allowed", and will not trigger an action if attached to the search path. The
+default is <code>allow_attached_packages = NULL</code>, in which case only base-priority
+packages are allowed.</p></dd>
 
 
 <dt id="arg-action-on-pass">action_on_pass<a class="anchor" aria-label="anchor" href="#arg-action-on-pass"></a></dt>

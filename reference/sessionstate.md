@@ -26,7 +26,59 @@ An object of class `sessioncheck_sessionstate`, a list with elements
 `platform`, `locale`, `matrix`, `document`, `machine`, `git`, `timing`,
 `rng`, `libpaths`, `packages`, `globalenv`, and `attachments`.
 
-## Details
+## Platform
+
+The `platform` element records `version` (the running R version, via
+`R.version.string`), `os` (the operating system, preferring
+[`utils::osVersion()`](https://rdrr.io/r/utils/sessionInfo.html) when
+available and falling back to
+[`Sys.info()`](https://rdrr.io/r/base/Sys.info.html)), `system` (the R
+build's `R.version$system`), `ui` (the interface running the session –
+`"non-interactive"` when
+[`interactive()`](https://rdrr.io/r/base/interactive.html) is `FALSE`,
+otherwise the frontend reported by `.Platform$GUI`, e.g. `"RStudio"` or
+`"Positron"`), `tz` (the session timezone via
+[`Sys.timezone()`](https://rdrr.io/r/base/timezones.html)), and `date`
+(the capture date).
+
+## Locale
+
+The `locale` element records `language`, `collate`, and `ctype`. These
+are split out from `platform` because they describe how text and dates
+are formatted for this session, rather than what/where/when the session
+is running.
+
+## Matrix
+
+The `matrix` element records `blas` and `lapack`, the shared libraries
+backing R's linear algebra routines (as reported by
+[`extSoftVersion()`](https://rdrr.io/r/base/extSoftVersion.html) and
+[`La_library()`](https://rdrr.io/r/base/La_library.html)). Like
+`locale`, this is split out from `platform` – in this case mirroring how
+base R's
+[`utils::sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html)
+treats "Matrix products" as its own block rather than nesting it under
+platform info.
+
+## Document
+
+The `document` element's `pandoc` and `quarto` fields record the
+versions of those two document-rendering tools, if found (`NA`
+otherwise). Both checks prefer the IDE-provided location over whatever
+happens to be on `PATH` (`RSTUDIO_PANDOC` for pandoc, `QUARTO_PATH` for
+quarto), since RStudio/Positron bundle their own copies that may differ
+from a separately installed one. Deliberately not tracked: other system
+dependencies (e.g. LaTeX, Hugo, spatial libraries) are package-specific
+rather than session-wide, and tracking them well would mean tracking
+many of them; `pandoc`/`quarto` are included because they, like
+BLAS/LAPACK, are already tracked by
+[`utils::sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html) or
+[`sessioninfo::session_info()`](https://sessioninfo.r-lib.org/reference/session_info.html).
+`document` has no
+[`sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html) precedent
+(unlike `matrix`), but is grouped the same way for consistency.
+
+## Machine
 
 The `machine` element includes the node name and user reported by
 [`Sys.info()`](https://rdrr.io/r/base/Sys.info.html), along with the
@@ -39,6 +91,8 @@ mindful about where `sessionstate()` output is stored or shared. The
 same caution applies to the `ondisk_path`/ `loaded_path` columns of
 `packages`, since library paths often embed a home directory.
 
+## Git
+
 The `git` element records `sha`, the current commit
 (`git rev-parse HEAD`, run in the working directory captured as
 `machine$cwd`), and `dirty`, whether the working tree has uncommitted
@@ -49,6 +103,17 @@ reproducing a script's output later: `sha` identifies exactly which
 version of the code ran, and `dirty` flags whether that identification
 is trustworthy (a `TRUE` means the code that ran may not match any
 commit).
+
+## Timing
+
+The `timing` element records `captured_at`, the capture time reported by
+[`Sys.time()`](https://rdrr.io/r/base/Sys.time.html), and `elapsed_sec`,
+the session's elapsed run time in seconds (the `"elapsed"` component of
+[`proc.time()`](https://rdrr.io/r/base/proc.time.html)). Together they
+let an audit log show both when a snapshot was taken and how long the
+session had already been running at that point.
+
+## RNG
 
 The `rng` element records
 [`RNGkind()`](https://rdrr.io/r/base/Random.html) (as `kind`,
@@ -66,6 +131,8 @@ document shows whether an edit changed the RNG state anywhere upstream,
 without having to inspect or store the (long, not directly meaningful)
 seed value.
 
+## Library paths
+
 The `libpaths` element is the character vector returned by
 [`.libPaths()`](https://rdrr.io/r/base/libPaths.html), i.e. the library
 locations R searches, in search order. It complements `packages`: that
@@ -76,6 +143,8 @@ personal one. Unlike the other elements, there is no corresponding
 display-filtering argument for `libpaths`, since it is already a flat
 list of paths rather than a set of named fields or columns to choose
 among; it is always shown in full.
+
+## Packages
 
 The `packages` element covers every package that is either attached to
 the search path or loaded via namespace (i.e.,
@@ -94,45 +163,18 @@ but no longer found on disk at all), and `source`, which classifies each
 package as `"base"`, `"CRAN (R x.y.z)"`, `"Github (user/repo@sha)"`,
 another remote type, or `"local"` when no remote metadata is available.
 
+## Global environment
+
 The `globalenv` element is a data frame with one row per object in
 `.GlobalEnv` (including dot-prefixed objects), with columns `name`,
 `class`, and `size` (in bytes, as reported by
 [`utils::object.size()`](https://rdrr.io/r/utils/object.size.html)).
 Only object names, classes, and sizes are captured, never values.
 Because a long-running script can accumulate many objects, the default
-display shows only the largest few (see below); the captured object
-itself always holds every object.
+display shows only the largest few (see "Selecting which elements are
+displayed" below); the captured object itself always holds every object.
 
-The `locale` element records `language`, `collate`, and `ctype`. These
-are split out from `platform` because they describe how text and dates
-are formatted for this session, rather than what/where/when the session
-is running.
-
-The `matrix` element records `blas` and `lapack`, the shared libraries
-backing R's linear algebra routines (as reported by
-[`extSoftVersion()`](https://rdrr.io/r/base/extSoftVersion.html) and
-[`La_library()`](https://rdrr.io/r/base/La_library.html)). Like
-`locale`, this is split out from `platform` – in this case mirroring how
-base R's
-[`utils::sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html)
-treats "Matrix products" as its own block rather than nesting it under
-platform info.
-
-The `document` element's `pandoc` and `quarto` fields record the
-versions of those two document-rendering tools, if found (`NA`
-otherwise). Both checks prefer the IDE-provided location over whatever
-happens to be on `PATH` (`RSTUDIO_PANDOC` for pandoc, `QUARTO_PATH` for
-quarto), since RStudio/Positron bundle their own copies that may differ
-from a separately installed one. Deliberately not tracked: other system
-dependencies (e.g. LaTeX, Hugo, spatial libraries) are package-specific
-rather than session-wide, and tracking them well would mean tracking
-many of them; `pandoc`/`quarto` are included because they, like
-BLAS/LAPACK, are already tracked by
-[`utils::sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html) or
-[`sessioninfo::session_info()`](https://sessioninfo.r-lib.org/reference/session_info.html).
-`document` has no
-[`sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html) precedent
-(unlike `matrix`), but is grouped the same way for consistency.
+## Attachments
 
 The `attachments` element is a data frame with one row per entry on the
 search path (as returned by
@@ -141,6 +183,8 @@ and `type` (`"package"` or `"other"`). This surfaces non-package
 attachments (e.g. `tools:rstudio`, or environments added via
 [`attach()`](https://rdrr.io/r/base/attach.html)) that aren't reflected
 in `packages`.
+
+## Selecting which elements are displayed
 
 `sessionstate()` itself always captures every field in full (`globalenv`
 is never truncated at capture time). To display only a subset when
@@ -199,12 +243,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/docs/reference
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          71081165969ad9419bbc89ba5991d6c46c02500e
+#> • commit sha          6af4cc5129be9dce701a331ca20b3deb1fdbfee9
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-06 10:58:54 UTC
-#> • session uptime      7.912 sec
+#> • captured at         2026-09-06 12:04:24 UTC
+#> • session uptime      8.553 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister

@@ -75,7 +75,9 @@ Session checkers can produce errors, warnings, or messages if requested.</p>
 
 <dt id="arg-allow-loaded-namespaces">allow_loaded_namespaces<a class="anchor" aria-label="anchor" href="#arg-allow-loaded-namespaces"></a></dt>
 <dd><p>Character vector containing names of packages that
-are "allowed", and will not trigger an action if loaded via namespace.</p></dd>
+are "allowed", and will not trigger an action if loaded via namespace. The
+default is <code>allow_loaded_namespaces = NULL</code>, in which case only base-priority
+packages and the <strong>sessioncheck</strong> namespace itself are allowed.</p></dd>
 
 
 <dt id="arg-action-on-pass">action_on_pass<a class="anchor" aria-label="anchor" href="#arg-action-on-pass"></a></dt>

@@ -75,7 +75,10 @@ environments. Session checkers can produce errors, warnings, or messages if requ
 
 <dt id="arg-allow-attached-environments">allow_attached_environments<a class="anchor" aria-label="anchor" href="#arg-allow-attached-environments"></a></dt>
 <dd><p>Character vector containing names of environments
-that are "allowed", and will not trigger an action if attached to the search path.</p></dd>
+that are "allowed", and will not trigger an action if attached to the search path.
+The default is <code>allow_attached_environments = NULL</code>, in which case package
+environments and a set of known IDE-injected environments (e.g. "tools:rstudio")
+are allowed.</p></dd>
 
 
 <dt id="arg-action-on-pass">action_on_pass<a class="anchor" aria-label="anchor" href="#arg-action-on-pass"></a></dt>

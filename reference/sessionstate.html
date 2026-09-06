@@ -88,8 +88,61 @@ elements <code>platform</code>, <code>locale</code>, <code>matrix</code>, <code>
 <code>timing</code>, <code>rng</code>, <code>libpaths</code>, <code>packages</code>, <code>globalenv</code>, and <code>attachments</code>.</p>
     </div>
     <div class="section level2">
-    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The <code>machine</code> element includes the node name and user reported by
+    <h2 id="platform">Platform<a class="anchor" aria-label="anchor" href="#platform"></a></h2>
+
+
+<p>The <code>platform</code> element records <code>version</code> (the running R version, via
+<code>R.version.string</code>), <code>os</code> (the operating system, preferring
+<code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">utils::osVersion()</a></code> when available and falling back to <code><a href="https://rdrr.io/r/base/Sys.info.html" class="external-link">Sys.info()</a></code>),
+<code>system</code> (the R build's <code>R.version$system</code>), <code>ui</code> (the interface running
+the session – <code>"non-interactive"</code> when <code><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive()</a></code> is <code>FALSE</code>,
+otherwise the frontend reported by <code>.Platform$GUI</code>, e.g. <code>"RStudio"</code> or
+<code>"Positron"</code>), <code>tz</code> (the session timezone via <code><a href="https://rdrr.io/r/base/timezones.html" class="external-link">Sys.timezone()</a></code>), and
+<code>date</code> (the capture date).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="locale">Locale<a class="anchor" aria-label="anchor" href="#locale"></a></h2>
+
+
+<p>The <code>locale</code> element records <code>language</code>, <code>collate</code>, and <code>ctype</code>. These
+are split out from <code>platform</code> because they describe how text and dates
+are formatted for this session, rather than what/where/when the session
+is running.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="matrix">Matrix<a class="anchor" aria-label="anchor" href="#matrix"></a></h2>
+
+
+<p>The <code>matrix</code> element records <code>blas</code> and <code>lapack</code>, the shared libraries
+backing R's linear algebra routines (as reported by
+<code><a href="https://rdrr.io/r/base/extSoftVersion.html" class="external-link">extSoftVersion()</a></code> and <code><a href="https://rdrr.io/r/base/La_library.html" class="external-link">La_library()</a></code>). Like <code>locale</code>, this is split out
+from <code>platform</code> – in this case mirroring how base R's
+<code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">utils::sessionInfo()</a></code> treats "Matrix products" as its own block rather
+than nesting it under platform info.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="document">Document<a class="anchor" aria-label="anchor" href="#document"></a></h2>
+
+
+<p>The <code>document</code> element's <code>pandoc</code> and <code>quarto</code> fields record the versions
+of those two document-rendering tools, if found (<code>NA</code> otherwise). Both
+checks prefer the IDE-provided location over whatever happens to be on
+<code>PATH</code> (<code>RSTUDIO_PANDOC</code> for pandoc, <code>QUARTO_PATH</code> for quarto), since
+RStudio/Positron bundle their own copies that may differ from a
+separately installed one. Deliberately not tracked: other system
+dependencies (e.g. LaTeX, Hugo, spatial libraries) are package-specific
+rather than session-wide, and tracking them well would mean tracking
+many of them; <code>pandoc</code>/<code>quarto</code> are included because they, like
+BLAS/LAPACK, are already tracked by <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">utils::sessionInfo()</a></code> or
+<code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code>. <code>document</code> has no <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo()</a></code>
+precedent (unlike <code>matrix</code>), but is grouped the same way for
+consistency.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="machine">Machine<a class="anchor" aria-label="anchor" href="#machine"></a></h2>
+
+
+<p>The <code>machine</code> element includes the node name and user reported by
 <code><a href="https://rdrr.io/r/base/Sys.info.html" class="external-link">Sys.info()</a></code>, along with the working directory reported by <code><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd()</a></code> at
 capture time (<code>cwd</code>) – useful for a reproducibility audit since relative
 paths used elsewhere in a script only resolve correctly relative to this
@@ -98,6 +151,11 @@ directory structure, be mindful about where <code>sessionstate()</code> output i
 stored or shared. The same caution applies to the <code>ondisk_path</code>/
 <code>loaded_path</code> columns of <code>packages</code>, since library paths often embed a
 home directory.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="git">Git<a class="anchor" aria-label="anchor" href="#git"></a></h2>
+
+
 <p>The <code>git</code> element records <code>sha</code>, the current commit
 (<code>git rev-parse HEAD</code>, run in the working directory captured as
 <code>machine$cwd</code>), and <code>dirty</code>, whether the working tree has uncommitted
@@ -107,6 +165,21 @@ isn't installed. This is arguably the single most useful field for
 reproducing a script's output later: <code>sha</code> identifies exactly which
 version of the code ran, and <code>dirty</code> flags whether that identification is
 trustworthy (a <code>TRUE</code> means the code that ran may not match any commit).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="timing">Timing<a class="anchor" aria-label="anchor" href="#timing"></a></h2>
+
+
+<p>The <code>timing</code> element records <code>captured_at</code>, the capture time reported by
+<code><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time()</a></code>, and <code>elapsed_sec</code>, the session's elapsed run time in
+seconds (the <code>"elapsed"</code> component of <code><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time()</a></code>). Together they let
+an audit log show both when a snapshot was taken and how long the
+session had already been running at that point.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="rng">RNG<a class="anchor" aria-label="anchor" href="#rng"></a></h2>
+
+
 <p>The <code>rng</code> element records <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">RNGkind()</a></code> (as <code>kind</code>, <code>normal_kind</code>, and
 <code>sample_kind</code>) together with <code>seed_hash</code>, an MD5 fingerprint of
 <code>.Random.seed</code> (via <code><a href="https://rdrr.io/r/tools/md5sum.html" class="external-link">tools::md5sum()</a></code>, since base R has no in-memory
@@ -119,6 +192,11 @@ printing the seed itself: for example, comparing <code>seed_hash</code> between 
 rendered versions of the same Quarto/R Markdown document shows whether
 an edit changed the RNG state anywhere upstream, without having to
 inspect or store the (long, not directly meaningful) seed value.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="library-paths">Library paths<a class="anchor" aria-label="anchor" href="#library-paths"></a></h2>
+
+
 <p>The <code>libpaths</code> element is the character vector returned by <code><a href="https://rdrr.io/r/base/libPaths.html" class="external-link">.libPaths()</a></code>,
 i.e. the library locations R searches, in search order. It complements
 <code>packages</code>: that element records where each individual package resolved
@@ -128,6 +206,11 @@ personal one. Unlike the other elements, there is no corresponding
 display-filtering argument for <code>libpaths</code>, since it is already a flat
 list of paths rather than a set of named fields or columns to choose
 among; it is always shown in full.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="packages">Packages<a class="anchor" aria-label="anchor" href="#packages"></a></h2>
+
+
 <p>The <code>packages</code> element covers every package that is either attached to
 the search path or loaded via namespace (i.e., <code>union(.packages(), loadedNamespaces())</code>). It has columns <code>package</code>, <code>attached</code>,
 <code>ondisk_version</code> (the version recorded in the installed package's
@@ -142,41 +225,33 @@ when the namespace is loaded but no longer found on disk at all), and
 <code>source</code>, which classifies each package as <code>"base"</code>, <code>"CRAN (R x.y.z)"</code>,
 <code>"Github (user/repo@sha)"</code>, another remote type, or <code>"local"</code> when no
 remote metadata is available.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="global-environment">Global environment<a class="anchor" aria-label="anchor" href="#global-environment"></a></h2>
+
+
 <p>The <code>globalenv</code> element is a data frame with one row per object in
 <code>.GlobalEnv</code> (including dot-prefixed objects), with columns <code>name</code>,
 <code>class</code>, and <code>size</code> (in bytes, as reported by <code><a href="https://rdrr.io/r/utils/object.size.html" class="external-link">utils::object.size()</a></code>). Only
 object names, classes, and sizes are captured, never values. Because a
 long-running script can accumulate many objects, the default display shows
-only the largest few (see below); the captured object itself always holds
-every object.</p>
-<p>The <code>locale</code> element records <code>language</code>, <code>collate</code>, and <code>ctype</code>. These
-are split out from <code>platform</code> because they describe how text and dates
-are formatted for this session, rather than what/where/when the session
-is running.</p>
-<p>The <code>matrix</code> element records <code>blas</code> and <code>lapack</code>, the shared libraries
-backing R's linear algebra routines (as reported by
-<code><a href="https://rdrr.io/r/base/extSoftVersion.html" class="external-link">extSoftVersion()</a></code> and <code><a href="https://rdrr.io/r/base/La_library.html" class="external-link">La_library()</a></code>). Like <code>locale</code>, this is split out
-from <code>platform</code> – in this case mirroring how base R's
-<code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">utils::sessionInfo()</a></code> treats "Matrix products" as its own block rather
-than nesting it under platform info.</p>
-<p>The <code>document</code> element's <code>pandoc</code> and <code>quarto</code> fields record the versions
-of those two document-rendering tools, if found (<code>NA</code> otherwise). Both
-checks prefer the IDE-provided location over whatever happens to be on
-<code>PATH</code> (<code>RSTUDIO_PANDOC</code> for pandoc, <code>QUARTO_PATH</code> for quarto), since
-RStudio/Positron bundle their own copies that may differ from a
-separately installed one. Deliberately not tracked: other system
-dependencies (e.g. LaTeX, Hugo, spatial libraries) are package-specific
-rather than session-wide, and tracking them well would mean tracking
-many of them; <code>pandoc</code>/<code>quarto</code> are included because they, like
-BLAS/LAPACK, are already tracked by <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">utils::sessionInfo()</a></code> or
-<code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code>. <code>document</code> has no <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo()</a></code>
-precedent (unlike <code>matrix</code>), but is grouped the same way for
-consistency.</p>
+only the largest few (see "Selecting which elements are displayed"
+below); the captured object itself always holds every object.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="attachments">Attachments<a class="anchor" aria-label="anchor" href="#attachments"></a></h2>
+
+
 <p>The <code>attachments</code> element is a data frame with one row per entry on the
 search path (as returned by <code><a href="https://rdrr.io/r/base/search.html" class="external-link">search()</a></code>), with columns <code>name</code> and <code>type</code>
 (<code>"package"</code> or <code>"other"</code>). This surfaces non-package attachments (e.g.
 <code>tools:rstudio</code>, or environments added via <code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code>) that aren't
 reflected in <code>packages</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="selecting-which-elements-are-displayed">Selecting which elements are displayed<a class="anchor" aria-label="anchor" href="#selecting-which-elements-are-displayed"></a></h2>
+
+
 <p><code>sessionstate()</code> itself always captures every field in full (<code>globalenv</code>
 is never truncated at capture time). To display only a subset when
 printing, pass <code>platform</code>/<code>locale</code>/<code>matrix</code>/<code>document</code>/<code>machine</code>/<code>git</code>/
@@ -228,12 +303,12 @@ unlike the one for <code><a href="sessioncheck.html">sessioncheck()</a></code>, 
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> working directory   /home/runner/work/sessioncheck/sessioncheck/docs/reference</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> commit sha          71081165969ad9419bbc89ba5991d6c46c02500e</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> commit sha          6af4cc5129be9dce701a331ca20b3deb1fdbfee9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> dirty               FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> captured at         2026-09-06 10:58:54 UTC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> session uptime      7.912 sec</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> captured at         2026-09-06 12:04:24 UTC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> session uptime      8.553 sec</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> kind                Mersenne-Twister</span>

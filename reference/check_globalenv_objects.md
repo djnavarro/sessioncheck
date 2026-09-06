@@ -1,8 +1,8 @@
 # Check global environment objects
 
-Individual session check functions that inspect the contents of the
-global environment and the names of attached non-package environments.
-Session checkers can produce errors, warnings, or messages if requested.
+Individual session check function that inspects the contents of the
+global environment. Session checkers can produce errors, warnings, or
+messages if requested.
 
 ## Usage
 
@@ -25,7 +25,9 @@ check_globalenv_objects(
 - allow_globalenv_objects:
 
   Character vector containing names of objects that are "allowed", and
-  will not trigger an action.
+  will not trigger an action. The default is
+  `allow_globalenv_objects = NULL`, in which case dot-prefixed objects
+  (e.g. `.Random.seed`) are allowed.
 
 - action_on_pass:
 

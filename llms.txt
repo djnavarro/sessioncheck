@@ -182,8 +182,7 @@ Individual session check functions
 
 S3 methods for session check classes
 
-- [`.status_prefix`](https://sessioncheck.djnavarro.net/reference/display_methods.md)
-  [`format(`*`<sessioncheck_status>`*`)`](https://sessioncheck.djnavarro.net/reference/display_methods.md)
+- [`format(`*`<sessioncheck_status>`*`)`](https://sessioncheck.djnavarro.net/reference/display_methods.md)
   [`format(`*`<sessioncheck_sessioncheck>`*`)`](https://sessioncheck.djnavarro.net/reference/display_methods.md)
   [`print(`*`<sessioncheck_status>`*`)`](https://sessioncheck.djnavarro.net/reference/display_methods.md)
   [`print(`*`<sessioncheck_sessioncheck>`*`)`](https://sessioncheck.djnavarro.net/reference/display_methods.md)

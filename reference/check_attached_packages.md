@@ -24,7 +24,9 @@ check_attached_packages(
 - allow_attached_packages:
 
   Character vector containing names of packages that are "allowed", and
-  will not trigger an action if attached to the search path.
+  will not trigger an action if attached to the search path. The default
+  is `allow_attached_packages = NULL`, in which case only base-priority
+  packages are allowed.
 
 - action_on_pass:
 

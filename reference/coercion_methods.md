@@ -1,6 +1,10 @@
 # Coerce session check object to a data frame
 
-Coerce session check object to a data frame
+S3 [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
+methods for the three classes this package defines, letting each be
+dropped into ordinary data frame workflows (filtering, joining, export)
+instead of only being inspected via
+[`print()`](https://rdrr.io/r/base/print.html)/[`format()`](https://rdrr.io/r/base/format.html).
 
 ## Usage
 

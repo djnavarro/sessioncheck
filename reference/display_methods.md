@@ -1,12 +1,16 @@
 # Format and print sessioncheck objects
 
-Format and print sessioncheck objects
+S3
+[`format()`](https://rdrr.io/r/base/format.html)/[`print()`](https://rdrr.io/r/base/print.html)
+methods for the three classes this package defines.
+`sessioncheck_status`/`sessioncheck_sessioncheck` objects render as a
+one-line-per-check status summary; `sessioncheck_sessionstate` objects
+render as a multi-section report, and the arguments below let that
+report be filtered down to specific fields or columns per section.
 
 ## Usage
 
 ``` r
-.status_prefix
-
 # S3 method for class 'sessioncheck_status'
 format(x, ...)
 
@@ -178,7 +182,7 @@ built-in default is used (showing every field/column, except for
 `c("package", "attached", "loaded_version", "source")`, and
 `globalenv_n`, which defaults to `10`). This selection only affects what
 is displayed; it never changes the underlying object, so
-[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) always
-returns the full package inventory, and `x$globalenv`/`x$attachments`
-always return their full data frames, regardless of any selection in
-effect.
+[`as.data.frame()`](https://sessioncheck.djnavarro.net/reference/coercion_methods.md)
+always returns the full package inventory, and
+`x$globalenv`/`x$attachments` always return their full data frames,
+regardless of any selection in effect.

@@ -75,7 +75,9 @@ Session checkers can produce errors, warnings, or messages if requested.</p>
 
 <dt id="arg-required-options">required_options<a class="anchor" aria-label="anchor" href="#arg-required-options"></a></dt>
 <dd><p>A named list of required options. If any of these options are
-missing or have different values to the required values, an action is triggered.</p></dd>
+missing or have different values to the required values, an action is triggered. The
+default is <code>required_options = NULL</code>, which means there is nothing to compare
+against, so the check always passes.</p></dd>
 
 
 <dt id="arg-action-on-pass">action_on_pass<a class="anchor" aria-label="anchor" href="#arg-action-on-pass"></a></dt>

@@ -25,7 +25,8 @@ check_required_locale(
 
   A named list of required locale settings. If any of these are missing
   or have different values to the required values, an action is
-  triggered.
+  triggered. The default is `required_locale = NULL`, which means there
+  is nothing to compare against, so the check always passes.
 
 - action_on_pass:
 

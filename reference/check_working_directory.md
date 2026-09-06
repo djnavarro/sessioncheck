@@ -26,7 +26,8 @@ check_working_directory(
 
   A single character path giving the working directory the session is
   expected to be in. If any other directory is currently in use, an
-  action is triggered.
+  action is triggered. The default is `required_wd = NULL`, which means
+  there is nothing to compare against, so the check always passes.
 
 - action_on_pass:
 
@@ -67,7 +68,7 @@ check_working_directory(action = "message")
 # a working directory that does not match the required path: reports both
 # the actual and required paths
 check_working_directory(action = "message", required_wd = tempdir())
-#> ✖ Working directory (/home/runner/work/sessioncheck/sessioncheck/docs/reference) does not match required path (/tmp/Rtmpl7M72i)
+#> ✖ Working directory (/home/runner/work/sessioncheck/sessioncheck/docs/reference) does not match required path (/tmp/RtmpwCZtC0)
 
 # a working directory matching the required path: `action` only controls
 # what happens when a problem *is* found, so use

@@ -350,7 +350,7 @@ action is triggered. If no value is supplied, it defaults to 300
 seconds. The customization is illustrated below:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_sessiontime.html">check_sessiontime</a></span><span class="op">(</span>max_sessiontime <span class="op">=</span> <span class="fl">.0001</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: ✖ Session runtime (1.71 secs) exceeds threshold of 0 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: ✖ Session runtime (1.85 secs) exceeds threshold of 0 secs</span></span></code></pre></div>
 <p>Note that this check is not one of the default checks performed by
 the <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> function.</p>
 </div>
@@ -376,7 +376,7 @@ actual and expected paths:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_working_directory.html">check_working_directory</a></span><span class="op">(</span>required_wd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: ✖ Working directory</span></span>
 <span><span class="co">#&gt; (/home/runner/work/sessioncheck/sessioncheck/vignettes/articles) does not match</span></span>
-<span><span class="co">#&gt; required path (/tmp/Rtmp75Cq30)</span></span></code></pre></div>
+<span><span class="co">#&gt; required path (/tmp/RtmpCqK4mV)</span></span></code></pre></div>
 <p>Both paths are passed through <code><a href="https://rdrr.io/r/base/normalizePath.html" class="external-link">normalizePath()</a></code> before
 comparison, so differences in trailing slashes, or relative versus
 absolute forms, do not produce false positives. As with

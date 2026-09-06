@@ -76,7 +76,8 @@ Session checkers can produce errors, warnings, or messages if requested.</p>
 <dt id="arg-required-sysenv">required_sysenv<a class="anchor" aria-label="anchor" href="#arg-required-sysenv"></a></dt>
 <dd><p>A named list of required system environment variables.
 If any of these variables are missing or have different values to the required
-values, an action is triggered.</p></dd>
+values, an action is triggered. The default is <code>required_sysenv = NULL</code>, which
+means there is nothing to compare against, so the check always passes.</p></dd>
 
 
 <dt id="arg-action-on-pass">action_on_pass<a class="anchor" aria-label="anchor" href="#arg-action-on-pass"></a></dt>

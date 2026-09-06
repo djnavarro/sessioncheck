@@ -25,7 +25,10 @@ check_attached_environments(
 - allow_attached_environments:
 
   Character vector containing names of environments that are "allowed",
-  and will not trigger an action if attached to the search path.
+  and will not trigger an action if attached to the search path. The
+  default is `allow_attached_environments = NULL`, in which case package
+  environments and a set of known IDE-injected environments (e.g.
+  "tools:rstudio") are allowed.
 
 - action_on_pass:
 

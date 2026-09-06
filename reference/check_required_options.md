@@ -25,7 +25,8 @@ check_required_options(
 
   A named list of required options. If any of these options are missing
   or have different values to the required values, an action is
-  triggered.
+  triggered. The default is `required_options = NULL`, which means there
+  is nothing to compare against, so the check always passes.
 
 - action_on_pass:
 
