@@ -216,11 +216,20 @@ compare_sessionstates <- function(old, new) {
 
 # globalenv's "modified" logic differs from .diff_modified_table()'s generic
 # shape because the notion of "changed" depends on whether a trustworthy
-# `hash` is available on both sides: when it is, a hash mismatch is
-# authoritative; when it isn't (an object that failed to serialize -- see
-# .hash_object()), the comparison falls back to class/size only, and the
-# row is marked verified = FALSE so that fallback is visible rather than
-# silently indistinguishable from a verified result
+# `hash` is available on both sides. When it is, a hash mismatch is
+# authoritative: if the hash is unchanged, serialize() must have produced
+# byte-identical output, so class/size cannot have changed either and no
+# further comparison is needed; if the hash *did* change, a "hash" field
+# row is always emitted (the definitive evidence something changed), plus
+# "class"/"size" rows for whichever of those also happened to differ. When
+# a trustworthy hash isn't available on both sides (an object that failed
+# to serialize -- see .hash_object()), the comparison falls back to
+# class/size only, and every row is marked verified = FALSE so that
+# fallback stays visible rather than silently indistinguishable from a
+# hash-verified result. The resulting shape -- one row per (name, changed
+# field), in `field`/`old`/`new` form -- deliberately matches
+# .diff_packages()'s modified table, so both the print method and
+# as.data.frame() can treat "modified" uniformly across sections
 .diff_globalenv <- function(old, new) {
   ar <- .diff_table_added_removed(old, new, "name")
   common <- intersect(old$name, new$name)
@@ -228,16 +237,22 @@ compare_sessionstates <- function(old, new) {
     o <- old[old$name == nm, , drop = FALSE]
     n <- new[new$name == nm, , drop = FALSE]
     hash_verifiable <- !is.na(o$hash) && !is.na(n$hash)
-    changed <- if (hash_verifiable) {
-      !identical(o$hash, n$hash)
+    if (hash_verifiable) {
+      if (identical(o$hash, n$hash)) return(NULL)
+      fields <- "hash"
+      if (!identical(o$class, n$class)) fields <- c(fields, "class")
+      if (!identical(o$size, n$size)) fields <- c(fields, "size")
     } else {
-      !identical(o$class, n$class) || !identical(o$size, n$size)
+      class_changed <- !identical(o$class, n$class)
+      size_changed <- !identical(o$size, n$size)
+      if (!class_changed && !size_changed) return(NULL)
+      fields <- c(if (class_changed) "class", if (size_changed) "size")
     }
-    if (!changed) return(NULL)
     data.frame(
       name = nm,
-      old_class = o$class, new_class = n$class,
-      old_size = o$size, new_size = n$size,
+      field = fields,
+      old = vapply(fields, function(f) .diff_display_value(o[[f]]), character(1L)),
+      new = vapply(fields, function(f) .diff_display_value(n[[f]]), character(1L)),
       verified = hash_verifiable,
       stringsAsFactors = FALSE
     )
@@ -245,9 +260,8 @@ compare_sessionstates <- function(old, new) {
   rows <- rows[!vapply(rows, is.null, logical(1L))]
   modified <- if (length(rows) == 0L) {
     data.frame(
-      name = character(), old_class = character(), new_class = character(),
-      old_size = numeric(), new_size = numeric(), verified = logical(),
-      stringsAsFactors = FALSE
+      name = character(), field = character(), old = character(), new = character(),
+      verified = logical(), stringsAsFactors = FALSE
     )
   } else {
     out <- do.call(rbind, rows)

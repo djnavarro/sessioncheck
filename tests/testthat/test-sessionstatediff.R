@@ -23,7 +23,13 @@
     ),
     attachments = data.frame(name = c(".GlobalEnv", "package:base"), type = c("other", "package"), stringsAsFactors = FALSE)
   )
-  merged <- utils::modifyList(base, overrides)
+  # deliberately not utils::modifyList(): it recurses into data frames
+  # (they're lists too) and merges them column-by-column, which silently
+  # breaks whenever an override table has a different number of rows than
+  # the base fixture. Overrides here are always meant to fully replace a
+  # top-level section, so a plain loop is both simpler and correct.
+  merged <- base
+  for (nm in names(overrides)) merged[[nm]] <- overrides[[nm]]
   structure(merged, class = "sessioncheck_sessionstate")
 }
 
@@ -268,6 +274,112 @@ test_that("format.sessioncheck_sessionstatediff() reports added/removed/modified
   txt <- format(diff)
   expect_match(txt, "Modified \\[n = ", fixed = FALSE)
   expect_match(txt, "pkgA", fixed = TRUE)
+})
+
+# as.data.frame.sessioncheck_sessionstatediff() ------
+
+test_that("as.data.frame.sessioncheck_sessionstatediff() defaults to a long-format packages table", {
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11),
+    packages = data.frame(
+      package = c("base", "pkgA", "pkgC"), attached = c(TRUE, FALSE, TRUE),
+      ondisk_version = c("1.0", "1.1", "1.0"), loaded_version = c("1.0", "1.1", "1.0"),
+      source = c("base", "CRAN", "CRAN"), stringsAsFactors = FALSE
+    )
+  ))
+  diff <- compare_sessionstates(old, new)
+  df <- as.data.frame(diff)
+  expect_identical(df, as.data.frame(diff, which = "packages"))
+  expect_named(df, c("package", "change", "field", "old", "new"))
+
+  added_rows <- df[df$package == "pkgC" & df$change == "added", ]
+  expect_setequal(added_rows$field, c("attached", "ondisk_version", "loaded_version", "source"))
+  expect_true(all(is.na(added_rows$old)))
+  expect_false(any(is.na(added_rows$new)))
+
+  modified_rows <- df[df$package == "pkgA" & df$change == "modified", ]
+  expect_true(all(c("attached", "ondisk_version", "loaded_version") %in% modified_rows$field))
+})
+
+test_that("as.data.frame.sessioncheck_sessionstatediff() reports globalenv with a verified column", {
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11),
+    globalenv = data.frame(
+      name = c("x", "z"), class = c("numeric", "character"), size = c(56, 10),
+      hash = c("hx2", "hz1"), stringsAsFactors = FALSE
+    )
+  ))
+  diff <- compare_sessionstates(old, new)
+  df <- as.data.frame(diff, which = "globalenv")
+  expect_named(df, c("name", "change", "field", "old", "new", "verified"))
+
+  added_rows <- df[df$name == "z" & df$change == "added", ]
+  expect_true(all(is.na(added_rows$verified)))
+
+  removed_rows <- df[df$name == "y" & df$change == "removed", ]
+  expect_identical(nrow(removed_rows), 3L)
+  expect_true(all(is.na(removed_rows$verified)))
+
+  modified_rows <- df[df$name == "x" & df$change == "modified", ]
+  expect_identical(modified_rows$field, "hash")
+  expect_true(all(modified_rows$verified))
+})
+
+test_that("as.data.frame.sessioncheck_sessionstatediff() attachments has no modified rows", {
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11),
+    attachments = data.frame(name = c(".GlobalEnv", "package:pkgD"), type = c("other", "package"), stringsAsFactors = FALSE)
+  ))
+  diff <- compare_sessionstates(old, new)
+  df <- as.data.frame(diff, which = "attachments")
+  expect_named(df, c("name", "change", "field", "old", "new"))
+  expect_false("modified" %in% df$change)
+  expect_true(all(df$field == "type"))
+})
+
+test_that("as.data.frame.sessioncheck_sessionstatediff() returns zero-row tables with correct columns when nothing changed", {
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(timing = list(
+    captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11
+  )))
+  diff <- compare_sessionstates(old, new)
+
+  df_pkg <- as.data.frame(diff, which = "packages")
+  expect_named(df_pkg, c("package", "change", "field", "old", "new"))
+  expect_identical(nrow(df_pkg), 0L)
+
+  df_genv <- as.data.frame(diff, which = "globalenv")
+  expect_named(df_genv, c("name", "change", "field", "old", "new", "verified"))
+  expect_identical(nrow(df_genv), 0L)
+
+  df_att <- as.data.frame(diff, which = "attachments")
+  expect_named(df_att, c("name", "change", "field", "old", "new"))
+  expect_identical(nrow(df_att), 0L)
+})
+
+test_that("as.data.frame.sessioncheck_sessionstatediff() errors informatively on an unknown which value", {
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(timing = list(
+    captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11
+  )))
+  diff <- compare_sessionstates(old, new)
+  expect_error(as.data.frame(diff, which = "bogus"))
+})
+
+test_that("as.data.frame.sessioncheck_sessionstatediff() integrates with a real sessionstate() diff", {
+  old <- sessionstate()
+  assign("sc_test_diff_df_obj", 1:10, envir = .GlobalEnv)
+  on.exit(rm(sc_test_diff_df_obj, envir = .GlobalEnv), add = TRUE)
+  new <- sessionstate()
+
+  diff <- compare_sessionstates(old, new)
+  df <- as.data.frame(diff, which = "globalenv")
+  added_rows <- df[df$name == "sc_test_diff_df_obj" & df$change == "added", ]
+  expect_setequal(added_rows$field, c("class", "size", "hash"))
+  expect_true(all(is.na(added_rows$old)))
 })
 
 test_that("print.sessioncheck_sessionstatediff() prints format() output invisibly", {

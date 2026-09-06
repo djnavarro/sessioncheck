@@ -2,6 +2,7 @@
 
 S3method(base::as.data.frame,sessioncheck_sessioncheck)
 S3method(base::as.data.frame,sessioncheck_sessionstate)
+S3method(base::as.data.frame,sessioncheck_sessionstatediff)
 S3method(base::as.data.frame,sessioncheck_status)
 S3method(base::format,sessioncheck_sessioncheck)
 S3method(base::format,sessioncheck_sessionstate)
