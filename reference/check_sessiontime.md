@@ -54,11 +54,11 @@ check_sessiontime(action = "message")
 # a session that has run past the threshold: reports the elapsed time
 # and the threshold together, both in human-readable units
 check_sessiontime(action = "message", max_sessiontime = 0)
-#> ✖ Session runtime (7.27 secs) exceeds threshold of 0 secs
+#> ✖ Session runtime (7.73 secs) exceeds threshold of 0 secs
 
 # a session comfortably within the threshold: `action` only controls
 # what happens when a problem *is* found, so use
 # `action_on_pass = "message"` to confirm the clean result instead
 check_sessiontime(action = "none", max_sessiontime = Inf, action_on_pass = "message")
-#> ✔ Session runtime (7.27 secs) below threshold of Inf days
+#> ✔ Session runtime (7.73 secs) below threshold of Inf days
 ```

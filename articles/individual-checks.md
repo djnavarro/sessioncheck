@@ -327,7 +327,7 @@ illustrated below:
 ``` r
 
 check_sessiontime(max_sessiontime = .0001)
-#> Warning: ✖ Session runtime (1.71 secs) exceeds threshold of 0 secs
+#> Warning: ✖ Session runtime (1.8 secs) exceeds threshold of 0 secs
 ```
 
 Note that this check is not one of the default checks performed by the
