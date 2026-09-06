@@ -236,7 +236,8 @@ compare_sessionstates <- function(old, new) {
   rows <- lapply(common, function(nm) {
     o <- old[old$name == nm, , drop = FALSE]
     n <- new[new$name == nm, , drop = FALSE]
-    hash_verifiable <- !is.na(o$hash) && !is.na(n$hash)
+    hash_verifiable <- "hash" %in% names(o) && "hash" %in% names(n) &&
+      !is.na(o$hash) && !is.na(n$hash)
     if (hash_verifiable) {
       if (identical(o$hash, n$hash)) return(NULL)
       fields <- "hash"

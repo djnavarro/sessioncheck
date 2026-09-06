@@ -177,6 +177,19 @@ test_that(".diff_globalenv() treats an unchanged hash as no modification", {
   expect_identical(nrow(diff$modified), 0L)
 })
 
+test_that(".diff_globalenv() falls back to class/size (without erroring) when a hash column is entirely missing", {
+  old <- data.frame(name = "x", class = "numeric", size = 100, stringsAsFactors = FALSE)
+  new <- data.frame(name = "x", class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE)
+  diff <- .diff_globalenv(old, new)
+  expect_identical(nrow(diff$modified), 0L)
+
+  new_bigger <- data.frame(name = "x", class = "numeric", size = 200, hash = "h1", stringsAsFactors = FALSE)
+  diff2 <- .diff_globalenv(old, new_bigger)
+  expect_identical(nrow(diff2$modified), 1L)
+  expect_identical(diff2$modified$field, "size")
+  expect_false(diff2$modified$verified)
+})
+
 test_that(".diff_globalenv() reports added/removed objects", {
   old <- data.frame(name = "x", class = "numeric", size = 1, hash = "h1", stringsAsFactors = FALSE)
   new <- data.frame(name = "y", class = "numeric", size = 1, hash = "h2", stringsAsFactors = FALSE)
