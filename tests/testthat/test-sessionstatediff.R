@@ -93,6 +93,72 @@ test_that(".diff_vector() reports added/removed but ignores reordering", {
   expect_identical(diff2$removed, "/a")
 })
 
+# .validate_unique_key() ------
+
+test_that(".validate_unique_key() is silent when keys are unique", {
+  df <- data.frame(package = c("a", "b"), stringsAsFactors = FALSE)
+  expect_silent(.validate_unique_key(df, "package", "packages", "old"))
+})
+
+test_that(".validate_unique_key() errors informatively on duplicate keys", {
+  df <- data.frame(package = c("a", "a", "b"), stringsAsFactors = FALSE)
+  expect_error(
+    .validate_unique_key(df, "package", "packages", "old"),
+    "`old`'s `packages` table has duplicate `package` value\\(s\\): a"
+  )
+})
+
+# .diff_table_added_removed() / duplicate-key propagation ------
+
+test_that(".diff_table_added_removed() rejects duplicate keys in old_df", {
+  old <- data.frame(package = c("a", "a"), stringsAsFactors = FALSE)
+  new <- data.frame(package = "a", stringsAsFactors = FALSE)
+  expect_error(.diff_table_added_removed(old, new, "package", "packages"), "duplicate")
+})
+
+test_that(".diff_table_added_removed() rejects duplicate keys in new_df", {
+  old <- data.frame(package = "a", stringsAsFactors = FALSE)
+  new <- data.frame(package = c("a", "a"), stringsAsFactors = FALSE)
+  expect_error(.diff_table_added_removed(old, new, "package", "packages"), "duplicate")
+})
+
+test_that(".diff_packages() rejects duplicate package keys", {
+  old <- data.frame(
+    package = c("pkgA", "pkgA"), attached = TRUE, ondisk_version = "1.0",
+    loaded_version = "1.0", source = "CRAN", stringsAsFactors = FALSE
+  )
+  new <- data.frame(
+    package = "pkgA", attached = TRUE, ondisk_version = "1.0",
+    loaded_version = "1.0", source = "CRAN", stringsAsFactors = FALSE
+  )
+  expect_error(.diff_packages(old, new), "`old`'s `packages` table has duplicate")
+})
+
+test_that(".diff_attachments() rejects duplicate name keys", {
+  old <- data.frame(name = c("a", "a"), type = "package", stringsAsFactors = FALSE)
+  new <- data.frame(name = "a", type = "package", stringsAsFactors = FALSE)
+  expect_error(.diff_attachments(old, new), "`old`'s `attachments` table has duplicate")
+})
+
+test_that(".diff_globalenv() rejects duplicate name keys", {
+  old <- data.frame(
+    name = c("x", "x"), class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE
+  )
+  new <- data.frame(name = "x", class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE)
+  expect_error(.diff_globalenv(old, new), "`old`'s `globalenv` table has duplicate")
+})
+
+test_that("compare_sessionstates() rejects duplicate keys end to end", {
+  old <- .mock_sessionstate(list(
+    packages = data.frame(
+      package = c("base", "base"), attached = TRUE, ondisk_version = "1.0",
+      loaded_version = "1.0", source = "base", stringsAsFactors = FALSE
+    )
+  ))
+  new <- .mock_sessionstate()
+  expect_error(compare_sessionstates(old, new), "duplicate")
+})
+
 # .diff_packages() ------
 
 test_that(".diff_packages() detects added, removed, and modified packages", {

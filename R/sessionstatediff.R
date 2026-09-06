@@ -50,6 +50,14 @@
 #'   (`package`/`name`, `field`, `old`, `new` for `packages`; see below for
 #'   `globalenv`'s slightly different `modified` columns).
 #'
+#' Keyed-table diffing assumes each key (`package` for `packages`; `name`
+#' for `globalenv`/`attachments`) appears at most once per snapshot -- true
+#' for anything [sessionstate()] itself produces. `old`/`new` are checked
+#' for this on every keyed-table section, and `compare_sessionstates()`
+#' errors with an informative message identifying the offending snapshot,
+#' section, and duplicated value(s) if it doesn't hold (e.g. for a
+#' hand-constructed or corrupted `sessioncheck_sessionstate` object).
+#'
 #' Keyed-table diffing is purely key-based: it has no way to detect a
 #' rename. A package or global environment object that is renamed but
 #' otherwise unchanged between `old` and `new` (e.g. `pkgA` reinstalled
@@ -168,8 +176,15 @@ compare_sessionstates <- function(old, new) {
 
 # shared added/removed logic for the three keyed-table sections
 # (packages/globalenv/attachments), keyed by `key` (package/name/name
-# respectively)
-.diff_table_added_removed <- function(old_df, new_df, key) {
+# respectively). `section` names the calling section (e.g. "packages")
+# for .validate_unique_key()'s error message. Validating uniqueness here,
+# before the added/removed split, means every downstream keyed-table
+# consumer (.diff_modified_table(), .diff_globalenv()'s own inline
+# modified logic) is protected too, since each of .diff_packages()/
+# .diff_attachments()/.diff_globalenv() calls this first
+.diff_table_added_removed <- function(old_df, new_df, key, section) {
+  .validate_unique_key(old_df, key, section, "old")
+  .validate_unique_key(new_df, key, section, "new")
   added <- new_df[!(new_df[[key]] %in% old_df[[key]]), , drop = FALSE]
   removed <- old_df[!(old_df[[key]] %in% new_df[[key]]), , drop = FALSE]
   rownames(added) <- NULL
@@ -209,7 +224,7 @@ compare_sessionstates <- function(old, new) {
 }
 
 .diff_packages <- function(old, new) {
-  ar <- .diff_table_added_removed(old, new, "package")
+  ar <- .diff_table_added_removed(old, new, "package", "packages")
   modified <- .diff_modified_table(
     old, new, "package",
     compare_cols = c("attached", "ondisk_version", "loaded_version", "source")
@@ -218,7 +233,7 @@ compare_sessionstates <- function(old, new) {
 }
 
 .diff_attachments <- function(old, new) {
-  ar <- .diff_table_added_removed(old, new, "name")
+  ar <- .diff_table_added_removed(old, new, "name", "attachments")
   list(added = ar$added, removed = ar$removed)
 }
 
@@ -239,7 +254,7 @@ compare_sessionstates <- function(old, new) {
 # .diff_packages()'s modified table, so both the print method and
 # as.data.frame() can treat "modified" uniformly across sections
 .diff_globalenv <- function(old, new) {
-  ar <- .diff_table_added_removed(old, new, "name")
+  ar <- .diff_table_added_removed(old, new, "name", "globalenv")
   common <- intersect(old$name, new$name)
   rows <- lapply(common, function(nm) {
     o <- old[old$name == nm, , drop = FALSE]

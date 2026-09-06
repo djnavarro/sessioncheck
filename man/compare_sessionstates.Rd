@@ -58,6 +58,14 @@ differs, in a long format with one row per changed field
 \code{globalenv}'s slightly different \code{modified} columns).
 }
 
+Keyed-table diffing assumes each key (\code{package} for \code{packages}; \code{name}
+for \code{globalenv}/\code{attachments}) appears at most once per snapshot -- true
+for anything \code{\link[=sessionstate]{sessionstate()}} itself produces. \code{old}/\code{new} are checked
+for this on every keyed-table section, and \code{compare_sessionstates()}
+errors with an informative message identifying the offending snapshot,
+section, and duplicated value(s) if it doesn't hold (e.g. for a
+hand-constructed or corrupted \code{sessioncheck_sessionstate} object).
+
 Keyed-table diffing is purely key-based: it has no way to detect a
 rename. A package or global environment object that is renamed but
 otherwise unchanged between \code{old} and \code{new} (e.g. \code{pkgA} reinstalled
