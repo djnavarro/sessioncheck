@@ -12,6 +12,10 @@
 
 ## New features
 
+- Added an `action_on_pass` argument to `sessioncheck()` and the individual
+  `check_*()` functions, allowing a clean result to be confirmed with a message
+  rather than remaining silent (#10).
+
 - Added `sessionstate()`, a companion to `sessioncheck()` intended for use at
   the *end* of a script as an audit log. It reports platform details (R
   version, OS, matrix products, locale, timezone, UI/frontend), selected

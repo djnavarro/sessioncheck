@@ -39,6 +39,32 @@ test_that(".action() produces the requested action for sessioncheck objects", {
   expect_no_message(.action(action = "none", status = sessioncheck_true))
 })
 
+test_that(".action() is silent on a clean status when action_on_pass = \"none\" (the default)", {
+  expect_no_message(.action(action = "warn", status = status_false))
+  expect_no_message(.action(action = "warn", status = status_false, action_on_pass = "none"))
+  expect_no_message(.action(action = "warn", status = sessioncheck_false))
+  expect_no_message(.action(action = "warn", status = sessioncheck_false, action_on_pass = "none"))
+})
+
+test_that(".action() confirms a clean status when action_on_pass = \"message\"", {
+  expect_message(.action(action = "warn", status = status_false, action_on_pass = "message"))
+  expect_message(.action(action = "none", status = status_false, action_on_pass = "message"))
+  expect_message(.action(action = "warn", status = sessioncheck_false, action_on_pass = "message"))
+  expect_message(.action(action = "none", status = sessioncheck_false, action_on_pass = "message"))
+})
+
+test_that(".action() ignores action_on_pass when status is unclean", {
+  # `action` still governs the unclean case; action_on_pass never adds a
+  # second, redundant confirmation on top of it
+  expect_warning(.action(action = "warn", status = status_true, action_on_pass = "message"))
+  expect_no_message(suppressWarnings(.action(action = "warn", status = status_true, action_on_pass = "message")))
+  expect_error(.action(action = "error", status = sessioncheck_true, action_on_pass = "message"))
+})
+
+test_that(".action() returns the status object invisibly regardless of action_on_pass", {
+  expect_equal(.action(action = "warn", status = status_false, action_on_pass = "message"), status_false)
+})
+
 test_that(".message_text() prefixes with a cross symbol when issues are found", {
   ss <- c(a = FALSE, b = TRUE, c = TRUE, d = TRUE)
 
@@ -304,6 +330,59 @@ test_that(".colored_symbol() returns a plain symbol when ansi is disabled", {
   local_mocked_bindings(.ansi_enabled = function() FALSE, .unicode_enabled = function() FALSE)
   expect_equal(.colored_symbol("tick"), "v")
   expect_equal(.colored_symbol("cross"), "x")
+})
+
+test_that(".get_locale_list() parses the normal 'CATEGORY=value;...' format", {
+  # computed inside a helper so the Sys.getlocale() mock is already
+  # unwound before expect_equal() runs -- expect_equal() uses waldo, which
+  # temporarily switches locale for comparison and restores it afterwards,
+  # and that restore fails noisily if Sys.getlocale() is still mocked to
+  # return this fake, non-settable composite string
+  get_mocked <- function(raw) {
+    local_mocked_bindings(Sys.getlocale = function(category = "LC_ALL") raw, .package = "base")
+    .get_locale_list()
+  }
+  expect_equal(get_mocked("LC_COLLATE=en_US.UTF-8;LC_TIME=C"), list(LC_COLLATE = "en_US.UTF-8", LC_TIME = "C"))
+})
+
+test_that(".get_locale_list() handles the collapsed, unprefixed format used when every category matches (macOS CI)", {
+  # per ?Sys.getlocale, Sys.getlocale() returns a bare, unprefixed value
+  # when every category shares the same setting -- this has been observed
+  # on macOS CI runners and previously caused every requested category to
+  # be misreported as "missing"
+  local_mocked_bindings(
+    Sys.getlocale = function(category = "LC_ALL") "en_US.UTF-8",
+    .package = "base"
+  )
+  lc <- .get_locale_list()
+
+  expect_true("LC_COLLATE" %in% names(lc))
+  expect_true("LC_TIME" %in% names(lc))
+  expect_equal(unname(unlist(lc)), rep("en_US.UTF-8", length(lc)))
+})
+
+test_that(".get_locale_list() omits categories unsupported by the current platform", {
+  local_mocked_bindings(
+    Sys.getlocale = function(category = "LC_ALL") {
+      if (identical(category, "LC_ALL")) return("en_US.UTF-8")
+      if (identical(category, "LC_NAME")) stop("category not supported")
+      "en_US.UTF-8"
+    },
+    .package = "base"
+  )
+  expect_false("LC_NAME" %in% names(.get_locale_list()))
+})
+
+test_that("check_required_locale() confirms a clean pass under the collapsed-locale condition", {
+  local_mocked_bindings(
+    Sys.getlocale = function(category = "LC_ALL") "en_US.UTF-8",
+    .package = "base"
+  )
+  expect_message(check_required_locale(
+    action = "none",
+    required_locale = list(LC_COLLATE = "en_US.UTF-8"),
+    action_on_pass = "message"
+  ))
 })
 
 test_that(".get_xiny_status() returns expected integer status", {

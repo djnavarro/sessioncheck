@@ -4,7 +4,11 @@
 \alias{check_globalenv_objects}
 \title{Check global environment objects}
 \usage{
-check_globalenv_objects(action = "warn", allow_globalenv_objects = NULL)
+check_globalenv_objects(
+  action = "warn",
+  allow_globalenv_objects = NULL,
+  action_on_pass = "none"
+)
 }
 \arguments{
 \item{action}{Behavior to take if the status is not clean. Possible values are
@@ -12,6 +16,9 @@ check_globalenv_objects(action = "warn", allow_globalenv_objects = NULL)
 
 \item{allow_globalenv_objects}{Character vector containing names of objects
 that are "allowed", and will not trigger an action.}
+
+\item{action_on_pass}{Behavior to take if the status is clean. Possible values
+are "message" and "none". The default is \code{action_on_pass = "none"}.}
 }
 \value{
 Invisibly returns an object of class \code{sessioncheck_status}.
@@ -30,13 +37,14 @@ For example, \code{.Random.seed} and \code{.Last.value} do not trigger actions b
 \examples{
 check_globalenv_objects(action = "message")
 
-# a session with no unexpected objects in the global environment: a
-# passing check is always silent regardless of `action`, so print() the
-# returned status directly to see the "no issues" wording
-print(check_globalenv_objects(
+# a session with no unexpected objects in the global environment:
+# `action` only controls what happens when a problem *is* found, so use
+# `action_on_pass = "message"` to confirm the clean result instead
+check_globalenv_objects(
   action = "none",
-  allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE)
-))
+  allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE),
+  action_on_pass = "message"
+)
  
 }
 \seealso{

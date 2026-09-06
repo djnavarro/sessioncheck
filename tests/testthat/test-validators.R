@@ -12,6 +12,25 @@ test_that("valid `action` arguments are permitted", {
   expect_no_error(.validate_action(action = "none"))
 })
 
+test_that("invalid `action_on_pass` arguments are detected", {
+  expect_error(.validate_action_on_pass(action_on_pass = NULL))
+  expect_error(.validate_action_on_pass(action_on_pass = "warn"))
+  expect_error(.validate_action_on_pass(action_on_pass = "error"))
+  expect_error(.validate_action_on_pass(action_on_pass = "dffgsdf"))
+  expect_error(.validate_action_on_pass(action_on_pass = c("none", "message")))
+  expect_error(.validate_action_on_pass(action_on_pass = 1L))
+})
+
+test_that("valid `action_on_pass` arguments are permitted", {
+  expect_no_error(.validate_action_on_pass(action_on_pass = "none"))
+  expect_no_error(.validate_action_on_pass(action_on_pass = "message"))
+})
+
+test_that("`action_on_pass = NULL` is permitted when allow_null = TRUE", {
+  expect_no_error(.validate_action_on_pass(action_on_pass = NULL, allow_null = TRUE))
+  expect_no_error(.validate_action_on_pass(action_on_pass = "message", allow_null = TRUE))
+})
+
 test_that("invalid `allow` arguments are detected", {
   expect_error(.validate_allow(allow = 1L))
   expect_error(.validate_allow(allow = TRUE))

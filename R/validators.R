@@ -10,6 +10,18 @@
   )
 }
 
+# only "none" and "message" are admissible here: unlike .validate_action(),
+# this governs behavior on a *clean* status, and "error"/"warn" on a passing
+# check would be nonsensical (see #10)
+.validate_action_on_pass <- function(action_on_pass, allow_null = FALSE) {
+  if (allow_null & is.null(action_on_pass)) return(invisible(NULL))
+  stopifnot(
+    "`action_on_pass` must be one of 'none' or 'message'" = length(action_on_pass) == 1L,
+    "`action_on_pass` must be one of 'none' or 'message'" = is.character(action_on_pass),
+    "`action_on_pass` must be one of 'none' or 'message'" = action_on_pass %in% c("none", "message")
+  )
+}
+
 .validate_allow <- function(allow) {
   stopifnot("`allow` must be a character vector or NULL" = is.character(allow) | is.null(allow))
 }

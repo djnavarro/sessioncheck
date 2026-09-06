@@ -54,8 +54,31 @@
   status
 }
 
+# per ?Sys.getlocale, Sys.getlocale() (with no category) normally returns a
+# "CATEGORY=value;CATEGORY=value;..." string, but collapses to a single
+# *unprefixed* value when every category happens to share the same setting
+# (observed in practice on macOS CI runners). The unprefixed form carries no
+# category names to parse, so it's handled separately below by querying
+# each known category directly -- a single-category call to
+# Sys.getlocale() always returns a bare value, never a "CATEGORY=" prefix,
+# so this works regardless of which branch produced the composite string.
+.locale_categories <- c(
+  "LC_COLLATE", "LC_CTYPE", "LC_MONETARY", "LC_NUMERIC", "LC_TIME",
+  "LC_MESSAGES", "LC_PAPER", "LC_MEASUREMENT",
+  "LC_NAME", "LC_ADDRESS", "LC_TELEPHONE", "LC_IDENTIFICATION"
+)
+
 .get_locale_list <- function() {
-  lc_vec <- strsplit(Sys.getlocale(), ";")[[1]]
+  raw <- Sys.getlocale()
+  if (!grepl("=", raw, fixed = TRUE)) {
+    lc <- lapply(
+      .locale_categories,
+      function(category) tryCatch(Sys.getlocale(category), error = function(e) NULL)
+    )
+    names(lc) <- .locale_categories
+    return(lc[!vapply(lc, is.null, logical(1L))])
+  }
+  lc_vec <- strsplit(raw, ";")[[1]]
   lc_lst <- strsplit(lc_vec, "=", fixed = TRUE)
   lc_lbl <- vapply(lc_lst, function(x) x[1L], character(1L))
   lc_val <- vapply(lc_lst, function(x) x[2L], character(1L))

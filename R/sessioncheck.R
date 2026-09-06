@@ -12,6 +12,9 @@
 #' @param checks Character vector listing the checks to run. If the user does not 
 #' specify the checks, the default is to run
 #' `checks = c("globalenv_objects", "attached_packages", "attached_environments")`.
+#' @param action_on_pass Behavior to take if the status is clean. Possible values
+#' are "message" and "none". If the user does not specify a value, the default
+#' is `action_on_pass = "none"`.
 #' @param ... Arguments passed to individual checks.
 #'
 #' @returns Invisibly returns an object of class `sessioncheck_sessioncheck`.
@@ -19,16 +22,16 @@
 #' @examples
 #' sessioncheck(action = "message")
 #' 
-#' # a session with nothing flagged by the default checks: like every
-#' # check_*() function, a passing check is silent regardless of `action`
-#' # (that argument only controls what happens when a problem *is* found),
-#' # so print() the returned status directly to see the "no issues" wording
-#' print(sessioncheck(
+#' # a session with nothing flagged by the default checks: `action` only
+#' # controls what happens when a problem *is* found, so pass
+#' # `action_on_pass = "message"` to confirm the clean result instead
+#' sessioncheck(
 #'   action = "none",
 #'   allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE),
 #'   allow_attached_packages = .packages(),
-#'   allow_attached_environments = search()
-#' ))
+#'   allow_attached_environments = search(),
+#'   action_on_pass = "message"
+#' )
 #'  
 #' @details
 #' `sessioncheck()` allows the user to apply multiple session checks in a single function. 
@@ -48,12 +51,15 @@
 sessioncheck <- function(
   action = NULL, 
   checks = NULL,
+  action_on_pass = NULL,
   ...
 ) {
-  args <- .parse_args(action = action, checks = checks, ...)
+  args <- .parse_args(action = action, checks = checks, action_on_pass = action_on_pass, ...)
   .validate_action(args$action, allow_null = TRUE)
+  .validate_action_on_pass(args$action_on_pass, allow_null = TRUE)
   .validate_checks(args$checks)
   if (is.null(args$action)) args$action <- "warn"
+  if (is.null(args$action_on_pass)) args$action_on_pass <- "none"
   if (is.null(args$checks)) args$checks <- c("globalenv_objects", "attached_packages", "attached_environments")
 
   results <- list()
@@ -65,7 +71,7 @@ sessioncheck <- function(
   if ("required_options" %in% args$checks) results$options <- .get_options_status(args$required_options)
   if ("required_locale" %in% args$checks) results$locale <- .get_locale_status(args$required_locale)
   if ("required_sysenv" %in% args$checks) results$sysenv <- .get_sysenv_status(args$required_sysenv) 
-  .action(args$action, do.call(new_sessioncheck, results))
+  .action(args$action, do.call(new_sessioncheck, results), action_on_pass = args$action_on_pass)
 }
 
 #' @title Check attached packages
@@ -78,16 +84,22 @@ sessioncheck <- function(
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param allow_attached_packages Character vector containing names of packages that 
 #' are "allowed", and will not trigger an action if attached to the search path.
+#' @param action_on_pass Behavior to take if the status is clean. Possible values
+#' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
 #' @returns Invisibly returns an object of class `sessioncheck_status`. 
 #'  
 #' @examples
 #' check_attached_packages(action = "message")
 #' 
-#' # a session with no unexpected packages attached: a passing check is
-#' # always silent regardless of `action`, so print() the returned status
-#' # directly to see the "no issues" wording
-#' print(check_attached_packages(action = "none", allow_attached_packages = .packages()))
+#' # a session with no unexpected packages attached: `action` only controls
+#' # what happens when a problem *is* found, so use `action_on_pass = "message"`
+#' # to confirm the clean result instead
+#' check_attached_packages(
+#'   action = "none",
+#'   allow_attached_packages = .packages(),
+#'   action_on_pass = "message"
+#' )
 #'  
 #' @details
 #' This checker inspects the list of packages that have been
@@ -106,11 +118,12 @@ sessioncheck <- function(
 #' [check_required_sysenv()]
 #' 
 #' @export
-check_attached_packages <- function(action = "warn", allow_attached_packages = NULL) {
+check_attached_packages <- function(action = "warn", allow_attached_packages = NULL, action_on_pass = "none") {
   .validate_action(action)
+  .validate_action_on_pass(action_on_pass)
   .validate_allow(allow_attached_packages)
   status <- .get_package_status(allow_attached_packages)
-  .action(action, status)
+  .action(action, status, action_on_pass = action_on_pass)
 }
 
 
@@ -124,16 +137,22 @@ check_attached_packages <- function(action = "warn", allow_attached_packages = N
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param allow_loaded_namespaces Character vector containing names of packages that 
 #' are "allowed", and will not trigger an action if loaded via namespace.
+#' @param action_on_pass Behavior to take if the status is clean. Possible values
+#' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
 #' @returns Invisibly returns an object of class `sessioncheck_status`. 
 #'  
 #' @examples
 #' check_loaded_namespaces(action = "message")
 #' 
-#' # a session with no unexpected namespaces loaded: a passing check is
-#' # always silent regardless of `action`, so print() the returned status
-#' # directly to see the "no issues" wording
-#' print(check_loaded_namespaces(action = "none", allow_loaded_namespaces = loadedNamespaces()))
+#' # a session with no unexpected namespaces loaded: `action` only controls
+#' # what happens when a problem *is* found, so use `action_on_pass = "message"`
+#' # to confirm the clean result instead
+#' check_loaded_namespaces(
+#'   action = "none",
+#'   allow_loaded_namespaces = loadedNamespaces(),
+#'   action_on_pass = "message"
+#' )
 #'  
 #' @details
 #' This checker inspects the list of loaded namespaces 
@@ -152,11 +171,12 @@ check_attached_packages <- function(action = "warn", allow_attached_packages = N
 #' [check_required_sysenv()]
 #' 
 #' @export
-check_loaded_namespaces <- function(action = "warn", allow_loaded_namespaces = NULL) {
+check_loaded_namespaces <- function(action = "warn", allow_loaded_namespaces = NULL, action_on_pass = "none") {
   .validate_action(action)
+  .validate_action_on_pass(action_on_pass)
   .validate_allow(allow_loaded_namespaces)
   status <- .get_namespace_status(allow_loaded_namespaces)
-  .action(action, status)
+  .action(action, status, action_on_pass = action_on_pass)
 }
 
 #' @title Check global environment objects
@@ -170,19 +190,22 @@ check_loaded_namespaces <- function(action = "warn", allow_loaded_namespaces = N
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param allow_globalenv_objects Character vector containing names of objects
 #' that are "allowed", and will not trigger an action.
+#' @param action_on_pass Behavior to take if the status is clean. Possible values
+#' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
 #' @returns Invisibly returns an object of class `sessioncheck_status`. 
 #'  
 #' @examples
 #' check_globalenv_objects(action = "message")
 #' 
-#' # a session with no unexpected objects in the global environment: a
-#' # passing check is always silent regardless of `action`, so print() the
-#' # returned status directly to see the "no issues" wording
-#' print(check_globalenv_objects(
+#' # a session with no unexpected objects in the global environment:
+#' # `action` only controls what happens when a problem *is* found, so use
+#' # `action_on_pass = "message"` to confirm the clean result instead
+#' check_globalenv_objects(
 #'   action = "none",
-#'   allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE)
-#' ))
+#'   allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE),
+#'   action_on_pass = "message"
+#' )
 #'  
 #' @details
 #' This checker inspects the state of the global environment and takes action based 
@@ -200,11 +223,12 @@ check_loaded_namespaces <- function(action = "warn", allow_loaded_namespaces = N
 #' [check_required_sysenv()]
 #' 
 #' @export
-check_globalenv_objects <- function(action = "warn", allow_globalenv_objects = NULL) {
+check_globalenv_objects <- function(action = "warn", allow_globalenv_objects = NULL, action_on_pass = "none") {
   .validate_action(action)
+  .validate_action_on_pass(action_on_pass)
   .validate_allow(allow_globalenv_objects)
   status <- .get_globalenv_status(allow_globalenv_objects)
-  .action(action, status)
+  .action(action, status, action_on_pass = action_on_pass)
 }
 
 #' @title Check environments attached to the search path
@@ -217,16 +241,22 @@ check_globalenv_objects <- function(action = "warn", allow_globalenv_objects = N
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param allow_attached_environments Character vector containing names of environments
 #' that are "allowed", and will not trigger an action if attached to the search path.
+#' @param action_on_pass Behavior to take if the status is clean. Possible values
+#' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
 #' @returns Invisibly returns an object of class `sessioncheck_status`. 
 #'  
 #' @examples
 #' check_attached_environments(action = "message")
 #' 
-#' # a session with no unexpected environments attached: a passing check
-#' # is always silent regardless of `action`, so print() the returned
-#' # status directly to see the "no issues" wording
-#' print(check_attached_environments(action = "none", allow_attached_environments = search()))
+#' # a session with no unexpected environments attached: `action` only
+#' # controls what happens when a problem *is* found, so use
+#' # `action_on_pass = "message"` to confirm the clean result instead
+#' check_attached_environments(
+#'   action = "none",
+#'   allow_attached_environments = search(),
+#'   action_on_pass = "message"
+#' )
 #'  
 #' @details
 #' This checker inspects all environments on the search path. This includes attached 
@@ -246,11 +276,12 @@ check_globalenv_objects <- function(action = "warn", allow_globalenv_objects = N
 #' [check_required_sysenv()]
 #' 
 #' @export
-check_attached_environments <- function(action = "warn", allow_attached_environments = NULL) {
+check_attached_environments <- function(action = "warn", allow_attached_environments = NULL, action_on_pass = "none") {
   .validate_action(action)
+  .validate_action_on_pass(action_on_pass)
   .validate_allow(allow_attached_environments)
   status <- .get_attachment_status(allow_attached_environments)
-  .action(action, status)
+  .action(action, status, action_on_pass = action_on_pass)
 }
 
 #' @title Check session run time
@@ -263,6 +294,8 @@ check_attached_environments <- function(action = "warn", allow_attached_environm
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param max_sessiontime Maximum session time permitted in seconds before the checker 
 #' takes action
+#' @param action_on_pass Behavior to take if the status is clean. Possible values
+#' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
 #' @returns Invisibly returns an object of class `sessioncheck_status`. 
 #'  
@@ -273,11 +306,10 @@ check_attached_environments <- function(action = "warn", allow_attached_environm
 #' # and the threshold together, both in human-readable units
 #' check_sessiontime(action = "message", max_sessiontime = 0)
 #' 
-#' # a session comfortably within the threshold: a passing check is always
-#' # silent regardless of `action` (that argument only controls what
-#' # happens when a problem *is* found), so print() the returned status
-#' # directly to see the "no issues" wording
-#' print(check_sessiontime(action = "none", max_sessiontime = Inf))
+#' # a session comfortably within the threshold: `action` only controls
+#' # what happens when a problem *is* found, so use
+#' # `action_on_pass = "message"` to confirm the clean result instead
+#' check_sessiontime(action = "none", max_sessiontime = Inf, action_on_pass = "message")
 #' 
 #' @seealso 
 #' [check_attached_packages()],
@@ -289,11 +321,12 @@ check_attached_environments <- function(action = "warn", allow_attached_environm
 #' [check_required_sysenv()]
 #' 
 #' @export
-check_sessiontime <- function(action = "warn", max_sessiontime = NULL) {
+check_sessiontime <- function(action = "warn", max_sessiontime = NULL, action_on_pass = "none") {
   .validate_action(action)
+  .validate_action_on_pass(action_on_pass)
   .validate_tol(max_sessiontime)
   status <- .get_sessiontime_status(max_sessiontime)
-  .action(action, status)
+  .action(action, status, action_on_pass = action_on_pass)
 }
 
 #' @title Check required values for options
@@ -306,6 +339,8 @@ check_sessiontime <- function(action = "warn", max_sessiontime = NULL) {
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param required_options A named list of required options. If any of these options are 
 #' missing or have different values to the required values, an action is triggered.
+#' @param action_on_pass Behavior to take if the status is clean. Possible values
+#' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
 #' @returns Invisibly returns an object of class `sessioncheck_status`. 
 #'  
@@ -340,10 +375,14 @@ check_sessiontime <- function(action = "warn", max_sessiontime = NULL) {
 #' )
 #' options(old)
 #' 
-#' # a required option matching its current value: a passing check is
-#' # always silent regardless of `action`, so print() the returned status
-#' # directly to see the "no issues" wording
-#' print(check_required_options(action = "none", required_options = list(digits = getOption("digits"))))
+#' # a required option matching its current value: `action` only controls
+#' # what happens when a problem *is* found, so use
+#' # `action_on_pass = "message"` to confirm the clean result instead
+#' check_required_options(
+#'   action = "none",
+#'   required_options = list(digits = getOption("digits")),
+#'   action_on_pass = "message"
+#' )
 #' 
 #' @seealso 
 #' [check_attached_packages()],
@@ -355,11 +394,12 @@ check_sessiontime <- function(action = "warn", max_sessiontime = NULL) {
 #' [check_required_sysenv()]
 #' 
 #' @export
-check_required_options <- function(action = "warn", required_options = NULL) {
+check_required_options <- function(action = "warn", required_options = NULL, action_on_pass = "none") {
   .validate_action(action)
+  .validate_action_on_pass(action_on_pass)
   .validate_required(required_options)
   status <- .get_options_status(required_options)
-  .action(action, status)
+  .action(action, status, action_on_pass = action_on_pass)
 }
 
 #' @title Check required values for locale settings
@@ -372,6 +412,8 @@ check_required_options <- function(action = "warn", required_options = NULL) {
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param required_locale A named list of required locale settings. If any of these 
 #' are missing or have different values to the required values, an action is triggered.
+#' @param action_on_pass Behavior to take if the status is clean. Possible values
+#' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
 #' @returns Invisibly returns an object of class `sessioncheck_status`. 
 #'  
@@ -387,13 +429,14 @@ check_required_options <- function(action = "warn", required_options = NULL) {
 #' # mismatched-value case above
 #' check_required_locale(action = "message", required_locale = list(LC_MADEUP = "en_US.UTF-8"))
 #' 
-#' # a required locale setting matching its current value: a passing check
-#' # is always silent regardless of `action`, so print() the returned
-#' # status directly to see the "no issues" wording
-#' print(check_required_locale(
+#' # a required locale setting matching its current value: `action` only
+#' # controls what happens when a problem *is* found, so use
+#' # `action_on_pass = "message"` to confirm the clean result instead
+#' check_required_locale(
 #'   action = "none",
-#'   required_locale = list(LC_COLLATE = Sys.getlocale("LC_COLLATE"))
-#' ))
+#'   required_locale = list(LC_COLLATE = Sys.getlocale("LC_COLLATE")),
+#'   action_on_pass = "message"
+#' )
 #' 
 #' @seealso 
 #' [check_attached_packages()],
@@ -405,11 +448,12 @@ check_required_options <- function(action = "warn", required_options = NULL) {
 #' [check_required_sysenv()]
 #' 
 #' @export
-check_required_locale <- function(action = "warn", required_locale = NULL) {
+check_required_locale <- function(action = "warn", required_locale = NULL, action_on_pass = "none") {
   .validate_action(action)
+  .validate_action_on_pass(action_on_pass)
   .validate_required(required_locale)
   status <- .get_locale_status(required_locale)
-  .action(action, status)
+  .action(action, status, action_on_pass = action_on_pass)
 }
 
 #' @title Check required values for system environment variables
@@ -423,6 +467,8 @@ check_required_locale <- function(action = "warn", required_locale = NULL) {
 #' @param required_sysenv A named list of required system environment variables. 
 #' If any of these variables are missing or have different values to the required 
 #' values, an action is triggered.
+#' @param action_on_pass Behavior to take if the status is clean. Possible values
+#' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
 #' @returns Invisibly returns an object of class `sessioncheck_status`. 
 #'  
@@ -441,10 +487,14 @@ check_required_locale <- function(action = "warn", required_locale = NULL) {
 #'   required_sysenv = list(SESSIONCHECK_EXAMPLE_UNSET_VAR = "value")
 #' )
 #' 
-#' # a required variable matching its current value: a passing check is
-#' # always silent regardless of `action`, so print() the returned status
-#' # directly to see the "no issues" wording
-#' print(check_required_sysenv(action = "none", required_sysenv = list(R_HOME = Sys.getenv("R_HOME"))))
+#' # a required variable matching its current value: `action` only
+#' # controls what happens when a problem *is* found, so use
+#' # `action_on_pass = "message"` to confirm the clean result instead
+#' check_required_sysenv(
+#'   action = "none",
+#'   required_sysenv = list(R_HOME = Sys.getenv("R_HOME")),
+#'   action_on_pass = "message"
+#' )
 #' 
 #' @seealso 
 #' [check_attached_packages()],
@@ -456,11 +506,12 @@ check_required_locale <- function(action = "warn", required_locale = NULL) {
 #' [check_required_locale()]
 #' 
 #' @export
-check_required_sysenv <- function(action = "warn", required_sysenv = NULL) {
+check_required_sysenv <- function(action = "warn", required_sysenv = NULL, action_on_pass = "none") {
   .validate_action(action)
+  .validate_action_on_pass(action_on_pass)
   .validate_required(required_sysenv)
   status <- .get_sysenv_status(required_sysenv)
-  .action(action, status)
+  .action(action, status, action_on_pass = action_on_pass)
 }
 
 # status checkers: packages and namespaces ------
@@ -567,8 +618,7 @@ check_required_sysenv <- function(action = "warn", required_sysenv = NULL) {
   paste(symbol, prefix, txt)
 }
 
-.action <- function(action, status) {
-  if (action == "none") return(invisible(status)) 
+.action <- function(action, status, action_on_pass = "none") {
   if (inherits(status, "sessioncheck_status")) {
     is_ok <- !any(status$status)
   } else if (inherits(status, "sessioncheck_sessioncheck")) {
@@ -576,7 +626,14 @@ check_required_sysenv <- function(action = "warn", required_sysenv = NULL) {
   } else {
     stop("unexpected status class: ", paste(class(status), collapse = ", "), call. = FALSE)
   }
-  if (is_ok) return(invisible(status))
+  if (is_ok) {
+    # action_on_pass is orthogonal to `action`: it governs whether a clean
+    # status is confirmed, regardless of what `action` would have done on
+    # an unclean one (see #10)
+    if (identical(action_on_pass, "message")) message(format(status))
+    return(invisible(status))
+  }
+  if (action == "none") return(invisible(status))
   msg <- format(status)
   if (action == "message") {
     message(msg)
@@ -595,6 +652,7 @@ check_required_sysenv <- function(action = "warn", required_sysenv = NULL) {
   .validate_settings(opts_args)
   if (is.list(opts_args)) {
     if (is.null(args$action)) args$action <- opts_args$action
+    if (is.null(args$action_on_pass)) args$action_on_pass <- opts_args$action_on_pass
     if (is.null(args$checks)) args$checks <- opts_args$checks
     if (is.null(args$allow_globalenv_objects)) args$allow_globalenv_objects <- opts_args$allow_globalenv_objects
     if (is.null(args$allow_attached_packages)) args$allow_attached_packages <- opts_args$allow_attached_packages

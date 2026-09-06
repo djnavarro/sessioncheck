@@ -4,7 +4,11 @@
 \alias{check_attached_packages}
 \title{Check attached packages}
 \usage{
-check_attached_packages(action = "warn", allow_attached_packages = NULL)
+check_attached_packages(
+  action = "warn",
+  allow_attached_packages = NULL,
+  action_on_pass = "none"
+)
 }
 \arguments{
 \item{action}{Behavior to take if the status is not clean. Possible values are
@@ -12,6 +16,9 @@ check_attached_packages(action = "warn", allow_attached_packages = NULL)
 
 \item{allow_attached_packages}{Character vector containing names of packages that
 are "allowed", and will not trigger an action if attached to the search path.}
+
+\item{action_on_pass}{Behavior to take if the status is clean. Possible values
+are "message" and "none". The default is \code{action_on_pass = "none"}.}
 }
 \value{
 Invisibly returns an object of class \code{sessioncheck_status}.
@@ -30,10 +37,14 @@ packages that will not trigger actions.
 \examples{
 check_attached_packages(action = "message")
 
-# a session with no unexpected packages attached: a passing check is
-# always silent regardless of `action`, so print() the returned status
-# directly to see the "no issues" wording
-print(check_attached_packages(action = "none", allow_attached_packages = .packages()))
+# a session with no unexpected packages attached: `action` only controls
+# what happens when a problem *is* found, so use `action_on_pass = "message"`
+# to confirm the clean result instead
+check_attached_packages(
+  action = "none",
+  allow_attached_packages = .packages(),
+  action_on_pass = "message"
+)
  
 }
 \seealso{

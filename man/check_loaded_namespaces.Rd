@@ -4,7 +4,11 @@
 \alias{check_loaded_namespaces}
 \title{Check loaded namespaces}
 \usage{
-check_loaded_namespaces(action = "warn", allow_loaded_namespaces = NULL)
+check_loaded_namespaces(
+  action = "warn",
+  allow_loaded_namespaces = NULL,
+  action_on_pass = "none"
+)
 }
 \arguments{
 \item{action}{Behavior to take if the status is not clean. Possible values are
@@ -12,6 +16,9 @@ check_loaded_namespaces(action = "warn", allow_loaded_namespaces = NULL)
 
 \item{allow_loaded_namespaces}{Character vector containing names of packages that
 are "allowed", and will not trigger an action if loaded via namespace.}
+
+\item{action_on_pass}{Behavior to take if the status is clean. Possible values
+are "message" and "none". The default is \code{action_on_pass = "none"}.}
 }
 \value{
 Invisibly returns an object of class \code{sessioncheck_status}.
@@ -30,10 +37,14 @@ since the package namespace must be loaded in order to call the function.
 \examples{
 check_loaded_namespaces(action = "message")
 
-# a session with no unexpected namespaces loaded: a passing check is
-# always silent regardless of `action`, so print() the returned status
-# directly to see the "no issues" wording
-print(check_loaded_namespaces(action = "none", allow_loaded_namespaces = loadedNamespaces()))
+# a session with no unexpected namespaces loaded: `action` only controls
+# what happens when a problem *is* found, so use `action_on_pass = "message"`
+# to confirm the clean result instead
+check_loaded_namespaces(
+  action = "none",
+  allow_loaded_namespaces = loadedNamespaces(),
+  action_on_pass = "message"
+)
  
 }
 \seealso{
