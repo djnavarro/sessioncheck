@@ -155,11 +155,18 @@ remote metadata is available.
 
 The \code{globalenv} element is a data frame with one row per object in
 \code{.GlobalEnv} (including dot-prefixed objects), with columns \code{name},
-\code{class}, and \code{size} (in bytes, as reported by \code{\link[utils:object.size]{utils::object.size()}}). Only
-object names, classes, and sizes are captured, never values. Because a
-long-running script can accumulate many objects, the default display shows
-only the largest few (see "Selecting which elements are displayed"
-below); the captured object itself always holds every object.
+\code{class}, \code{size} (in bytes, as reported by \code{\link[utils:object.size]{utils::object.size()}}), and
+\code{hash} (an MD5 fingerprint of the object's serialized value, in the same
+spirit as \code{rng$seed_hash}: \code{\link[=serialize]{serialize()}} the object, then run
+\code{\link[tools:md5sum]{tools::md5sum()}} on the result). \code{hash} is \code{NA} when an object cannot be
+serialized at all (e.g. one holding an external pointer, such as a
+database connection) -- this is reported rather than silently treated as
+"unchanged" by anything comparing two snapshots. Only object names,
+classes, sizes, and value fingerprints are captured, never values
+themselves. Because a long-running script can accumulate many objects,
+the default display shows only the largest few, and omits \code{hash} (see
+"Selecting which elements are displayed" below); the captured object
+itself always holds every object and every column.
 }
 
 \section{Attachments}{

@@ -129,11 +129,18 @@
 #' @section Global environment:
 #' The `globalenv` element is a data frame with one row per object in
 #' `.GlobalEnv` (including dot-prefixed objects), with columns `name`,
-#' `class`, and `size` (in bytes, as reported by [utils::object.size()]). Only
-#' object names, classes, and sizes are captured, never values. Because a
-#' long-running script can accumulate many objects, the default display shows
-#' only the largest few (see "Selecting which elements are displayed"
-#' below); the captured object itself always holds every object.
+#' `class`, `size` (in bytes, as reported by [utils::object.size()]), and
+#' `hash` (an MD5 fingerprint of the object's serialized value, in the same
+#' spirit as `rng$seed_hash`: [serialize()] the object, then run
+#' [tools::md5sum()] on the result). `hash` is `NA` when an object cannot be
+#' serialized at all (e.g. one holding an external pointer, such as a
+#' database connection) -- this is reported rather than silently treated as
+#' "unchanged" by anything comparing two snapshots. Only object names,
+#' classes, sizes, and value fingerprints are captured, never values
+#' themselves. Because a long-running script can accumulate many objects,
+#' the default display shows only the largest few, and omits `hash` (see
+#' "Selecting which elements are displayed" below); the captured object
+#' itself always holds every object and every column.
 #'
 #' @section Attachments:
 #' The `attachments` element is a data frame with one row per entry on the
@@ -387,10 +394,40 @@ sessionstate <- function() {
     function(nm) as.numeric(utils::object.size(get(nm, envir = .GlobalEnv))),
     numeric(1L)
   )
-  df <- data.frame(name = objs, class = cls, size = size, stringsAsFactors = FALSE)
+  hash <- vapply(
+    objs,
+    function(nm) .hash_object(get(nm, envir = .GlobalEnv)),
+    character(1L)
+  )
+  df <- data.frame(name = objs, class = cls, size = size, hash = hash, stringsAsFactors = FALSE)
   df <- df[order(df$name), , drop = FALSE]
   rownames(df) <- NULL
   df
+}
+
+# fingerprints an arbitrary object's value via serialization, the same
+# technique .hash_random_seed() uses for .Random.seed. This lets a
+# comparison between two sessionstate() snapshots (see
+# compare_sessionstates()) detect that a global environment object's value
+# changed even when its class and size did not (e.g. a numeric vector whose
+# elements were modified in place). Returns NA when the object cannot be
+# serialized at all -- objects holding external pointers (e.g. database
+# connections, some R6/S4/xptr-backed objects) can error under serialize();
+# rather than letting that abort the whole snapshot, the failure is
+# recorded as "not verifiable" and left for the caller to decide how to
+# treat it
+.hash_object <- function(obj) {
+  tmp <- tempfile()
+  on.exit(unlink(tmp))
+  ok <- tryCatch(
+    {
+      writeBin(serialize(obj, connection = NULL), tmp)
+      TRUE
+    },
+    error = function(e) FALSE
+  )
+  if (!ok) return(NA_character_)
+  unname(tools::md5sum(tmp))
 }
 
 .get_search_path_info <- function() {

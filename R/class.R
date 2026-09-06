@@ -25,6 +25,17 @@ new_sessionstate <- function(platform, locale, matrix, document, machine, git, t
   )
 }
 
+new_sessionstatediff <- function(platform, locale, matrix, document, machine, git, timing, rng, libpaths, packages, globalenv, attachments) {
+  structure(
+    list(
+      platform = platform, locale = locale, matrix = matrix, document = document, machine = machine,
+      git = git, timing = timing, rng = rng, libpaths = libpaths, packages = packages,
+      globalenv = globalenv, attachments = attachments
+    ),
+    class = "sessioncheck_sessionstatediff"
+  )
+}
+
 
 # status message tables ------
 
@@ -69,7 +80,11 @@ new_sessionstate <- function(platform, locale, matrix, document, machine, git, t
 #' that report be filtered down to specific fields or columns per section.
 #'
 #' @param x An object of class `sessioncheck_status`, `sessioncheck_sessioncheck`,
-#' or `sessioncheck_sessionstate`
+#' `sessioncheck_sessionstate`, or `sessioncheck_sessionstatediff`
+#' @param changed_only For `sessioncheck_sessionstatediff` objects, whether to
+#' collapse sections/fields with no detected change down to a single "(no
+#' changes)" line (`TRUE`, the default) or always show every field. Ignored
+#' for other classes.
 #' @param platform For `sessioncheck_sessionstate` objects, an optional character
 #' vector selecting which platform fields to display (from `"version"`, `"os"`,
 #' `"system"`, `"ui"`, `"tz"`, `"date"`). Defaults to showing all fields.
@@ -110,7 +125,9 @@ new_sessionstate <- function(platform, locale, matrix, document, machine, git, t
 #' classes. See Details for how the default is resolved.
 #' @param globalenv For `sessioncheck_sessionstate` objects, an optional
 #' character vector selecting which global environment columns to display
-#' (from `"name"`, `"class"`, `"size"`). Defaults to showing all columns.
+#' (from `"name"`, `"class"`, `"size"`, `"hash"`). Defaults to
+#' `c("name", "class", "size")` (omitting `"hash"`, a long fingerprint
+#' mainly useful programmatically -- see [compare_sessionstates()]).
 #' Ignored for other classes. See Details for how the default is resolved,
 #' and for how `globalenv_n` separately controls the number of rows shown.
 #' @param globalenv_n For `sessioncheck_sessionstate` objects, an optional
@@ -139,7 +156,8 @@ new_sessionstate <- function(platform, locale, matrix, document, machine, git, t
 #' (respectively); if neither is set, a
 #' built-in default is used (showing every field/column, except for
 #' `packages`, which defaults to
-#' `c("package", "attached", "loaded_version", "source")`, and
+#' `c("package", "attached", "loaded_version", "source")`,
+#' `globalenv`, which defaults to `c("name", "class", "size")`, and
 #' `globalenv_n`, which defaults to `10`). This selection only affects what
 #' is displayed; it never changes the underlying object, so
 #' [`as.data.frame()`][coercion_methods] always returns the full package
