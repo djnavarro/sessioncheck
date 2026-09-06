@@ -83,6 +83,8 @@ Several things are always allowed regardless of user configuration:
 
 When asked to add a new `check_*()` function, load the `add-check-function` skill. It contains a step-by-step recipe covering which files to change, in what order, with code templates matching the existing patterns.
 
+When adding or editing a `NEWS.md` entry, load the `write-news-entries` skill. It covers keeping entries short and user-facing, and scoping them to changes since the last CRAN release.
+
 ## Do Not Touch Without Explicit Instruction
 
 ### Auto-generated files — never edit directly
