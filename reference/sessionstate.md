@@ -178,7 +178,7 @@ sessionstate()
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
-#> • date                2026-09-05
+#> • date                2026-09-06
 #> 
 #> ─ Locale ───────────────────────────────────────────────────────────────────────
 #> • language            en-US
@@ -199,12 +199,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/docs/reference
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          90a8e825c707ab48189dfbf16a7728e62c8c5734
+#> • commit sha          7a507a68ef8e8010ff48f4428b01bf77bf138462
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-05 14:38:07 UTC
-#> • session uptime      7.363 sec
+#> • captured at         2026-09-06 04:52:58 UTC
+#> • session uptime      8.537 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister

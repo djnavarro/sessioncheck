@@ -101,7 +101,7 @@ sessioninfo::session_info()
 #>  collate  C.UTF-8
 #>  ctype    C.UTF-8
 #>  tz       UTC
-#>  date     2026-09-05
+#>  date     2026-09-06
 #>  pandoc   3.8.3 @ /opt/hostedtoolcache/pandoc/3.8.3/x64/ (via rmarkdown)
 #>  quarto   NA
 #> 
@@ -127,7 +127,7 @@ sessioninfo::session_info()
 #>  rlang          1.3.0      2026-07-05 [1] RSPM
 #>  rmarkdown      2.32       2026-09-01 [1] RSPM
 #>  sass           0.4.10     2025-04-11 [1] RSPM
-#>  sessioncheck * 0.1.1.9000 2026-09-05 [1] local
+#>  sessioncheck * 0.1.1.9000 2026-09-06 [1] local
 #>  sessioninfo    1.2.4      2026-06-04 [1] RSPM
 #>  systemfonts    1.3.2      2026-03-05 [1] RSPM
 #>  textshaping    1.0.5      2026-03-06 [1] RSPM
@@ -151,7 +151,7 @@ sessionstate()
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
-#> • date                2026-09-05
+#> • date                2026-09-06
 #> 
 #> ─ Locale ───────────────────────────────────────────────────────────────────────
 #> • language            en-US
@@ -172,12 +172,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          90a8e825c707ab48189dfbf16a7728e62c8c5734
+#> • commit sha          7a507a68ef8e8010ff48f4428b01bf77bf138462
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-05 14:38:18 UTC
-#> • session uptime      1.017 sec
+#> • captured at         2026-09-06 04:53:10 UTC
+#> • session uptime      1.105 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -361,7 +361,7 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
-#> • date                2026-09-05
+#> • date                2026-09-06
 #> 
 #> ─ Locale ───────────────────────────────────────────────────────────────────────
 #> • language            en-US
@@ -379,12 +379,12 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          90a8e825c707ab48189dfbf16a7728e62c8c5734
+#> • commit sha          7a507a68ef8e8010ff48f4428b01bf77bf138462
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-05 14:38:18 UTC
-#> • session uptime      1.141 sec
+#> • captured at         2026-09-06 04:53:10 UTC
+#> • session uptime      1.232 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
