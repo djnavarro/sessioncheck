@@ -52,4 +52,4 @@ In addition to providing tools to check the session state (most useful at the st
 sessioncheck::sessionstate()
 ```
 
-The `sessionstate()` function is similar in spirit to session information functions provided by base R and other packages. For details on the similarities and differences between them see the [session state reporting](https://sessioncheck.djnavarro.net/articles/sessionstate-reporting.html) page.
+The `sessionstate()` function is similar in spirit to session information functions provided by base R and other packages. For details on the similarities and differences between them see the [session state reporting](https://sessioncheck.djnavarro.net/articles/sessionstate-reporting.html) page. 

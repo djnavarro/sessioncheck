@@ -84,12 +84,12 @@ sessioncheck::sessionstate()
 #> • working directory   /home/danielle/GitHub/djnavarro/sessioncheck
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          e5d60a0884bc4d3a92863080e2d54bdcce5026f5
+#> • commit sha          4df7fe576c7dbfad3ddff681c88c962629a8f913
 #> • dirty               TRUE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-06 00:08:21 AEST
-#> • session uptime      0.389 sec
+#> • captured at         2026-09-06 15:17:06 AEST
+#> • session uptime      0.404 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -98,7 +98,7 @@ sessioncheck::sessionstate()
 #> • seed hash           (not set)
 #> 
 #> ─ Library paths [n = 5] ────────────────────────────────────────────────────────
-#> • /tmp/Rtmp48mZ74/temp_libpath84f3535a57f22
+#> • /tmp/RtmpNAlKWN/temp_libpath8c27a1b4d6b90
 #> • /home/danielle/R/x86_64-pc-linux-gnu-library/4.6
 #> • /usr/local/lib/R/site-library
 #> • /usr/lib/R/site-library
