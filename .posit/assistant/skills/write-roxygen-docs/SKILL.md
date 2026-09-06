@@ -70,6 +70,13 @@ Match documentation density to how novel the content actually is:
   it into markdown headings or `@section` blocks, one per sub-topic, instead
   of one long unbroken block of paragraphs. A reader looking for one specific
   fact shouldn't have to read the whole section serially to find it.
+- `@section` titles must be capitalized (R Core's own
+  [Rd file guidelines](https://developer.r-project.org/Rds.html) state this
+  explicitly for both `\title` and `\section` titles). Don't just reuse a
+  lowercase identifier (e.g. a returned list element's name) verbatim as a
+  heading -- prefer a short, readable capitalized phrase (e.g. "Library
+  paths" rather than "libpaths"), and refer to the actual identifier in the
+  body text instead, in backticks.
 
 ## Keep it user-facing
 
@@ -112,6 +119,8 @@ skill), and a couple of sessioncheck-specific ones:
       not filler to make the section non-empty.
 - [ ] If `@details` covers more than three or four sub-topics, it's broken
       into headings/`@section`s rather than left as one long block.
+- [ ] Every `@section` title is capitalized, and reads as a short phrase
+      rather than a bare lowercase identifier copied from the code.
 - [ ] Every `@param` states the default where one exists, and enumerates
       fixed value sets.
 - [ ] `@returns` is present and names the concrete class returned.

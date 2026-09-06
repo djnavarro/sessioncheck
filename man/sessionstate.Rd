@@ -22,7 +22,55 @@ typically called at the \emph{start} of a script to check for a clean session,
 \code{sessionstate()} is intended to be called at the \emph{end} of a script to
 produce an audit log of the environment the script actually ran in.
 }
-\details{
+\section{Platform}{
+
+The \code{platform} element records \code{version} (the running R version, via
+\code{R.version.string}), \code{os} (the operating system, preferring
+\code{\link[utils:osVersion]{utils::osVersion()}} when available and falling back to \code{\link[=Sys.info]{Sys.info()}}),
+\code{system} (the R build's \code{R.version$system}), \code{ui} (the interface running
+the session -- \code{"non-interactive"} when \code{\link[=interactive]{interactive()}} is \code{FALSE},
+otherwise the frontend reported by \code{.Platform$GUI}, e.g. \code{"RStudio"} or
+\code{"Positron"}), \code{tz} (the session timezone via \code{\link[=Sys.timezone]{Sys.timezone()}}), and
+\code{date} (the capture date).
+}
+
+\section{Locale}{
+
+The \code{locale} element records \code{language}, \code{collate}, and \code{ctype}. These
+are split out from \code{platform} because they describe how text and dates
+are formatted for this session, rather than what/where/when the session
+is running.
+}
+
+\section{Matrix}{
+
+The \code{matrix} element records \code{blas} and \code{lapack}, the shared libraries
+backing R's linear algebra routines (as reported by
+\code{\link[=extSoftVersion]{extSoftVersion()}} and \code{\link[=La_library]{La_library()}}). Like \code{locale}, this is split out
+from \code{platform} -- in this case mirroring how base R's
+\code{\link[utils:sessionInfo]{utils::sessionInfo()}} treats "Matrix products" as its own block rather
+than nesting it under platform info.
+}
+
+\section{Document}{
+
+The \code{document} element's \code{pandoc} and \code{quarto} fields record the versions
+of those two document-rendering tools, if found (\code{NA} otherwise). Both
+checks prefer the IDE-provided location over whatever happens to be on
+\code{PATH} (\code{RSTUDIO_PANDOC} for pandoc, \code{QUARTO_PATH} for quarto), since
+RStudio/Positron bundle their own copies that may differ from a
+separately installed one. Deliberately not tracked: other system
+dependencies (e.g. LaTeX, Hugo, spatial libraries) are package-specific
+rather than session-wide, and tracking them well would mean tracking
+many of them; \code{pandoc}/\code{quarto} are included because they, like
+BLAS/LAPACK, are already tracked by \code{\link[utils:sessionInfo]{utils::sessionInfo()}} or
+\code{\link[sessioninfo:session_info]{sessioninfo::session_info()}}. \code{document} has no \code{sessionInfo()}
+precedent (unlike \code{matrix}), but is grouped the same way for
+consistency.
+}
+
+\section{Machine}{
+
 The \code{machine} element includes the node name and user reported by
 \code{\link[=Sys.info]{Sys.info()}}, along with the working directory reported by \code{\link[=getwd]{getwd()}} at
 capture time (\code{cwd}) -- useful for a reproducibility audit since relative
@@ -32,6 +80,9 @@ directory structure, be mindful about where \code{sessionstate()} output is
 stored or shared. The same caution applies to the \code{ondisk_path}/
 \code{loaded_path} columns of \code{packages}, since library paths often embed a
 home directory.
+}
+
+\section{Git}{
 
 The \code{git} element records \code{sha}, the current commit
 (\verb{git rev-parse HEAD}, run in the working directory captured as
@@ -42,6 +93,18 @@ isn't installed. This is arguably the single most useful field for
 reproducing a script's output later: \code{sha} identifies exactly which
 version of the code ran, and \code{dirty} flags whether that identification is
 trustworthy (a \code{TRUE} means the code that ran may not match any commit).
+}
+
+\section{Timing}{
+
+The \code{timing} element records \code{captured_at}, the capture time reported by
+\code{\link[=Sys.time]{Sys.time()}}, and \code{elapsed_sec}, the session's elapsed run time in
+seconds (the \code{"elapsed"} component of \code{proc.time()}). Together they let
+an audit log show both when a snapshot was taken and how long the
+session had already been running at that point.
+}
+
+\section{RNG}{
 
 The \code{rng} element records \code{\link[=RNGkind]{RNGkind()}} (as \code{kind}, \code{normal_kind}, and
 \code{sample_kind}) together with \code{seed_hash}, an MD5 fingerprint of
@@ -55,6 +118,9 @@ printing the seed itself: for example, comparing \code{seed_hash} between two
 rendered versions of the same Quarto/R Markdown document shows whether
 an edit changed the RNG state anywhere upstream, without having to
 inspect or store the (long, not directly meaningful) seed value.
+}
+
+\section{Library paths}{
 
 The \code{libpaths} element is the character vector returned by \code{\link[=.libPaths]{.libPaths()}},
 i.e. the library locations R searches, in search order. It complements
@@ -65,6 +131,9 @@ personal one. Unlike the other elements, there is no corresponding
 display-filtering argument for \code{libpaths}, since it is already a flat
 list of paths rather than a set of named fields or columns to choose
 among; it is always shown in full.
+}
+
+\section{Packages}{
 
 The \code{packages} element covers every package that is either attached to
 the search path or loaded via namespace (i.e., \code{union(.packages(), loadedNamespaces())}). It has columns \code{package}, \code{attached},
@@ -80,46 +149,29 @@ when the namespace is loaded but no longer found on disk at all), and
 \code{source}, which classifies each package as \code{"base"}, \code{"CRAN (R x.y.z)"},
 \code{"Github (user/repo@sha)"}, another remote type, or \code{"local"} when no
 remote metadata is available.
+}
+
+\section{Global environment}{
 
 The \code{globalenv} element is a data frame with one row per object in
 \code{.GlobalEnv} (including dot-prefixed objects), with columns \code{name},
 \code{class}, and \code{size} (in bytes, as reported by \code{\link[utils:object.size]{utils::object.size()}}). Only
 object names, classes, and sizes are captured, never values. Because a
 long-running script can accumulate many objects, the default display shows
-only the largest few (see below); the captured object itself always holds
-every object.
+only the largest few (see "Selecting which elements are displayed"
+below); the captured object itself always holds every object.
+}
 
-The \code{locale} element records \code{language}, \code{collate}, and \code{ctype}. These
-are split out from \code{platform} because they describe how text and dates
-are formatted for this session, rather than what/where/when the session
-is running.
-
-The \code{matrix} element records \code{blas} and \code{lapack}, the shared libraries
-backing R's linear algebra routines (as reported by
-\code{\link[=extSoftVersion]{extSoftVersion()}} and \code{\link[=La_library]{La_library()}}). Like \code{locale}, this is split out
-from \code{platform} -- in this case mirroring how base R's
-\code{\link[utils:sessionInfo]{utils::sessionInfo()}} treats "Matrix products" as its own block rather
-than nesting it under platform info.
-
-The \code{document} element's \code{pandoc} and \code{quarto} fields record the versions
-of those two document-rendering tools, if found (\code{NA} otherwise). Both
-checks prefer the IDE-provided location over whatever happens to be on
-\code{PATH} (\code{RSTUDIO_PANDOC} for pandoc, \code{QUARTO_PATH} for quarto), since
-RStudio/Positron bundle their own copies that may differ from a
-separately installed one. Deliberately not tracked: other system
-dependencies (e.g. LaTeX, Hugo, spatial libraries) are package-specific
-rather than session-wide, and tracking them well would mean tracking
-many of them; \code{pandoc}/\code{quarto} are included because they, like
-BLAS/LAPACK, are already tracked by \code{\link[utils:sessionInfo]{utils::sessionInfo()}} or
-\code{\link[sessioninfo:session_info]{sessioninfo::session_info()}}. \code{document} has no \code{sessionInfo()}
-precedent (unlike \code{matrix}), but is grouped the same way for
-consistency.
+\section{Attachments}{
 
 The \code{attachments} element is a data frame with one row per entry on the
 search path (as returned by \code{\link[=search]{search()}}), with columns \code{name} and \code{type}
 (\code{"package"} or \code{"other"}). This surfaces non-package attachments (e.g.
 \code{tools:rstudio}, or environments added via \code{\link[=attach]{attach()}}) that aren't
 reflected in \code{packages}.
+}
+
+\section{Selecting which elements are displayed}{
 
 \code{sessionstate()} itself always captures every field in full (\code{globalenv}
 is never truncated at capture time). To display only a subset when
@@ -137,6 +189,7 @@ Separately, \code{as.data.frame()} returns one of the three tables captured by
 its \code{which} argument); see \link{coercion_methods} for why this coercion,
 unlike the one for \code{\link[=sessioncheck]{sessioncheck()}}, cannot be lossless.
 }
+
 \examples{
 sessionstate()
 
