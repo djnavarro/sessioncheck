@@ -8,7 +8,7 @@
 - Messaging for `sessioncheck()` and the individual `check_*()` functions is more
   informative and more consistent across checkers, including a clearer distinction
   between "missing" and "mismatched" for the options/locale/sysenv checks, and a
-  dedicated message for `check_sessiontime()`.
+  dedicated message for `check_sessiontime()` (#5).
 
 ## New features
 
@@ -24,6 +24,14 @@
   `sessioninfo::session_info()`. Returns an object of class
   `sessioncheck_sessionstate` with `format()`, `print()`, and
   `as.data.frame()` methods.
+
+## Bug fixes
+
+- Fixed `.get_locale_list()` (used by `check_required_locale()`) to handle the
+  case where `Sys.getlocale()` returns a single unprefixed value instead of the
+  usual `"CATEGORY=value;..."` format, which happens when every locale category
+  shares the same setting. Previously this caused every requested category to
+  be misreported as missing.
 
 # sessioncheck 0.1.1
 
