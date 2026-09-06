@@ -2,6 +2,7 @@
 % Please edit documentation in R/class.R, R/sessionstate-format.R
 \name{display_methods}
 \alias{display_methods}
+\alias{.status_prefix}
 \alias{format.sessioncheck_status}
 \alias{format.sessioncheck_sessioncheck}
 \alias{print.sessioncheck_status}
@@ -10,6 +11,8 @@
 \alias{print.sessioncheck_sessionstate}
 \title{Format and print sessioncheck objects}
 \usage{
+.status_prefix
+
 \method{format}{sessioncheck_status}(x, ...)
 
 \method{format}{sessioncheck_sessioncheck}(x, ...)

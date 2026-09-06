@@ -29,6 +29,14 @@ For example, \code{.Random.seed} and \code{.Last.value} do not trigger actions b
 }
 \examples{
 check_globalenv_objects(action = "message")
+
+# a session with no unexpected objects in the global environment: a
+# passing check is always silent regardless of `action`, so print() the
+# returned status directly to see the "no issues" wording
+print(check_globalenv_objects(
+  action = "none",
+  allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE)
+))
  
 }
 \seealso{

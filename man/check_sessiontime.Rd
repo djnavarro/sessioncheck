@@ -23,6 +23,16 @@ Session checkers can produce errors, warnings, or messages if requested.
 \examples{
 check_sessiontime(action = "message")
 
+# a session that has run past the threshold: reports the elapsed time
+# and the threshold together, both in human-readable units
+check_sessiontime(action = "message", max_sessiontime = 0)
+
+# a session comfortably within the threshold: a passing check is always
+# silent regardless of `action` (that argument only controls what
+# happens when a problem *is* found), so print() the returned status
+# directly to see the "no issues" wording
+print(check_sessiontime(action = "none", max_sessiontime = Inf))
+
 }
 \seealso{
 \code{\link[=check_attached_packages]{check_attached_packages()}},

@@ -309,10 +309,148 @@ test_that(".colored_symbol() returns a plain symbol when ansi is disabled", {
 test_that(".get_xiny_status() returns expected integer status", {
   x <- list(a = 1L, b = 2L, c = 3L)
   y <- list(a = 1L, b = "", d = 3L)
-  expect_equal(
-    .get_xiny_status(x, y),
-    c(a = FALSE, b = TRUE, c = TRUE)
+  status <- .get_xiny_status(x, y)
+  attributes(status)[c("expected", "actual", "present")] <- NULL
+  expect_equal(status, c(a = FALSE, b = TRUE, c = TRUE))
+})
+
+test_that(".get_xiny_status() attaches expected/actual/present detail (#5)", {
+  x <- list(a = 1L, b = 2L, c = 3L)
+  y <- list(a = 1L, b = "", d = 3L)
+  status <- .get_xiny_status(x, y)
+
+  expect_equal(attr(status, "expected"), x)
+  expect_equal(attr(status, "actual"), list(a = 1L, b = "", c = NULL))
+  expect_equal(attr(status, "present"), c(a = TRUE, b = TRUE, c = FALSE))
+})
+
+test_that(".message_text_detail() distinguishes missing from mismatched entries", {
+  status <- .get_xiny_status(
+    x = list(scipen = 5L, OutDec = "."),
+    y = list(scipen = 0L)
   )
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_detail("Unexpected options:", status)
+
+  expect_match(msg, "scipen: expected 5, got 0", fixed = TRUE)
+  expect_match(msg, "OutDec: missing (expected .)", fixed = TRUE)
+})
+
+test_that(".message_text_detail() reports no issues when nothing is flagged", {
+  status <- .get_xiny_status(x = list(scipen = 0L), y = list(scipen = 0L))
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  expect_equal(.message_text_detail("Unexpected options:", status), "v Unexpected options: [no issues detected]")
+})
+
+test_that(".message_text_detail() truncates long lists like .message_text()", {
+  x <- list(a = 1L, b = 2L, c = 3L, d = 4L, e = 5L)
+  status <- .get_xiny_status(x, y = list())
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_detail("Unexpected options:", status, max_len = 2L)
+
+  expect_match(msg, "a: missing", fixed = TRUE)
+  expect_match(msg, "b: missing", fixed = TRUE)
+  expect_match(msg, "... and 3 more", fixed = TRUE)
+  expect_no_match(msg, "c: missing")
+})
+
+test_that(".format_compare_value() truncates long atomic vectors instead of printing every element", {
+  expect_equal(.format_compare_value(1L), "1")
+  expect_equal(.format_compare_value(c(1L, 2L, 3L)), "c(1, 2, 3)")
+  expect_equal(
+    .format_compare_value(1:5000),
+    paste0("c(", paste(1:5, collapse = ", "), ", ... [5000 total])")
+  )
+  expect_equal(.format_compare_value(1:5), "c(1, 2, 3, 4, 5)")  # exactly at max_elements: no truncation marker
+})
+
+test_that(".format_compare_value() distinguishes same-class non-atomic values by role rather than printing identical placeholders", {
+  expect_equal(.format_compare_value(list(a = 1), role = "expected"), "user-supplied <list>")
+  expect_equal(.format_compare_value(list(a = 1), role = "actual"), "a different <list>")
+  expect_equal(.format_compare_value(data.frame(x = 1), role = "expected"), "user-supplied <data.frame>")
+  expect_equal(.format_compare_value(data.frame(x = 1), role = "actual"), "a different <data.frame>")
+})
+
+test_that(".format_compare_value() still reports NULL and scalar values plainly", {
+  expect_equal(.format_compare_value(NULL), "NULL")
+  expect_equal(.format_compare_value("x"), "x")
+  expect_equal(.format_compare_value(TRUE), "TRUE")
+})
+
+test_that(".message_text_detail() reports a truncated summary for a long atomic vector value (#5 follow-up)", {
+  status <- .get_xiny_status(x = list(scipen = 1:5000), y = list(scipen = 0L))
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_detail("Unexpected options:", status)
+
+  expect_match(msg, "... [5000 total]", fixed = TRUE)
+  expect_no_match(msg, "1000, 1001", fixed = TRUE)
+})
+
+test_that(".message_text_detail() distinguishes mismatched non-atomic values of the same class (#5 follow-up)", {
+  status <- .get_xiny_status(x = list(myopt = list(a = 1)), y = list(myopt = list(b = 2)))
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_detail("Unexpected options:", status)
+
+  expect_match(msg, "myopt: expected user-supplied <list>, got a different <list>", fixed = TRUE)
+})
+
+test_that(".message_text_detail() falls back to .message_text() without detail attributes", {
+  status <- c(a = FALSE, b = TRUE, c = TRUE, d = TRUE)
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  expect_equal(.message_text_detail("hi", status, 5L), .message_text("hi", status, 5L))
+})
+
+test_that(".format_duration() auto-selects units the way difftime() does", {
+  expect_equal(.format_duration(30), "30 secs")
+  expect_equal(.format_duration(59.999), "60 secs")
+  expect_equal(.format_duration(90), "1.5 mins")
+  expect_equal(.format_duration(5400), "1.5 hours")
+  expect_equal(.format_duration(9603.8), "2.67 hours")
+  expect_equal(.format_duration(172800), "2 days")
+})
+
+test_that(".message_text_sessiontime() reports elapsed vs. threshold with pretty units when exceeded", {
+  status <- TRUE
+  attr(status, "elapsed") <- 9603.8
+  attr(status, "threshold") <- 300
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_sessiontime(status, "Session runtime exceeded:", "Session runtime within limits")
+
+  expect_equal(msg, "x Session runtime (2.67 hours) exceeds threshold of 5 mins")
+})
+
+test_that(".message_text_sessiontime() reports elapsed vs. threshold with pretty units when within limits", {
+  status <- FALSE
+  attr(status, "elapsed") <- 42
+  attr(status, "threshold") <- 300
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_sessiontime(status, "Session runtime exceeded:", "Session runtime within limits")
+
+  expect_equal(msg, "v Session runtime (42 secs) below threshold of 5 mins")
+})
+
+test_that(".message_text_sessiontime() falls back to .message_text() without elapsed/threshold attributes", {
+  status <- c(x = TRUE)
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  expect_equal(
+    .message_text_sessiontime(status, "Session runtime exceeded:", "Session runtime within limits"),
+    .message_text("Session runtime exceeded:", status, clean_message = "Session runtime within limits")
+  )
+})
+
+test_that(".get_sessiontime_status() attaches elapsed/threshold attributes usable by .message_text_sessiontime()", {
+  status <- .get_sessiontime_status(tol = Inf)$status
+  expect_type(attr(status, "elapsed"), "double")
+  expect_equal(attr(status, "threshold"), Inf)
 })
 
 test_that(".session_snapshot works", {

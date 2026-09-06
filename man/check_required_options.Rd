@@ -23,6 +23,39 @@ Session checkers can produce errors, warnings, or messages if requested.
 \examples{
 check_required_options(action = "message", required_options = list(scipen = 0L, max.print = 50L))
 
+# a required option that is present, but has a different value: reports
+# the expected and actual values
+old <- options(scipen = 0L)
+check_required_options(action = "message", required_options = list(scipen = 100L))
+options(old)
+
+# a required option that is not set at all: reported as missing, rather
+# than lumped in with the mismatched-value case above
+check_required_options(
+  action = "message",
+  required_options = list(a_totally_unset_option = TRUE)
+)
+
+# a long vector value is summarized rather than printed in full
+old <- options(scipen = 0L)
+check_required_options(action = "message", required_options = list(scipen = 1:5000))
+options(old)
+
+# non-atomic values (e.g. lists) are described by role -- "user-supplied"
+# vs. "a different" -- rather than by content, since two unequal lists
+# would otherwise both print as the uninformative "<list>"
+old <- options(sessioncheck_example = list(a = 1))
+check_required_options(
+  action = "message",
+  required_options = list(sessioncheck_example = list(b = 2))
+)
+options(old)
+
+# a required option matching its current value: a passing check is
+# always silent regardless of `action`, so print() the returned status
+# directly to see the "no issues" wording
+print(check_required_options(action = "none", required_options = list(digits = getOption("digits"))))
+
 }
 \seealso{
 \code{\link[=check_attached_packages]{check_attached_packages()}},

@@ -5,9 +5,11 @@ test_that("session checkers call the correct internal function", {
   expect_equal(check_globalenv_objects("none"), .get_globalenv_status(NULL))
   expect_equal(check_loaded_namespaces("none"), .get_namespace_status(NULL))
   expect_equal(check_attached_packages("none"), .get_package_status(NULL))
-  expect_equal( # names won't be the same
-    unname(check_sessiontime("none")$status), 
-    unname(.get_sessiontime_status(NULL)$status)
+  expect_equal( # names/elapsed/threshold attributes differ between the two
+    # independent .get_sessiontime_status() calls (real elapsed time
+    # varies), so compare only the bare TRUE/FALSE value
+    as.logical(check_sessiontime("none")$status),
+    as.logical(.get_sessiontime_status(NULL)$status)
   )
   expect_equal(check_required_options("none"), .get_options_status(NULL))
   expect_equal(check_required_sysenv("none"), .get_sysenv_status(NULL))
@@ -92,10 +94,17 @@ test_that("sessioncheck `checks` argument returns expected results", {
     required_sysenv = sysenv_check 
   )
 
+  # .get_options_status()/.get_sysenv_status() now attach expected/actual/
+  # present detail attributes (see #5) that aren't relevant to this test
+  options_status <- res$options$status
+  attributes(options_status)[c("expected", "actual", "present")] <- NULL
+  sysenv_status <- res$sysenv$status
+  attributes(sysenv_status)[c("expected", "actual", "present")] <- NULL
+
   expect_equal(res$sessiontime$status, sessiontime_res)
-  expect_equal(res$options$status, opts_res)
+  expect_equal(options_status, opts_res)
   expect_equal(res$locale, mock_locale_status)
-  expect_equal(res$sysenv$status, sysenv_res)
+  expect_equal(sysenv_status, sysenv_res)
 }
 )
 

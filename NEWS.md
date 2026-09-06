@@ -5,6 +5,11 @@
 - Formatted output (from `print()`, `format()`, and messages/warnings raised by
   `action = "message"`/`"warn"`) is now nicer to read, with a cli-like style.
 
+- Messaging for `sessioncheck()` and the individual `check_*()` functions is more
+  informative and more consistent across checkers, including a clearer distinction
+  between "missing" and "mismatched" for the options/locale/sysenv checks, and a
+  dedicated message for `check_sessiontime()`.
+
 ## New features
 
 - Added `sessionstate()`, a companion to `sessioncheck()` intended for use at

@@ -18,6 +18,17 @@
 #'  
 #' @examples
 #' sessioncheck(action = "message")
+#' 
+#' # a session with nothing flagged by the default checks: like every
+#' # check_*() function, a passing check is silent regardless of `action`
+#' # (that argument only controls what happens when a problem *is* found),
+#' # so print() the returned status directly to see the "no issues" wording
+#' print(sessioncheck(
+#'   action = "none",
+#'   allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE),
+#'   allow_attached_packages = .packages(),
+#'   allow_attached_environments = search()
+#' ))
 #'  
 #' @details
 #' `sessioncheck()` allows the user to apply multiple session checks in a single function. 
@@ -72,6 +83,11 @@ sessioncheck <- function(
 #'  
 #' @examples
 #' check_attached_packages(action = "message")
+#' 
+#' # a session with no unexpected packages attached: a passing check is
+#' # always silent regardless of `action`, so print() the returned status
+#' # directly to see the "no issues" wording
+#' print(check_attached_packages(action = "none", allow_attached_packages = .packages()))
 #'  
 #' @details
 #' This checker inspects the list of packages that have been
@@ -113,6 +129,11 @@ check_attached_packages <- function(action = "warn", allow_attached_packages = N
 #'  
 #' @examples
 #' check_loaded_namespaces(action = "message")
+#' 
+#' # a session with no unexpected namespaces loaded: a passing check is
+#' # always silent regardless of `action`, so print() the returned status
+#' # directly to see the "no issues" wording
+#' print(check_loaded_namespaces(action = "none", allow_loaded_namespaces = loadedNamespaces()))
 #'  
 #' @details
 #' This checker inspects the list of loaded namespaces 
@@ -154,6 +175,14 @@ check_loaded_namespaces <- function(action = "warn", allow_loaded_namespaces = N
 #'  
 #' @examples
 #' check_globalenv_objects(action = "message")
+#' 
+#' # a session with no unexpected objects in the global environment: a
+#' # passing check is always silent regardless of `action`, so print() the
+#' # returned status directly to see the "no issues" wording
+#' print(check_globalenv_objects(
+#'   action = "none",
+#'   allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE)
+#' ))
 #'  
 #' @details
 #' This checker inspects the state of the global environment and takes action based 
@@ -193,6 +222,11 @@ check_globalenv_objects <- function(action = "warn", allow_globalenv_objects = N
 #'  
 #' @examples
 #' check_attached_environments(action = "message")
+#' 
+#' # a session with no unexpected environments attached: a passing check
+#' # is always silent regardless of `action`, so print() the returned
+#' # status directly to see the "no issues" wording
+#' print(check_attached_environments(action = "none", allow_attached_environments = search()))
 #'  
 #' @details
 #' This checker inspects all environments on the search path. This includes attached 
@@ -235,6 +269,16 @@ check_attached_environments <- function(action = "warn", allow_attached_environm
 #' @examples
 #' check_sessiontime(action = "message")
 #' 
+#' # a session that has run past the threshold: reports the elapsed time
+#' # and the threshold together, both in human-readable units
+#' check_sessiontime(action = "message", max_sessiontime = 0)
+#' 
+#' # a session comfortably within the threshold: a passing check is always
+#' # silent regardless of `action` (that argument only controls what
+#' # happens when a problem *is* found), so print() the returned status
+#' # directly to see the "no issues" wording
+#' print(check_sessiontime(action = "none", max_sessiontime = Inf))
+#' 
 #' @seealso 
 #' [check_attached_packages()],
 #' [check_loaded_namespaces()],
@@ -267,6 +311,39 @@ check_sessiontime <- function(action = "warn", max_sessiontime = NULL) {
 #'  
 #' @examples
 #' check_required_options(action = "message", required_options = list(scipen = 0L, max.print = 50L))
+#' 
+#' # a required option that is present, but has a different value: reports
+#' # the expected and actual values
+#' old <- options(scipen = 0L)
+#' check_required_options(action = "message", required_options = list(scipen = 100L))
+#' options(old)
+#' 
+#' # a required option that is not set at all: reported as missing, rather
+#' # than lumped in with the mismatched-value case above
+#' check_required_options(
+#'   action = "message",
+#'   required_options = list(a_totally_unset_option = TRUE)
+#' )
+#' 
+#' # a long vector value is summarized rather than printed in full
+#' old <- options(scipen = 0L)
+#' check_required_options(action = "message", required_options = list(scipen = 1:5000))
+#' options(old)
+#' 
+#' # non-atomic values (e.g. lists) are described by role -- "user-supplied"
+#' # vs. "a different" -- rather than by content, since two unequal lists
+#' # would otherwise both print as the uninformative "<list>"
+#' old <- options(sessioncheck_example = list(a = 1))
+#' check_required_options(
+#'   action = "message",
+#'   required_options = list(sessioncheck_example = list(b = 2))
+#' )
+#' options(old)
+#' 
+#' # a required option matching its current value: a passing check is
+#' # always silent regardless of `action`, so print() the returned status
+#' # directly to see the "no issues" wording
+#' print(check_required_options(action = "none", required_options = list(digits = getOption("digits"))))
 #' 
 #' @seealso 
 #' [check_attached_packages()],
@@ -301,6 +378,23 @@ check_required_options <- function(action = "warn", required_options = NULL) {
 #' @examples
 #' check_required_locale(action = "message", required_locale = list(LC_TIME = "en_US.UTF-8"))
 #' 
+#' # a required locale setting that is present, but has a different value:
+#' # reports the expected and actual values
+#' check_required_locale(action = "message", required_locale = list(LC_CTYPE = "not-a-real-locale"))
+#' 
+#' # a required locale setting that isn't part of the current locale at
+#' # all: reported as missing, rather than lumped in with the
+#' # mismatched-value case above
+#' check_required_locale(action = "message", required_locale = list(LC_MADEUP = "en_US.UTF-8"))
+#' 
+#' # a required locale setting matching its current value: a passing check
+#' # is always silent regardless of `action`, so print() the returned
+#' # status directly to see the "no issues" wording
+#' print(check_required_locale(
+#'   action = "none",
+#'   required_locale = list(LC_COLLATE = Sys.getlocale("LC_COLLATE"))
+#' ))
+#' 
 #' @seealso 
 #' [check_attached_packages()],
 #' [check_loaded_namespaces()],
@@ -334,6 +428,23 @@ check_required_locale <- function(action = "warn", required_locale = NULL) {
 #'  
 #' @examples
 #' check_required_sysenv(action = "message", required_sysenv = list(R_TEST = "value"))
+#' 
+#' # a required variable that is present, but has a different value: reports
+#' # the expected and actual values (R_HOME is set by R itself, so this is
+#' # reliably a mismatch rather than a missing variable)
+#' check_required_sysenv(action = "message", required_sysenv = list(R_HOME = "not-the-real-path"))
+#' 
+#' # a required variable that is not set at all: reported as missing,
+#' # rather than lumped in with the mismatched-value case above
+#' check_required_sysenv(
+#'   action = "message",
+#'   required_sysenv = list(SESSIONCHECK_EXAMPLE_UNSET_VAR = "value")
+#' )
+#' 
+#' # a required variable matching its current value: a passing check is
+#' # always silent regardless of `action`, so print() the returned status
+#' # directly to see the "no issues" wording
+#' print(check_required_sysenv(action = "none", required_sysenv = list(R_HOME = Sys.getenv("R_HOME"))))
 #' 
 #' @seealso 
 #' [check_attached_packages()],
@@ -404,9 +515,15 @@ check_required_sysenv <- function(action = "warn", required_sysenv = NULL) {
 .get_sessiontime_status <- function(tol) {
   if (is.null(tol)) tol <- 300
   pt <- proc.time()
-  elapsed <- pt["elapsed"]
+  elapsed <- unname(pt["elapsed"])
   status <- elapsed > tol
   names(status) <- paste(elapsed, "sec elapsed")
+  # attaches the raw elapsed/threshold values as attributes (additive only
+  # -- the status vector's own value/name are unchanged) so
+  # .message_text_sessiontime() can report both with nicer units than the
+  # raw "elapsed" name alone
+  attr(status, "elapsed") <- elapsed
+  attr(status, "threshold") <- tol
   new_status(status, type = "sessiontime")
 }
 
@@ -435,11 +552,11 @@ check_required_sysenv <- function(action = "warn", required_sysenv = NULL) {
 
 # actions and messages ------
 
-.message_text <- function(prefix, status, max_len = 4L) {
+.message_text <- function(prefix, status, max_len = 4L, clean_message = paste(prefix, "[no issues detected]")) {
   lst <- names(status[status])
   len <- length(lst)
   symbol <- .colored_symbol(if (len == 0L) "tick" else "cross")
-  if (len == 0L) return(paste(symbol, prefix, "[no issues detected]"))
+  if (len == 0L) return(paste(symbol, clean_message))
   if (len <= max_len) {
     txt <- paste(lst, collapse = ", ")
   } else {
