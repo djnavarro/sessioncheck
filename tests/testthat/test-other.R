@@ -406,6 +406,53 @@ test_that(".message_text_detail() falls back to .message_text() without detail a
   expect_equal(.message_text_detail("hi", status, 5L), .message_text("hi", status, 5L))
 })
 
+test_that(".format_duration() auto-selects units the way difftime() does", {
+  expect_equal(.format_duration(30), "30 secs")
+  expect_equal(.format_duration(59.999), "60 secs")
+  expect_equal(.format_duration(90), "1.5 mins")
+  expect_equal(.format_duration(5400), "1.5 hours")
+  expect_equal(.format_duration(9603.8), "2.67 hours")
+  expect_equal(.format_duration(172800), "2 days")
+})
+
+test_that(".message_text_sessiontime() reports elapsed vs. threshold with pretty units when exceeded", {
+  status <- TRUE
+  attr(status, "elapsed") <- 9603.8
+  attr(status, "threshold") <- 300
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_sessiontime(status, "Session runtime exceeded:", "Session runtime within limits")
+
+  expect_equal(msg, "x Session runtime (2.67 hours) exceeds threshold of 5 mins")
+})
+
+test_that(".message_text_sessiontime() reports elapsed vs. threshold with pretty units when within limits", {
+  status <- FALSE
+  attr(status, "elapsed") <- 42
+  attr(status, "threshold") <- 300
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_sessiontime(status, "Session runtime exceeded:", "Session runtime within limits")
+
+  expect_equal(msg, "v Session runtime (42 secs) below threshold of 5 mins")
+})
+
+test_that(".message_text_sessiontime() falls back to .message_text() without elapsed/threshold attributes", {
+  status <- c(x = TRUE)
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  expect_equal(
+    .message_text_sessiontime(status, "Session runtime exceeded:", "Session runtime within limits"),
+    .message_text("Session runtime exceeded:", status, clean_message = "Session runtime within limits")
+  )
+})
+
+test_that(".get_sessiontime_status() attaches elapsed/threshold attributes usable by .message_text_sessiontime()", {
+  status <- .get_sessiontime_status(tol = Inf)$status
+  expect_type(attr(status, "elapsed"), "double")
+  expect_equal(attr(status, "threshold"), Inf)
+})
+
 test_that(".session_snapshot works", {
   expect_no_error(.session_snapshot())
 })
