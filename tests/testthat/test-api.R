@@ -48,6 +48,18 @@ test_that("sessioncheck() returns a warning if args$action is NULL (the default)
   expect_warning(sessioncheck())
 })
 
+test_that("sessioncheck() validates options(sessioncheck = ...) before merging", {
+  opts <- options(sessioncheck = "not a list")
+  expect_error(sessioncheck())
+  options(opts)
+})
+
+test_that("sessioncheck() tolerates options(sessioncheck = NULL)", {
+  opts <- options(sessioncheck = NULL)
+  expect_no_error(sessioncheck(action = "none"))
+  options(opts)
+})
+
 test_that("sessioncheck `checks` argument returns expected results", {
   checks_to_test <- c("sessiontime", "required_options", "required_locale", "required_sysenv")
 

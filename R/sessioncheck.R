@@ -475,6 +475,7 @@ check_required_sysenv <- function(action = "warn", required_sysenv = NULL) {
 .parse_args <- function(...) {
   args <- list(...)
   opts_args <- getOption("sessioncheck")
+  .validate_settings(opts_args)
   if (is.list(opts_args)) {
     if (is.null(args$action)) args$action <- opts_args$action
     if (is.null(args$checks)) args$checks <- opts_args$checks
