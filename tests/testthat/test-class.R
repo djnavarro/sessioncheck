@@ -11,7 +11,8 @@ st <- new_status(status = c(x = TRUE), type = "sessiontime")
 opt <- new_status(status = c(x = TRUE), type = "options")
 syse <- new_status(status = c(x = TRUE), type = "sysenv")
 loc <- new_status(status = c(x = TRUE), type = "locale")
-ss <- new_sessioncheck(gg, nm, pac, att, st, opt, syse, loc)
+wd <- new_status(status = c(x = TRUE), type = "working_directory")
+ss <- new_sessioncheck(gg, nm, pac, att, st, opt, syse, loc, wd)
 
 test_that("constructors return objects with expected structure", {
   expect_s3_class(gg, "sessioncheck_status")
@@ -28,6 +29,7 @@ test_that("print methods return formatted objects", {
   expect_equal(capture.output(print(opt)), format(opt))
   expect_equal(capture.output(print(syse)), format(syse))
   expect_equal(capture.output(print(loc)), format(loc))
+  expect_equal(capture.output(print(wd)), format(wd))
 })
 
 test_that("print methods invisibly return original objects", {
@@ -64,6 +66,7 @@ test_that("format.sessioncheck_status() uses a consistent 'Unexpected <thing>:' 
   expect_equal(format(pac), "x Unexpected packages: x")
   expect_equal(format(att), "x Unexpected environments attached: x")
   expect_equal(format(st),  "x Session runtime exceeded: x")
+  expect_equal(format(wd),  "x Unexpected working directory: x")
 })
 
 test_that("format.sessioncheck_status() uses a checker-specific pass message instead of the generic '[no issues detected]'", {
@@ -78,6 +81,7 @@ test_that("format.sessioncheck_status() uses a checker-specific pass message ins
   expect_equal(format(clean("options")),     "v No unexpected options detected")
   expect_equal(format(clean("sysenv")),      "v No unexpected system environment variables detected")
   expect_equal(format(clean("locale")),      "v No unexpected locale settings detected")
+  expect_equal(format(clean("working_directory")), "v Working directory as expected")
 })
 
 test_that("as.data.frame methods return data frames", {

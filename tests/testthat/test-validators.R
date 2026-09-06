@@ -57,6 +57,20 @@ test_that("valid `tol` arguments are permitted", {
   expect_no_error(.validate_tol(tol = Inf))
 })
 
+test_that("invalid `required_wd` arguments are detected", {
+  expect_error(.validate_wd(wd = 1L))
+  expect_error(.validate_wd(wd = TRUE))
+  expect_error(.validate_wd(wd = list()))
+  expect_error(.validate_wd(wd = c("a", "b")))
+  expect_error(.validate_wd(wd = NA_character_))
+})
+
+test_that("valid `required_wd` arguments are permitted", {
+  expect_no_error(.validate_wd(wd = NULL))
+  expect_no_error(.validate_wd(wd = "a/b/c"))
+  expect_no_error(.validate_wd(wd = getwd()))
+})
+
 test_that("invalid `checks` arguments are detected", {
   expect_error(.validate_checks(checks = 1L))
   expect_error(.validate_checks(checks = "typo_check"))
@@ -70,7 +84,7 @@ test_that("valid `checks` arguments are permitted", {
   expect_no_error(.validate_checks(checks = c(
     "globalenv_objects", "attached_packages", "loaded_namespaces",
     "attached_environments", "sessiontime", "required_options",
-    "required_locale", "required_sysenv"
+    "required_locale", "required_sysenv", "working_directory"
   )))
 })
 

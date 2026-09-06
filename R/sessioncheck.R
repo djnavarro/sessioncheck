@@ -45,6 +45,7 @@
 #' - `required_options` is passed to `check_required_options()`
 #' - `required_locale` is passed to `check_required_locale()`
 #' - `required_sysenv` is passed to `check_required_sysenv()`
+#' - `required_wd` is passed to `check_working_directory()`
 #' 
 #' Other arguments are ignored.
 #' @export
@@ -71,6 +72,7 @@ sessioncheck <- function(
   if ("required_options" %in% args$checks) results$options <- .get_options_status(args$required_options)
   if ("required_locale" %in% args$checks) results$locale <- .get_locale_status(args$required_locale)
   if ("required_sysenv" %in% args$checks) results$sysenv <- .get_sysenv_status(args$required_sysenv) 
+  if ("working_directory" %in% args$checks) results$working_directory <- .get_working_directory_status(args$required_wd)
   .action(args$action, do.call(new_sessioncheck, results), action_on_pass = args$action_on_pass)
 }
 
@@ -115,7 +117,8 @@ sessioncheck <- function(
 #' [check_sessiontime()],
 #' [check_required_options()],
 #' [check_required_locale()],
-#' [check_required_sysenv()]
+#' [check_required_sysenv()],
+#' [check_working_directory()]
 #' 
 #' @export
 check_attached_packages <- function(action = "warn", allow_attached_packages = NULL, action_on_pass = "none") {
@@ -168,7 +171,8 @@ check_attached_packages <- function(action = "warn", allow_attached_packages = N
 #' [check_sessiontime()],
 #' [check_required_options()],
 #' [check_required_locale()],
-#' [check_required_sysenv()]
+#' [check_required_sysenv()],
+#' [check_working_directory()]
 #' 
 #' @export
 check_loaded_namespaces <- function(action = "warn", allow_loaded_namespaces = NULL, action_on_pass = "none") {
@@ -220,7 +224,8 @@ check_loaded_namespaces <- function(action = "warn", allow_loaded_namespaces = N
 #' [check_sessiontime()],
 #' [check_required_options()],
 #' [check_required_locale()],
-#' [check_required_sysenv()]
+#' [check_required_sysenv()],
+#' [check_working_directory()]
 #' 
 #' @export
 check_globalenv_objects <- function(action = "warn", allow_globalenv_objects = NULL, action_on_pass = "none") {
@@ -273,7 +278,8 @@ check_globalenv_objects <- function(action = "warn", allow_globalenv_objects = N
 #' [check_sessiontime()],
 #' [check_required_options()],
 #' [check_required_locale()],
-#' [check_required_sysenv()]
+#' [check_required_sysenv()],
+#' [check_working_directory()]
 #' 
 #' @export
 check_attached_environments <- function(action = "warn", allow_attached_environments = NULL, action_on_pass = "none") {
@@ -318,7 +324,8 @@ check_attached_environments <- function(action = "warn", allow_attached_environm
 #' [check_attached_environments()],
 #' [check_required_options()],
 #' [check_required_locale()],
-#' [check_required_sysenv()]
+#' [check_required_sysenv()],
+#' [check_working_directory()]
 #' 
 #' @export
 check_sessiontime <- function(action = "warn", max_sessiontime = NULL, action_on_pass = "none") {
@@ -391,7 +398,8 @@ check_sessiontime <- function(action = "warn", max_sessiontime = NULL, action_on
 #' [check_attached_environments()],
 #' [check_sessiontime()],
 #' [check_required_locale()],
-#' [check_required_sysenv()]
+#' [check_required_sysenv()],
+#' [check_working_directory()]
 #' 
 #' @export
 check_required_options <- function(action = "warn", required_options = NULL, action_on_pass = "none") {
@@ -445,7 +453,8 @@ check_required_options <- function(action = "warn", required_options = NULL, act
 #' [check_attached_environments()],
 #' [check_sessiontime()],
 #' [check_required_options()],
-#' [check_required_sysenv()]
+#' [check_required_sysenv()],
+#' [check_working_directory()]
 #' 
 #' @export
 check_required_locale <- function(action = "warn", required_locale = NULL, action_on_pass = "none") {
@@ -503,7 +512,8 @@ check_required_locale <- function(action = "warn", required_locale = NULL, actio
 #' [check_attached_environments()],
 #' [check_sessiontime()],
 #' [check_required_options()],
-#' [check_required_locale()]
+#' [check_required_locale()],
+#' [check_working_directory()]
 #' 
 #' @export
 check_required_sysenv <- function(action = "warn", required_sysenv = NULL, action_on_pass = "none") {
@@ -511,6 +521,66 @@ check_required_sysenv <- function(action = "warn", required_sysenv = NULL, actio
   .validate_action_on_pass(action_on_pass)
   .validate_required(required_sysenv)
   status <- .get_sysenv_status(required_sysenv)
+  .action(action, status, action_on_pass = action_on_pass)
+}
+
+#' @title Check the working directory
+#' 
+#' @description
+#' Individual session check function that inspects the current working
+#' directory. Session checkers can produce errors, warnings, or messages if
+#' requested.
+#' 
+#' @param action Behavior to take if the status is not clean. Possible values are 
+#' "error", "warn", "message", and "none". The default is `action = "warn"`.
+#' @param required_wd A single character path giving the working directory the
+#' session is expected to be in. If any other directory is currently in use,
+#' an action is triggered.
+#' @param action_on_pass Behavior to take if the status is clean. Possible values
+#' are "message" and "none". The default is `action_on_pass = "none"`.
+#'
+#' @returns Invisibly returns an object of class `sessioncheck_status`. 
+#'  
+#' @examples
+#' check_working_directory(action = "message")
+#' 
+#' # a working directory that does not match the required path: reports both
+#' # the actual and required paths
+#' check_working_directory(action = "message", required_wd = tempdir())
+#' 
+#' # a working directory matching the required path: `action` only controls
+#' # what happens when a problem *is* found, so use
+#' # `action_on_pass = "message"` to confirm the clean result instead
+#' check_working_directory(
+#'   action = "none",
+#'   required_wd = getwd(),
+#'   action_on_pass = "message"
+#' )
+#'  
+#' @details
+#' This checker compares the current working directory (`getwd()`) against
+#' `required_wd`. Both paths are passed through `normalizePath()` before
+#' comparison, so differences in trailing slashes or relative vs. absolute
+#' form do not trigger a false positive. When `required_wd = NULL` (the
+#' default), there is nothing to compare against, so the check always passes;
+#' the current working directory is still reported in the message.
+#' 
+#' @seealso 
+#' [check_attached_packages()],
+#' [check_loaded_namespaces()],
+#' [check_globalenv_objects()],
+#' [check_attached_environments()],
+#' [check_sessiontime()],
+#' [check_required_options()],
+#' [check_required_locale()],
+#' [check_required_sysenv()]
+#' 
+#' @export
+check_working_directory <- function(action = "warn", required_wd = NULL, action_on_pass = "none") {
+  .validate_action(action)
+  .validate_action_on_pass(action_on_pass)
+  .validate_wd(required_wd)
+  status <- .get_working_directory_status(required_wd)
   .action(action, status, action_on_pass = action_on_pass)
 }
 
@@ -601,6 +671,26 @@ check_required_sysenv <- function(action = "warn", required_sysenv = NULL, actio
   new_status(status, type = "locale")
 }
 
+# status checkers: working directory ------
+
+.get_working_directory_status <- function(required) {
+  actual <- getwd()
+  if (is.null(required)) {
+    status <- FALSE
+    names(status) <- actual
+    attr(status, "actual") <- actual
+    attr(status, "required") <- NULL
+    return(new_status(status, type = "working_directory"))
+  }
+  required_norm <- normalizePath(required, winslash = "/", mustWork = FALSE)
+  actual_norm <- normalizePath(actual, winslash = "/", mustWork = FALSE)
+  status <- !identical(required_norm, actual_norm)
+  names(status) <- actual
+  attr(status, "actual") <- actual
+  attr(status, "required") <- required
+  new_status(status, type = "working_directory")
+}
+
 # actions and messages ------
 
 .message_text <- function(prefix, status, max_len = 4L, clean_message = paste(prefix, "[no issues detected]")) {
@@ -662,6 +752,7 @@ check_required_sysenv <- function(action = "warn", required_sysenv = NULL, actio
     if (is.null(args$required_options)) args$required_options <- opts_args$required_options
     if (is.null(args$required_locale)) args$required_locale <- opts_args$required_locale
     if (is.null(args$required_sysenv)) args$required_sysenv <- opts_args$required_sysenv 
+    if (is.null(args$required_wd)) args$required_wd <- opts_args$required_wd
   }
   args
 }

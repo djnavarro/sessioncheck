@@ -16,6 +16,7 @@ The **sessioncheck** package is built on several functions that each check one s
 - `check_attached_environments()`
 - `check_loaded_namespaces()`
 - `check_sessiontime()`
+- `check_working_directory()`
 - `check_required_options()`
 - `check_required_locale()`
 - `check_required_sysenv()`
@@ -173,6 +174,30 @@ check_sessiontime(max_sessiontime = .0001)
 
 Note that this check is not one of the default checks performed by the `sessioncheck()` function. 
 
+### Check the working directory
+
+The `check_working_directory()` function checks whether the current working directory, as returned by `getwd()`, matches an expected path. Unlike the other checks discussed so far, there is no sensible default to compare against, so when `required_wd = NULL` (the default) the check always passes and no comparison is attempted:
+
+```{r}
+#| label: check-working-directory-1
+check_working_directory()
+```
+
+To make use of the check, supply the expected path via `required_wd`. If it matches the current working directory, the check passes silently:
+
+```{r}
+#| label: check-working-directory-2
+check_working_directory(required_wd = getwd())
+```
+
+If the paths don't match, a warning is triggered, reporting both the actual and expected paths:
+
+```{r}
+#| label: check-working-directory-3
+check_working_directory(required_wd = tempdir())
+```
+
+Both paths are passed through `normalizePath()` before comparison, so differences in trailing slashes, or relative versus absolute forms, do not produce false positives. As with `check_sessiontime()`, this check is not one of the default checks performed by `sessioncheck()`.
 
 ### Other checks
 

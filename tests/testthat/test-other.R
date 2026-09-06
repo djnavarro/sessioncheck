@@ -532,6 +532,48 @@ test_that(".get_sessiontime_status() attaches elapsed/threshold attributes usabl
   expect_equal(attr(status, "threshold"), Inf)
 })
 
+test_that(".message_text_working_directory() reports actual vs. required path when mismatched", {
+  status <- TRUE
+  attr(status, "actual") <- "/home/user/project"
+  attr(status, "required") <- "/home/user/other"
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_working_directory(status, "Unexpected working directory:", "Working directory as expected")
+
+  expect_equal(msg, "x Working directory (/home/user/project) does not match required path (/home/user/other)")
+})
+
+test_that(".message_text_working_directory() reports a match when the working directory is as required", {
+  status <- FALSE
+  attr(status, "actual") <- "/home/user/project"
+  attr(status, "required") <- "/home/user/project"
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_working_directory(status, "Unexpected working directory:", "Working directory as expected")
+
+  expect_equal(msg, "v Working directory matches required path (/home/user/project)")
+})
+
+test_that(".message_text_working_directory() simply reports the current directory when no required_wd is set", {
+  status <- FALSE
+  attr(status, "actual") <- "/home/user/project"
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_working_directory(status, "Unexpected working directory:", "Working directory as expected")
+
+  expect_equal(msg, "v Working directory: /home/user/project")
+})
+
+test_that(".message_text_working_directory() falls back to .message_text() without an actual attribute", {
+  status <- c(x = TRUE)
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  expect_equal(
+    .message_text_working_directory(status, "Unexpected working directory:", "Working directory as expected"),
+    .message_text("Unexpected working directory:", status, clean_message = "Working directory as expected")
+  )
+})
+
 test_that(".session_snapshot works", {
   expect_no_error(.session_snapshot())
 })
@@ -549,7 +591,8 @@ test_that(".session_snapshot returns named list", {
     "proc_time",
     "globalenv",
     "locale",
-    "sys_env"
+    "sys_env",
+    "wd"
   ))
 })
 

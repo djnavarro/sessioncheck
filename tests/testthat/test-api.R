@@ -14,6 +14,7 @@ test_that("session checkers call the correct internal function", {
   expect_equal(check_required_options("none"), .get_options_status(NULL))
   expect_equal(check_required_sysenv("none"), .get_sysenv_status(NULL))
   expect_equal(check_required_locale("none"), .get_locale_status(NULL))
+  expect_equal(check_working_directory("none"), .get_working_directory_status(NULL))
 })
 
 test_that("sessioncheck() returns a list of status checks", {
@@ -83,6 +84,7 @@ test_that("check_*() functions default to action_on_pass = \"none\" (silent on a
     action = "none",
     required_sysenv = list(R_HOME = Sys.getenv("R_HOME"))
   ))
+  expect_no_message(check_working_directory(action = "none"))
 })
 
 test_that("check_*() functions confirm a clean pass when action_on_pass = \"message\"", {
@@ -116,6 +118,7 @@ test_that("check_*() functions confirm a clean pass when action_on_pass = \"mess
     required_sysenv = list(R_HOME = Sys.getenv("R_HOME")),
     action_on_pass = "message"
   ))
+  expect_message(check_working_directory(action = "none", action_on_pass = "message"))
 })
 
 test_that("check_*() functions do not confirm when the status is unclean, even with action_on_pass = \"message\"", {
@@ -133,6 +136,7 @@ test_that("check_*() functions validate `action_on_pass`", {
   expect_error(check_required_options(action_on_pass = "warn"))
   expect_error(check_required_locale(action_on_pass = "warn"))
   expect_error(check_required_sysenv(action_on_pass = "warn"))
+  expect_error(check_working_directory(action_on_pass = "warn"))
 })
 
 test_that("sessioncheck() defaults to action_on_pass = \"none\" (silent on a clean pass)", {
@@ -227,4 +231,22 @@ test_that("sessioncheck `checks` argument returns expected results", {
   expect_equal(sysenv_status, sysenv_res)
 }
 )
+
+test_that("sessioncheck() runs check_working_directory() when requested via `checks`", {
+  res <- sessioncheck(action = "none", checks = "working_directory", required_wd = getwd())
+  expect_false(res$working_directory$status)
+
+  res2 <- sessioncheck(action = "none", checks = "working_directory", required_wd = tempdir())
+  expect_true(res2$working_directory$status)
+})
+
+test_that("sessioncheck() passes `required_wd` through options(sessioncheck = ...)", {
+  opts <- options(sessioncheck = list(
+    action = "none",
+    checks = "working_directory",
+    required_wd = tempdir()
+  ))
+  expect_true(sessioncheck()$working_directory$status)
+  options(opts)
+})
 

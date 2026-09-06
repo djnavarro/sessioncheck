@@ -123,7 +123,8 @@ new_sessionstate <- function(platform, locale, matrix, document, machine, git, t
   sessiontime = "Session runtime exceeded:",
   options     = "Unexpected options:",
   sysenv      = "Unexpected system environment variables:",
-  locale      = "Unexpected locale settings:"
+  locale      = "Unexpected locale settings:",
+  working_directory = "Unexpected working directory:"
 )
 
 .status_clean_message <- c(
@@ -134,7 +135,8 @@ new_sessionstate <- function(platform, locale, matrix, document, machine, git, t
   sessiontime = "Session runtime within limits",
   options     = "No unexpected options detected",
   sysenv      = "No unexpected system environment variables detected",
-  locale      = "No unexpected locale settings detected"
+  locale      = "No unexpected locale settings detected",
+  working_directory = "Working directory as expected"
 )
 
 #' @rdname display_methods
@@ -147,6 +149,9 @@ format.sessioncheck_status <- function(x, ...) {
   }
   if (x$type == "sessiontime") {
     return(.message_text_sessiontime(x$status, prefix, clean_message))
+  }
+  if (x$type == "working_directory") {
+    return(.message_text_working_directory(x$status, prefix, clean_message))
   }
   .message_text(prefix, x$status, clean_message = clean_message)
 }
