@@ -69,3 +69,15 @@ test_that("valid `required` arguments are permitted", {
   expect_no_error(.validate_required(required = list(a = 1L)))
   expect_no_error(.validate_required(required = list(a = 1L, b = "x")))
 })
+
+test_that("invalid `settings` arguments are detected", {
+  expect_error(.validate_settings(settings = "a"))
+  expect_error(.validate_settings(settings = 1L))
+  expect_error(.validate_settings(settings = TRUE))
+})
+
+test_that("valid `settings` arguments are permitted", {
+  expect_no_error(.validate_settings(settings = NULL))
+  expect_no_error(.validate_settings(settings = list()))
+  expect_no_error(.validate_settings(settings = list(action = "warn")))
+})
