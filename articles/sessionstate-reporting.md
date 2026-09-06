@@ -172,12 +172,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          7a507a68ef8e8010ff48f4428b01bf77bf138462
+#> • commit sha          7d88fbb96f5800fb1ed9187c162faf256474048e
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-06 04:53:10 UTC
-#> • session uptime      1.105 sec
+#> • captured at         2026-09-06 05:19:09 UTC
+#> • session uptime      1.011 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -379,12 +379,12 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          7a507a68ef8e8010ff48f4428b01bf77bf138462
+#> • commit sha          7d88fbb96f5800fb1ed9187c162faf256474048e
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-06 04:53:10 UTC
-#> • session uptime      1.232 sec
+#> • captured at         2026-09-06 05:19:09 UTC
+#> • session uptime      1.135 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
