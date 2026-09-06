@@ -172,12 +172,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          7a5196dce247d262d9edec3bcfb5eab05a01d373
+#> • commit sha          d77a93c504a6065fb5b42513b01194d737433f7f
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-06 12:09:18 UTC
-#> • session uptime      0.917 sec
+#> • captured at         2026-09-06 14:21:42 UTC
+#> • session uptime      0.963 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -379,12 +379,12 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          7a5196dce247d262d9edec3bcfb5eab05a01d373
+#> • commit sha          d77a93c504a6065fb5b42513b01194d737433f7f
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-06 12:09:18 UTC
-#> • session uptime      1.018 sec
+#> • captured at         2026-09-06 14:21:43 UTC
+#> • session uptime      1.067 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -462,6 +462,119 @@ for the complete list of selectable fields, and the [customizing
 sessioncheck](https://sessioncheck.djnavarro.net/articles/customizing-sessioncheck.md)
 article for how these defaults can also be set globally via
 `options(sessioncheck = list(...))`.
+
+## Comparing two snapshots
+
+A single
+[`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
+call is a snapshot of one moment; on its own it doesn’t say what
+changed.
+[`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)
+takes two snapshots and reports how they differ – take one at the start
+of a script (or an interactive session), do some work, take another, and
+diff them:
+
+``` r
+
+# wrapped in a function so `baseline`/`current` themselves never end up in
+# .GlobalEnv -- otherwise each would show up as "added" in the diff below,
+# simply for having been assigned in between the two snapshots
+take_diff <- function() {
+  baseline <- sessionstate()
+  assign("some_result", 1:10, envir = .GlobalEnv)
+  current <- sessionstate()
+  compare_sessionstates(baseline, current)
+}
+diff <- take_diff()
+diff
+#> ─ Platform ─────────────────────────────────────────────────────────────────────
+#> • (no changes)
+#> 
+#> ─ Locale ───────────────────────────────────────────────────────────────────────
+#> • (no changes)
+#> 
+#> ─ Matrix products ──────────────────────────────────────────────────────────────
+#> • (no changes)
+#> 
+#> ─ Document products ────────────────────────────────────────────────────────────
+#> • (no changes)
+#> 
+#> ─ Machine ──────────────────────────────────────────────────────────────────────
+#> • (no changes)
+#> 
+#> ─ Git ──────────────────────────────────────────────────────────────────────────
+#> • (no changes)
+#> 
+#> ─ Timing ───────────────────────────────────────────────────────────────────────
+#> • captured at (old)     2026-09-06 14:21:43 UTC
+#> • captured at (new)     2026-09-06 14:21:43 UTC
+#> • wall clock elapsed    0.04 secs
+#> • session uptime delta  0.04 secs
+#> 
+#> ─ RNG state ────────────────────────────────────────────────────────────────────
+#> • (no changes)
+#> 
+#> ─ Library paths ────────────────────────────────────────────────────────────────
+#> • (no changes)
+#> 
+#> ─ Packages ─────────────────────────────────────────────────────────────────────
+#> • (no changes)
+#> 
+#> ─ Global environment ───────────────────────────────────────────────────────────
+#> Added [n = 1]
+#>         name   class size                             hash
+#>  some_result integer   96 85ee0eceeffb89a47e4f4af1e6e38395
+#> 
+#> ─ Attached environments ────────────────────────────────────────────────────────
+#> • (no changes)
+```
+
+By default,
+[`print()`](https://rdrr.io/r/base/print.html)/[`format()`](https://rdrr.io/r/base/format.html)
+collapse every section with nothing to report down to a single “(no
+changes)” line (`changed_only = TRUE`, as seen above for every section
+but `globalenv` and `timing`); pass `changed_only = FALSE` to see every
+field for the record-shaped sections (`platform`, `locale`, `matrix`,
+`document`, `machine`, `git`, `rng`) regardless of whether it changed.
+`timing` is always shown in full, since `captured_at`/`elapsed_sec`
+necessarily differ between any two
+[`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
+calls – there’s no “unchanged” case to collapse.
+
+Like
+[`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)’s
+three tabular sections, the diff’s `packages`/`globalenv`/`attachments`
+sections can be coerced with
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html), though
+the shape is different: one row per key and tracked field, tagged
+`"added"`, `"removed"`, or `"modified"` rather than one row per key
+overall.
+
+``` r
+
+as.data.frame(diff, which = "globalenv")
+#>          name change field  old                              new verified
+#> 1 some_result  added class <NA>                          integer       NA
+#> 2 some_result  added  size <NA>                               96       NA
+#> 3 some_result  added  hash <NA> 85ee0eceeffb89a47e4f4af1e6e38395       NA
+```
+
+`globalenv`’s rows also carry a `verified` column.
+[`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
+fingerprints each global environment object’s value (an MD5 hash of its
+serialized form), so a value change can be detected even when an
+object’s class and size stay the same; when both snapshots have a usable
+hash for an object, a hash mismatch is authoritative
+(`verified = TRUE`). When an object can’t be hashed at all (e.g. one
+holding a database connection), the comparison falls back to
+`class`/`size` only (`verified = FALSE`) – and if neither of those
+changed either, a value change could have happened invisibly.
+
+[`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)
+also warns if `new` looks like it was captured *before* `old`, in case
+the two arguments were passed in the wrong order. See
+[`?compare_sessionstates`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)
+for the full per-section diff semantics.
 
 ## Suggested next step
 

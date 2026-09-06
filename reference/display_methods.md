@@ -58,6 +58,12 @@ print(
   attachments = NULL,
   ...
 )
+
+# S3 method for class 'sessioncheck_sessionstatediff'
+format(x, changed_only = TRUE, ...)
+
+# S3 method for class 'sessioncheck_sessionstatediff'
+print(x, changed_only = TRUE, ...)
 ```
 
 ## Arguments
@@ -65,7 +71,7 @@ print(
 - x:
 
   An object of class `sessioncheck_status`, `sessioncheck_sessioncheck`,
-  or `sessioncheck_sessionstate`
+  `sessioncheck_sessionstate`, or `sessioncheck_sessionstatediff`
 
 - ...:
 
@@ -142,9 +148,13 @@ print(
 
   For `sessioncheck_sessionstate` objects, an optional character vector
   selecting which global environment columns to display (from `"name"`,
-  `"class"`, `"size"`). Defaults to showing all columns. Ignored for
-  other classes. See Details for how the default is resolved, and for
-  how `globalenv_n` separately controls the number of rows shown.
+  `"class"`, `"size"`, `"hash"`). Defaults to
+  `c("name", "class", "size")` (omitting `"hash"`, a long fingerprint
+  mainly useful programmatically – see
+  [`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)).
+  Ignored for other classes. See Details for how the default is
+  resolved, and for how `globalenv_n` separately controls the number of
+  rows shown.
 
 - globalenv_n:
 
@@ -159,6 +169,13 @@ print(
   selecting which attached-environment columns to display (from
   `"name"`, `"type"`). Defaults to showing all columns. Ignored for
   other classes. See Details for how the default is resolved.
+
+- changed_only:
+
+  For `sessioncheck_sessionstatediff` objects, whether to collapse
+  sections/fields with no detected change down to a single "(no
+  changes)" line (`TRUE`, the default) or always show every field.
+  Ignored for other classes.
 
 ## Value
 
@@ -179,9 +196,10 @@ wins; otherwise, `getOption("sessioncheck")` is checked for a
 `sessionstate_attachments` field (respectively); if neither is set, a
 built-in default is used (showing every field/column, except for
 `packages`, which defaults to
-`c("package", "attached", "loaded_version", "source")`, and
-`globalenv_n`, which defaults to `10`). This selection only affects what
-is displayed; it never changes the underlying object, so
+`c("package", "attached", "loaded_version", "source")`, `globalenv`,
+which defaults to `c("name", "class", "size")`, and `globalenv_n`, which
+defaults to `10`). This selection only affects what is displayed; it
+never changes the underlying object, so
 [`as.data.frame()`](https://sessioncheck.djnavarro.net/reference/coercion_methods.md)
 always returns the full package inventory, and
 `x$globalenv`/`x$attachments` always return their full data frames,

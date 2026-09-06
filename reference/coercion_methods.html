@@ -48,7 +48,7 @@ joining, export) instead of only being inspected via print()/format()."></head><
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Coerce session check object to a data frame</h1>
-      <small class="dont-index">Source: <a href="https://github.com/djnavarro/sessioncheck/blob/main/R/class.R" class="external-link"><code>R/class.R</code></a>, <a href="https://github.com/djnavarro/sessioncheck/blob/main/R/sessionstate-format.R" class="external-link"><code>R/sessionstate-format.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/djnavarro/sessioncheck/blob/main/R/class.R" class="external-link"><code>R/class.R</code></a>, <a href="https://github.com/djnavarro/sessioncheck/blob/main/R/sessionstate-format.R" class="external-link"><code>R/sessionstate-format.R</code></a>, <a href="https://github.com/djnavarro/sessioncheck/blob/main/R/sessionstatediff-format.R" class="external-link"><code>R/sessionstatediff-format.R</code></a></small>
       <div class="d-none name"><code>coercion_methods.Rd</code></div>
     </div>
 
@@ -67,6 +67,9 @@ joining, export) instead of only being inspected via <code><a href="https://rdrr
 <span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">x</span>, row.names <span class="op">=</span> <span class="cn">NULL</span>, optional <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'sessioncheck_sessionstate'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">x</span>, row.names <span class="op">=</span> <span class="cn">NULL</span>, optional <span class="op">=</span> <span class="cn">FALSE</span>, which <span class="op">=</span> <span class="st">"packages"</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'sessioncheck_sessionstatediff'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">x</span>, row.names <span class="op">=</span> <span class="cn">NULL</span>, optional <span class="op">=</span> <span class="cn">FALSE</span>, which <span class="op">=</span> <span class="st">"packages"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -76,7 +79,7 @@ joining, export) instead of only being inspected via <code><a href="https://rdrr
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>An object of class <code>sessioncheck_status</code>, <code>sessioncheck_sessioncheck</code>,
-or <code>sessioncheck_sessionstate</code></p></dd>
+<code>sessioncheck_sessionstate</code>, or <code>sessioncheck_sessionstatediff</code></p></dd>
 
 
 <dt id="arg-row-names">row.names<a class="anchor" aria-label="anchor" href="#arg-row-names"></a></dt>
@@ -94,7 +97,10 @@ or <code>sessioncheck_sessionstate</code></p></dd>
 <dt id="arg-which">which<a class="anchor" aria-label="anchor" href="#arg-which"></a></dt>
 <dd><p>For <code>sessioncheck_sessionstate</code> objects, which tabular
 component to return: one of <code>"packages"</code> (the default), <code>"globalenv"</code>,
-or <code>"attachments"</code>. Ignored for other classes.</p></dd>
+or <code>"attachments"</code>. For <code>sessioncheck_sessionstatediff</code> objects, the same
+three section names instead select a long-format diff table (see
+Details); the default is likewise <code>"packages"</code>. Ignored for other
+classes.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -115,6 +121,25 @@ whichever one of those three tables <code>which</code> selects; none of the scal
 fields or <code>libpaths</code> are represented in the result. Use <code>x$platform</code>,
 <code>x$machine</code>, <code>x$git</code>, <code>x$libpaths</code>, etc. (or <code>unclass(x)</code> for everything
 at once) to access those directly.</p>
+<p><code>sessioncheck_sessionstatediff</code> objects (from <code><a href="compare_sessionstates.html">compare_sessionstates()</a></code>)
+coerce differently again: each <code>which</code> selects a single long-format
+table with one row per key (<code>package</code>/<code>name</code>/<code>name</code>, for
+<code>"packages"</code>/<code>"globalenv"</code>/<code>"attachments"</code> respectively) and tracked
+field, with columns <code>&lt;key&gt;</code>, <code>change</code> (<code>"added"</code>, <code>"removed"</code>, or
+<code>"modified"</code>), <code>field</code>, <code>old</code>, and <code>new</code>. A key present in only one
+snapshot contributes one row per tracked field, all with the same
+<code>change</code>, and <code>old</code>/<code>new</code> <code>NA</code> on whichever side it didn't exist; a key
+present in both snapshots contributes a row only for fields that
+actually changed. The tracked fields are
+<code>attached</code>/<code>ondisk_version</code>/<code>loaded_version</code>/<code>source</code> for <code>"packages"</code>,
+<code>class</code>/<code>size</code>/<code>hash</code> for <code>"globalenv"</code>, and <code>type</code> for <code>"attachments"</code>
+– the same fields <code><a href="compare_sessionstates.html">compare_sessionstates()</a></code> tracks for its own
+<code>modified</code> tables. <code>"globalenv"</code> additionally has a <code>verified</code> column
+(<code>NA</code> for <code>"added"</code>/<code>"removed"</code> rows, since there is nothing to verify
+when a key only exists in one snapshot; <code>TRUE</code>/<code>FALSE</code> for <code>"modified"</code>
+rows – see <code><a href="compare_sessionstates.html">compare_sessionstates()</a></code> for what <code>verified</code> means).
+<code>"attachments"</code> never has <code>"modified"</code> rows, since a <code>type</code> change for an
+existing search-path entry isn't a realistic scenario.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -167,12 +167,21 @@ another remote type, or `"local"` when no remote metadata is available.
 
 The `globalenv` element is a data frame with one row per object in
 `.GlobalEnv` (including dot-prefixed objects), with columns `name`,
-`class`, and `size` (in bytes, as reported by
-[`utils::object.size()`](https://rdrr.io/r/utils/object.size.html)).
-Only object names, classes, and sizes are captured, never values.
-Because a long-running script can accumulate many objects, the default
-display shows only the largest few (see "Selecting which elements are
-displayed" below); the captured object itself always holds every object.
+`class`, `size` (in bytes, as reported by
+[`utils::object.size()`](https://rdrr.io/r/utils/object.size.html)), and
+`hash` (an MD5 fingerprint of the object's serialized value, in the same
+spirit as `rng$seed_hash`:
+[`serialize()`](https://rdrr.io/r/base/serialize.html) the object, then
+run [`tools::md5sum()`](https://rdrr.io/r/tools/md5sum.html) on the
+result). `hash` is `NA` when an object cannot be serialized at all (e.g.
+one holding an external pointer, such as a database connection) – this
+is reported rather than silently treated as "unchanged" by anything
+comparing two snapshots. Only object names, classes, sizes, and value
+fingerprints are captured, never values themselves. Because a
+long-running script can accumulate many objects, the default display
+shows only the largest few, and omits `hash` (see "Selecting which
+elements are displayed" below); the captured object itself always holds
+every object and every column.
 
 ## Attachments
 
@@ -243,12 +252,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/docs/reference
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          7a5196dce247d262d9edec3bcfb5eab05a01d373
+#> • commit sha          d77a93c504a6065fb5b42513b01194d737433f7f
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-06 12:09:06 UTC
-#> • session uptime      8.727 sec
+#> • captured at         2026-09-06 14:21:32 UTC
+#> • session uptime      7.928 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister

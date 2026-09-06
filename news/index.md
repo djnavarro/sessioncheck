@@ -21,6 +21,18 @@
 ### New features
 
 - Added
+  [`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md),
+  which reports how two
+  [`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
+  snapshots differ – take a baseline snapshot, do some work, take
+  another, and diff them. Returns an object of class
+  `sessioncheck_sessionstatediff` with
+  [`format()`](https://rdrr.io/r/base/format.html),
+  [`print()`](https://rdrr.io/r/base/print.html), and
+  [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
+  methods.
+
+- Added
   [`check_working_directory()`](https://sessioncheck.djnavarro.net/reference/check_working_directory.md),
   which checks the session’s working directory against an expected path
   ([\#11](https://github.com/djnavarro/sessioncheck/issues/11)).

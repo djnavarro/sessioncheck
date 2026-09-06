@@ -211,7 +211,7 @@ str(unclass(session_state), max.level = 1)
 #>  $ rng        :List of 4
 #>  $ libpaths   : chr [1:3] "/home/runner/work/_temp/Library" "/opt/R/4.6.1/lib/R/site-library" "/opt/R/4.6.1/lib/R/library"
 #>  $ packages   :'data.frame': 34 obs. of  10 variables:
-#>  $ globalenv  :'data.frame': 4 obs. of  3 variables:
+#>  $ globalenv  :'data.frame': 4 obs. of  4 variables:
 #>  $ attachments:'data.frame': 11 obs. of  2 variables:
 ```
 
@@ -248,12 +248,12 @@ print(session_state, packages = "package", globalenv = "class", machine = charac
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          7a5196dce247d262d9edec3bcfb5eab05a01d373
+#> • commit sha          d77a93c504a6065fb5b42513b01194d737433f7f
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-06 12:09:13 UTC
-#> • session uptime      0.811 sec
+#> • captured at         2026-09-06 14:21:38 UTC
+#> • session uptime      0.828 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -368,11 +368,11 @@ head(as.data.frame(session_state))
 #> 5         FALSE             FALSE           base
 #> 6         FALSE             FALSE           base
 head(as.data.frame(session_state, which = "globalenv"))
-#>            name                     class size
-#> 1  .Random.seed                   integer 2552
-#> 2    obj_status       sessioncheck_status 1080
-#> 3    pkg_status       sessioncheck_status 1496
-#> 4 session_check sessioncheck_sessioncheck 5248
+#>            name                     class size                             hash
+#> 1  .Random.seed                   integer 2552 062c8cb08040b0f34c5bbdc8e634fd0a
+#> 2    obj_status       sessioncheck_status 1080 4ab3e0089f1ed4cf7f2643c97fffd38d
+#> 3    pkg_status       sessioncheck_status 1496 e469f098284bc6d4ff62f1201201d18f
+#> 4 session_check sessioncheck_sessioncheck 5248 affff37834b1d5480e58e6707f5547d0
 ```
 
 The eight scalar-field components (`platform`, `locale`, `matrix`,

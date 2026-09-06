@@ -232,11 +232,18 @@ remote metadata is available.</p>
 
 <p>The <code>globalenv</code> element is a data frame with one row per object in
 <code>.GlobalEnv</code> (including dot-prefixed objects), with columns <code>name</code>,
-<code>class</code>, and <code>size</code> (in bytes, as reported by <code><a href="https://rdrr.io/r/utils/object.size.html" class="external-link">utils::object.size()</a></code>). Only
-object names, classes, and sizes are captured, never values. Because a
-long-running script can accumulate many objects, the default display shows
-only the largest few (see "Selecting which elements are displayed"
-below); the captured object itself always holds every object.</p>
+<code>class</code>, <code>size</code> (in bytes, as reported by <code><a href="https://rdrr.io/r/utils/object.size.html" class="external-link">utils::object.size()</a></code>), and
+<code>hash</code> (an MD5 fingerprint of the object's serialized value, in the same
+spirit as <code>rng$seed_hash</code>: <code><a href="https://rdrr.io/r/base/serialize.html" class="external-link">serialize()</a></code> the object, then run
+<code><a href="https://rdrr.io/r/tools/md5sum.html" class="external-link">tools::md5sum()</a></code> on the result). <code>hash</code> is <code>NA</code> when an object cannot be
+serialized at all (e.g. one holding an external pointer, such as a
+database connection) – this is reported rather than silently treated as
+"unchanged" by anything comparing two snapshots. Only object names,
+classes, sizes, and value fingerprints are captured, never values
+themselves. Because a long-running script can accumulate many objects,
+the default display shows only the largest few, and omits <code>hash</code> (see
+"Selecting which elements are displayed" below); the captured object
+itself always holds every object and every column.</p>
     </div>
     <div class="section level2">
     <h2 id="attachments">Attachments<a class="anchor" aria-label="anchor" href="#attachments"></a></h2>
@@ -303,12 +310,12 @@ unlike the one for <code><a href="sessioncheck.html">sessioncheck()</a></code>, 
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> working directory   /home/runner/work/sessioncheck/sessioncheck/docs/reference</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> commit sha          7a5196dce247d262d9edec3bcfb5eab05a01d373</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> commit sha          d77a93c504a6065fb5b42513b01194d737433f7f</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> dirty               FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> captured at         2026-09-06 12:09:06 UTC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> session uptime      8.727 sec</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> captured at         2026-09-06 14:21:32 UTC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> session uptime      7.928 sec</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> kind                Mersenne-Twister</span>

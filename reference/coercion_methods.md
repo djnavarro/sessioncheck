@@ -17,6 +17,9 @@ as.data.frame(x, row.names = NULL, optional = FALSE, ...)
 
 # S3 method for class 'sessioncheck_sessionstate'
 as.data.frame(x, row.names = NULL, optional = FALSE, which = "packages", ...)
+
+# S3 method for class 'sessioncheck_sessionstatediff'
+as.data.frame(x, row.names = NULL, optional = FALSE, which = "packages", ...)
 ```
 
 ## Arguments
@@ -24,7 +27,7 @@ as.data.frame(x, row.names = NULL, optional = FALSE, which = "packages", ...)
 - x:
 
   An object of class `sessioncheck_status`, `sessioncheck_sessioncheck`,
-  or `sessioncheck_sessionstate`
+  `sessioncheck_sessionstate`, or `sessioncheck_sessionstatediff`
 
 - row.names:
 
@@ -42,7 +45,10 @@ as.data.frame(x, row.names = NULL, optional = FALSE, which = "packages", ...)
 
   For `sessioncheck_sessionstate` objects, which tabular component to
   return: one of `"packages"` (the default), `"globalenv"`, or
-  `"attachments"`. Ignored for other classes.
+  `"attachments"`. For `sessioncheck_sessionstatediff` objects, the same
+  three section names instead select a long-format diff table (see
+  Details); the default is likewise `"packages"`. Ignored for other
+  classes.
 
 ## Value
 
@@ -64,3 +70,27 @@ whichever one of those three tables `which` selects; none of the scalar
 fields or `libpaths` are represented in the result. Use `x$platform`,
 `x$machine`, `x$git`, `x$libpaths`, etc. (or `unclass(x)` for everything
 at once) to access those directly.
+
+`sessioncheck_sessionstatediff` objects (from
+[`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md))
+coerce differently again: each `which` selects a single long-format
+table with one row per key (`package`/`name`/`name`, for
+`"packages"`/`"globalenv"`/`"attachments"` respectively) and tracked
+field, with columns `<key>`, `change` (`"added"`, `"removed"`, or
+`"modified"`), `field`, `old`, and `new`. A key present in only one
+snapshot contributes one row per tracked field, all with the same
+`change`, and `old`/`new` `NA` on whichever side it didn't exist; a key
+present in both snapshots contributes a row only for fields that
+actually changed. The tracked fields are
+`attached`/`ondisk_version`/`loaded_version`/`source` for `"packages"`,
+`class`/`size`/`hash` for `"globalenv"`, and `type` for `"attachments"`
+– the same fields
+[`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)
+tracks for its own `modified` tables. `"globalenv"` additionally has a
+`verified` column (`NA` for `"added"`/`"removed"` rows, since there is
+nothing to verify when a key only exists in one snapshot; `TRUE`/`FALSE`
+for `"modified"` rows – see
+[`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)
+for what `verified` means). `"attachments"` never has `"modified"` rows,
+since a `type` change for an existing search-path entry isn't a
+realistic scenario.

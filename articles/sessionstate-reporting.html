@@ -234,12 +234,12 @@ running.</p>
 <span><span class="co">#&gt; • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • commit sha          7a5196dce247d262d9edec3bcfb5eab05a01d373</span></span>
+<span><span class="co">#&gt; • commit sha          d77a93c504a6065fb5b42513b01194d737433f7f</span></span>
 <span><span class="co">#&gt; • dirty               FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • captured at         2026-09-06 12:09:18 UTC</span></span>
-<span><span class="co">#&gt; • session uptime      0.917 sec</span></span>
+<span><span class="co">#&gt; • captured at         2026-09-06 14:21:42 UTC</span></span>
+<span><span class="co">#&gt; • session uptime      0.963 sec</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; • kind                Mersenne-Twister</span></span>
@@ -480,12 +480,12 @@ contents):</p>
 <span><span class="co">#&gt; ─ Machine ──────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • commit sha          7a5196dce247d262d9edec3bcfb5eab05a01d373</span></span>
+<span><span class="co">#&gt; • commit sha          d77a93c504a6065fb5b42513b01194d737433f7f</span></span>
 <span><span class="co">#&gt; • dirty               FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • captured at         2026-09-06 12:09:18 UTC</span></span>
-<span><span class="co">#&gt; • session uptime      1.018 sec</span></span>
+<span><span class="co">#&gt; • captured at         2026-09-06 14:21:43 UTC</span></span>
+<span><span class="co">#&gt; • session uptime      1.067 sec</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; • kind                Mersenne-Twister</span></span>
@@ -560,6 +560,106 @@ See <code><a href="../reference/display_methods.html">?display_methods</a></code
 fields, and the <a href="customizing-sessioncheck.html">customizing
 sessioncheck</a> article for how these defaults can also be set globally
 via <code>options(sessioncheck = list(...))</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="comparing-two-snapshots">Comparing two snapshots<a class="anchor" aria-label="anchor" href="#comparing-two-snapshots"></a>
+</h2>
+<p>A single <code><a href="../reference/sessionstate.html">sessionstate()</a></code> call is a snapshot of one
+moment; on its own it doesn’t say what changed.
+<code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code> takes two snapshots and reports how
+they differ – take one at the start of a script (or an interactive
+session), do some work, take another, and diff them:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># wrapped in a function so `baseline`/`current` themselves never end up in</span></span>
+<span><span class="co"># .GlobalEnv -- otherwise each would show up as "added" in the diff below,</span></span>
+<span><span class="co"># simply for having been assigned in between the two snapshots</span></span>
+<span><span class="va">take_diff</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">baseline</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sessionstate.html">sessionstate</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/assign.html" class="external-link">assign</a></span><span class="op">(</span><span class="st">"some_result"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, envir <span class="op">=</span> <span class="va">.GlobalEnv</span><span class="op">)</span></span>
+<span>  <span class="va">current</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sessionstate.html">sessionstate</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="../reference/compare_sessionstates.html">compare_sessionstates</a></span><span class="op">(</span><span class="va">baseline</span>, <span class="va">current</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">diff</span> <span class="op">&lt;-</span> <span class="fu">take_diff</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">diff</span></span>
+<span><span class="co">#&gt; ─ Platform ─────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • (no changes)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Locale ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • (no changes)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Matrix products ──────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • (no changes)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Document products ────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • (no changes)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Machine ──────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • (no changes)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • (no changes)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • captured at (old)     2026-09-06 14:21:43 UTC</span></span>
+<span><span class="co">#&gt; • captured at (new)     2026-09-06 14:21:43 UTC</span></span>
+<span><span class="co">#&gt; • wall clock elapsed    0.04 secs</span></span>
+<span><span class="co">#&gt; • session uptime delta  0.04 secs</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • (no changes)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Library paths ────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • (no changes)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Packages ─────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • (no changes)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Global environment ───────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; Added [n = 1]</span></span>
+<span><span class="co">#&gt;         name   class size                             hash</span></span>
+<span><span class="co">#&gt;  some_result integer   96 85ee0eceeffb89a47e4f4af1e6e38395</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Attached environments ────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • (no changes)</span></span></code></pre></div>
+<p>By default, <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>/<code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> collapse every
+section with nothing to report down to a single “(no changes)” line
+(<code>changed_only = TRUE</code>, as seen above for every section but
+<code>globalenv</code> and <code>timing</code>); pass
+<code>changed_only = FALSE</code> to see every field for the
+record-shaped sections (<code>platform</code>, <code>locale</code>,
+<code>matrix</code>, <code>document</code>, <code>machine</code>,
+<code>git</code>, <code>rng</code>) regardless of whether it changed.
+<code>timing</code> is always shown in full, since
+<code>captured_at</code>/<code>elapsed_sec</code> necessarily differ
+between any two <code><a href="../reference/sessionstate.html">sessionstate()</a></code> calls – there’s no
+“unchanged” case to collapse.</p>
+<p>Like <code><a href="../reference/sessionstate.html">sessionstate()</a></code>’s three tabular sections, the diff’s
+<code>packages</code>/<code>globalenv</code>/<code>attachments</code>
+sections can be coerced with <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>, though the
+shape is different: one row per key and tracked field, tagged
+<code>"added"</code>, <code>"removed"</code>, or <code>"modified"</code>
+rather than one row per key overall.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">diff</span>, which <span class="op">=</span> <span class="st">"globalenv"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;          name change field  old                              new verified</span></span>
+<span><span class="co">#&gt; 1 some_result  added class &lt;NA&gt;                          integer       NA</span></span>
+<span><span class="co">#&gt; 2 some_result  added  size &lt;NA&gt;                               96       NA</span></span>
+<span><span class="co">#&gt; 3 some_result  added  hash &lt;NA&gt; 85ee0eceeffb89a47e4f4af1e6e38395       NA</span></span></code></pre></div>
+<p><code>globalenv</code>’s rows also carry a <code>verified</code>
+column. <code><a href="../reference/sessionstate.html">sessionstate()</a></code> fingerprints each global environment
+object’s value (an MD5 hash of its serialized form), so a value change
+can be detected even when an object’s class and size stay the same; when
+both snapshots have a usable hash for an object, a hash mismatch is
+authoritative (<code>verified = TRUE</code>). When an object can’t be
+hashed at all (e.g. one holding a database connection), the comparison
+falls back to <code>class</code>/<code>size</code> only
+(<code>verified = FALSE</code>) – and if neither of those changed
+either, a value change could have happened invisibly.</p>
+<p><code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code> also warns if <code>new</code>
+looks like it was captured <em>before</em> <code>old</code>, in case the
+two arguments were passed in the wrong order. See
+<code><a href="../reference/compare_sessionstates.html">?compare_sessionstates</a></code> for the full per-section diff
+semantics.</p>
 </div>
 <div class="section level2">
 <h2 id="suggested-next-step">Suggested next step<a class="anchor" aria-label="anchor" href="#suggested-next-step"></a>
