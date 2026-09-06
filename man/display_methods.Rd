@@ -55,9 +55,9 @@
   ...
 )
 
-\method{format}{sessioncheck_sessionstatediff}(x, changed_only = TRUE, ...)
+\method{format}{sessioncheck_sessionstatediff}(x, changed_only = NULL, ...)
 
-\method{print}{sessioncheck_sessionstatediff}(x, changed_only = TRUE, ...)
+\method{print}{sessioncheck_sessionstatediff}(x, changed_only = NULL, ...)
 }
 \arguments{
 \item{x}{An object of class \code{sessioncheck_status}, \code{sessioncheck_sessioncheck},
@@ -132,8 +132,8 @@ other classes. See Details for how the default is resolved.}
 
 \item{changed_only}{For \code{sessioncheck_sessionstatediff} objects, whether to
 collapse sections/fields with no detected change down to a single "(no
-changes)" line (\code{TRUE}, the default) or always show every field. Ignored
-for other classes.}
+changes)" line (\code{TRUE} by default) or always show every field. Ignored
+for other classes. See Details for how the default is resolved.}
 }
 \value{
 Character vector
@@ -166,4 +166,10 @@ is displayed; it never changes the underlying object, so
 \code{\link[=coercion_methods]{as.data.frame()}} always returns the full package
 inventory, and \code{x$globalenv}/\code{x$attachments} always return their full
 data frames, regardless of any selection in effect.
+
+For \code{sessioncheck_sessionstatediff} objects, \code{changed_only} is resolved
+through the same precedence: an explicit argument always wins; otherwise
+\code{getOption("sessioncheck")} is checked for a
+\code{sessionstatediff_changed_only} field; if neither is set, it defaults to
+\code{TRUE}.
 }

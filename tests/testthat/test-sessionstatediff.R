@@ -272,6 +272,30 @@ test_that("format.sessioncheck_sessionstatediff() shows changed fields with old 
   expect_match(txt, "/tmp/proj -> /tmp/other", fixed = TRUE)
 })
 
+test_that("format.sessioncheck_sessionstatediff() honors sessionstatediff_changed_only set via options(sessioncheck = ...)", {
+  old_opt <- options(sessioncheck = list(sessionstatediff_changed_only = FALSE))
+  on.exit(options(old_opt), add = TRUE)
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(timing = list(
+    captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11
+  )))
+  diff <- compare_sessionstates(old, new)
+  txt <- format(diff)
+  expect_match(txt, "TestOS", fixed = TRUE)
+})
+
+test_that("an explicit changed_only argument overrides options(sessioncheck = ...)", {
+  old_opt <- options(sessioncheck = list(sessionstatediff_changed_only = FALSE))
+  on.exit(options(old_opt), add = TRUE)
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(timing = list(
+    captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11
+  )))
+  diff <- compare_sessionstates(old, new)
+  txt <- format(diff, changed_only = TRUE)
+  expect_no_match(txt, "TestOS", fixed = TRUE)
+})
+
 test_that("format.sessioncheck_sessionstatediff() with changed_only = FALSE shows unchanged fields too", {
   old <- .mock_sessionstate()
   new <- .mock_sessionstate(list(timing = list(

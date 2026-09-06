@@ -80,7 +80,8 @@
 
 #' @rdname display_methods
 #' @exportS3Method base::format
-format.sessioncheck_sessionstatediff <- function(x, changed_only = TRUE, ...) {
+format.sessioncheck_sessionstatediff <- function(x, changed_only = NULL, ...) {
+  changed_only <- .resolve_field_selection(changed_only, "sessionstatediff_changed_only", TRUE)
   sections <- list(
     .render_record_section("Platform", x$platform, changed_only),
     .render_record_section("Locale", x$locale, changed_only),
@@ -107,7 +108,7 @@ format.sessioncheck_sessionstatediff <- function(x, changed_only = TRUE, ...) {
 
 #' @rdname display_methods
 #' @exportS3Method base::print
-print.sessioncheck_sessionstatediff <- function(x, changed_only = TRUE, ...) {
+print.sessioncheck_sessionstatediff <- function(x, changed_only = NULL, ...) {
   cat(format(x, changed_only = changed_only, ...), "\n")
   invisible(x)
 }

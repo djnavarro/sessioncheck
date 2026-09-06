@@ -83,8 +83,8 @@ new_sessionstatediff <- function(platform, locale, matrix, document, machine, gi
 #' `sessioncheck_sessionstate`, or `sessioncheck_sessionstatediff`
 #' @param changed_only For `sessioncheck_sessionstatediff` objects, whether to
 #' collapse sections/fields with no detected change down to a single "(no
-#' changes)" line (`TRUE`, the default) or always show every field. Ignored
-#' for other classes.
+#' changes)" line (`TRUE` by default) or always show every field. Ignored
+#' for other classes. See Details for how the default is resolved.
 #' @param platform For `sessioncheck_sessionstate` objects, an optional character
 #' vector selecting which platform fields to display (from `"version"`, `"os"`,
 #' `"system"`, `"ui"`, `"tz"`, `"date"`). Defaults to showing all fields.
@@ -163,6 +163,12 @@ new_sessionstatediff <- function(platform, locale, matrix, document, machine, gi
 #' [`as.data.frame()`][coercion_methods] always returns the full package
 #' inventory, and `x$globalenv`/`x$attachments` always return their full
 #' data frames, regardless of any selection in effect.
+#'
+#' For `sessioncheck_sessionstatediff` objects, `changed_only` is resolved
+#' through the same precedence: an explicit argument always wins; otherwise
+#' `getOption("sessioncheck")` is checked for a
+#' `sessionstatediff_changed_only` field; if neither is set, it defaults to
+#' `TRUE`.
 #'
 #' @name display_methods
 
