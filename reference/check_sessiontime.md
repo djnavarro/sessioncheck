@@ -7,7 +7,11 @@ if requested.
 ## Usage
 
 ``` r
-check_sessiontime(action = "warn", max_sessiontime = NULL)
+check_sessiontime(
+  action = "warn",
+  max_sessiontime = NULL,
+  action_on_pass = "none"
+)
 ```
 
 ## Arguments
@@ -22,6 +26,11 @@ check_sessiontime(action = "warn", max_sessiontime = NULL)
 
   Maximum session time permitted in seconds before the checker takes
   action
+
+- action_on_pass:
+
+  Behavior to take if the status is clean. Possible values are "message"
+  and "none". The default is `action_on_pass = "none"`.
 
 ## Value
 
@@ -45,12 +54,11 @@ check_sessiontime(action = "message")
 # a session that has run past the threshold: reports the elapsed time
 # and the threshold together, both in human-readable units
 check_sessiontime(action = "message", max_sessiontime = 0)
-#> ✖ Session runtime (37.77 secs) exceeds threshold of 0 secs
+#> ✖ Session runtime (6.42 secs) exceeds threshold of 0 secs
 
-# a session comfortably within the threshold: a passing check is always
-# silent regardless of `action` (that argument only controls what
-# happens when a problem *is* found), so print() the returned status
-# directly to see the "no issues" wording
-print(check_sessiontime(action = "none", max_sessiontime = Inf))
-#> ✔ Session runtime (37.77 secs) below threshold of Inf days
+# a session comfortably within the threshold: `action` only controls
+# what happens when a problem *is* found, so use
+# `action_on_pass = "message"` to confirm the clean result instead
+check_sessiontime(action = "none", max_sessiontime = Inf, action_on_pass = "message")
+#> ✔ Session runtime (6.42 secs) below threshold of Inf days
 ```

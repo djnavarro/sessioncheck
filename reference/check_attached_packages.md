@@ -6,7 +6,11 @@ Session checkers can produce errors, warnings, or messages if requested.
 ## Usage
 
 ``` r
-check_attached_packages(action = "warn", allow_attached_packages = NULL)
+check_attached_packages(
+  action = "warn",
+  allow_attached_packages = NULL,
+  action_on_pass = "none"
+)
 ```
 
 ## Arguments
@@ -21,6 +25,11 @@ check_attached_packages(action = "warn", allow_attached_packages = NULL)
 
   Character vector containing names of packages that are "allowed", and
   will not trigger an action if attached to the search path.
+
+- action_on_pass:
+
+  Behavior to take if the status is clean. Possible values are "message"
+  and "none". The default is `action_on_pass = "none"`.
 
 ## Value
 
@@ -52,10 +61,14 @@ will not trigger actions.
 check_attached_packages(action = "message")
 #> ✖ Unexpected packages: sessioncheck
 
-# a session with no unexpected packages attached: a passing check is
-# always silent regardless of `action`, so print() the returned status
-# directly to see the "no issues" wording
-print(check_attached_packages(action = "none", allow_attached_packages = .packages()))
+# a session with no unexpected packages attached: `action` only controls
+# what happens when a problem *is* found, so use `action_on_pass = "message"`
+# to confirm the clean result instead
+check_attached_packages(
+  action = "none",
+  allow_attached_packages = .packages(),
+  action_on_pass = "message"
+)
 #> ✔ No unexpected packages attached
  
 ```

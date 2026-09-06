@@ -8,7 +8,7 @@ articles:
   articles/sessioncheck: sessioncheck.html
   articles/sessionstate-reporting: sessionstate-reporting.html
   articles/why-check-the-r-session: why-check-the-r-session.html
-last_built: 2026-09-06T08:54Z
+last_built: 2026-09-06T10:14Z
 urls:
   reference: https://sessioncheck.djnavarro.net/reference
   article: https://sessioncheck.djnavarro.net/articles

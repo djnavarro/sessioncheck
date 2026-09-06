@@ -6,7 +6,11 @@ checkers can produce errors, warnings, or messages if requested.
 ## Usage
 
 ``` r
-check_required_options(action = "warn", required_options = NULL)
+check_required_options(
+  action = "warn",
+  required_options = NULL,
+  action_on_pass = "none"
+)
 ```
 
 ## Arguments
@@ -22,6 +26,11 @@ check_required_options(action = "warn", required_options = NULL)
   A named list of required options. If any of these options are missing
   or have different values to the required values, an action is
   triggered.
+
+- action_on_pass:
+
+  Behavior to take if the status is clean. Possible values are "message"
+  and "none". The default is `action_on_pass = "none"`.
 
 ## Value
 
@@ -80,9 +89,13 @@ check_required_options(
 #>     sessioncheck_example: expected user-supplied <list>, got a different <list>
 options(old)
 
-# a required option matching its current value: a passing check is
-# always silent regardless of `action`, so print() the returned status
-# directly to see the "no issues" wording
-print(check_required_options(action = "none", required_options = list(digits = getOption("digits"))))
+# a required option matching its current value: `action` only controls
+# what happens when a problem *is* found, so use
+# `action_on_pass = "message"` to confirm the clean result instead
+check_required_options(
+  action = "none",
+  required_options = list(digits = getOption("digits")),
+  action_on_pass = "message"
+)
 #> ✔ No unexpected options detected
 ```

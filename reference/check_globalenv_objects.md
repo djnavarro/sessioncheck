@@ -7,7 +7,11 @@ Session checkers can produce errors, warnings, or messages if requested.
 ## Usage
 
 ``` r
-check_globalenv_objects(action = "warn", allow_globalenv_objects = NULL)
+check_globalenv_objects(
+  action = "warn",
+  allow_globalenv_objects = NULL,
+  action_on_pass = "none"
+)
 ```
 
 ## Arguments
@@ -22,6 +26,11 @@ check_globalenv_objects(action = "warn", allow_globalenv_objects = NULL)
 
   Character vector containing names of objects that are "allowed", and
   will not trigger an action.
+
+- action_on_pass:
+
+  Behavior to take if the status is clean. Possible values are "message"
+  and "none". The default is `action_on_pass = "none"`.
 
 ## Value
 
@@ -50,13 +59,14 @@ will not trigger an action if the name starts with a dot. For example,
 ``` r
 check_globalenv_objects(action = "message")
 
-# a session with no unexpected objects in the global environment: a
-# passing check is always silent regardless of `action`, so print() the
-# returned status directly to see the "no issues" wording
-print(check_globalenv_objects(
+# a session with no unexpected objects in the global environment:
+# `action` only controls what happens when a problem *is* found, so use
+# `action_on_pass = "message"` to confirm the clean result instead
+check_globalenv_objects(
   action = "none",
-  allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE)
-))
+  allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE),
+  action_on_pass = "message"
+)
 #> ✔ No unexpected objects in global environment
  
 ```

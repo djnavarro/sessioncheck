@@ -7,7 +7,11 @@ requested.
 ## Usage
 
 ``` r
-check_required_sysenv(action = "warn", required_sysenv = NULL)
+check_required_sysenv(
+  action = "warn",
+  required_sysenv = NULL,
+  action_on_pass = "none"
+)
 ```
 
 ## Arguments
@@ -23,6 +27,11 @@ check_required_sysenv(action = "warn", required_sysenv = NULL)
   A named list of required system environment variables. If any of these
   variables are missing or have different values to the required values,
   an action is triggered.
+
+- action_on_pass:
+
+  Behavior to take if the status is clean. Possible values are "message"
+  and "none". The default is `action_on_pass = "none"`.
 
 ## Value
 
@@ -61,9 +70,13 @@ check_required_sysenv(
 #> ✖ Unexpected system environment variables:
 #>     SESSIONCHECK_EXAMPLE_UNSET_VAR: missing (expected value)
 
-# a required variable matching its current value: a passing check is
-# always silent regardless of `action`, so print() the returned status
-# directly to see the "no issues" wording
-print(check_required_sysenv(action = "none", required_sysenv = list(R_HOME = Sys.getenv("R_HOME"))))
+# a required variable matching its current value: `action` only
+# controls what happens when a problem *is* found, so use
+# `action_on_pass = "message"` to confirm the clean result instead
+check_required_sysenv(
+  action = "none",
+  required_sysenv = list(R_HOME = Sys.getenv("R_HOME")),
+  action_on_pass = "message"
+)
 #> ✔ No unexpected system environment variables detected
 ```

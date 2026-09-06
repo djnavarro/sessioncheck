@@ -19,6 +19,12 @@
 
 ### New features
 
+- Added an `action_on_pass` argument to
+  [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
+  and the individual `check_*()` functions, allowing a clean result to
+  be confirmed with a message rather than remaining silent
+  ([\#10](https://github.com/djnavarro/sessioncheck/issues/10)).
+
 - Added
   [`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md),
   a companion to

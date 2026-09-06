@@ -6,7 +6,11 @@ Session checkers can produce errors, warnings, or messages if requested.
 ## Usage
 
 ``` r
-check_loaded_namespaces(action = "warn", allow_loaded_namespaces = NULL)
+check_loaded_namespaces(
+  action = "warn",
+  allow_loaded_namespaces = NULL,
+  action_on_pass = "none"
+)
 ```
 
 ## Arguments
@@ -21,6 +25,11 @@ check_loaded_namespaces(action = "warn", allow_loaded_namespaces = NULL)
 
   Character vector containing names of packages that are "allowed", and
   will not trigger an action if loaded via namespace.
+
+- action_on_pass:
+
+  Behavior to take if the status is clean. Possible values are "message"
+  and "none". The default is `action_on_pass = "none"`.
 
 ## Value
 
@@ -51,10 +60,14 @@ must be loaded in order to call the function.
 check_loaded_namespaces(action = "message")
 #> ✖ Unexpected namespaces: jsonlite, brio, xml2, jquerylib, and 42 more
 
-# a session with no unexpected namespaces loaded: a passing check is
-# always silent regardless of `action`, so print() the returned status
-# directly to see the "no issues" wording
-print(check_loaded_namespaces(action = "none", allow_loaded_namespaces = loadedNamespaces()))
+# a session with no unexpected namespaces loaded: `action` only controls
+# what happens when a problem *is* found, so use `action_on_pass = "message"`
+# to confirm the clean result instead
+check_loaded_namespaces(
+  action = "none",
+  allow_loaded_namespaces = loadedNamespaces(),
+  action_on_pass = "message"
+)
 #> ✔ No unexpected namespaces loaded
  
 ```

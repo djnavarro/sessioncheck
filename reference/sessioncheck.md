@@ -7,7 +7,7 @@ produce errors, warnings, or messages if requested.
 ## Usage
 
 ``` r
-sessioncheck(action = NULL, checks = NULL, ...)
+sessioncheck(action = NULL, checks = NULL, action_on_pass = NULL, ...)
 ```
 
 ## Arguments
@@ -23,6 +23,12 @@ sessioncheck(action = NULL, checks = NULL, ...)
   Character vector listing the checks to run. If the user does not
   specify the checks, the default is to run
   `checks = c("globalenv_objects", "attached_packages", "attached_environments")`.
+
+- action_on_pass:
+
+  Behavior to take if the status is clean. Possible values are "message"
+  and "none". If the user does not specify a value, the default is
+  `action_on_pass = "none"`.
 
 - ...:
 
@@ -72,16 +78,16 @@ sessioncheck(action = "message")
 #> ✖ Unexpected packages: sessioncheck
 #> ✔ No unexpected environments attached
 
-# a session with nothing flagged by the default checks: like every
-# check_*() function, a passing check is silent regardless of `action`
-# (that argument only controls what happens when a problem *is* found),
-# so print() the returned status directly to see the "no issues" wording
-print(sessioncheck(
+# a session with nothing flagged by the default checks: `action` only
+# controls what happens when a problem *is* found, so pass
+# `action_on_pass = "message"` to confirm the clean result instead
+sessioncheck(
   action = "none",
   allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE),
   allow_attached_packages = .packages(),
-  allow_attached_environments = search()
-))
+  allow_attached_environments = search(),
+  action_on_pass = "message"
+)
 #> Session check results:
 #> ✔ No unexpected objects in global environment
 #> ✔ No unexpected packages attached
