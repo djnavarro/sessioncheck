@@ -86,6 +86,40 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 
 Selecting fields this way only changes what's displayed -- it never touches the underlying object, so `x$machine` and `x$globalenv` are still captured in full for your own use. See `?display_methods` for the complete list of selectable fields, and the [customizing sessioncheck](customizing-sessioncheck.html) article for how these defaults can also be set globally via `options(sessioncheck = list(...))`.
 
+## Comparing two snapshots
+
+A single `sessionstate()` call is a snapshot of one moment; on its own it doesn't say what changed. `compare_sessionstates()` takes two snapshots and reports how they differ -- take one at the start of a script (or an interactive session), do some work, take another, and diff them:
+
+```{r}
+# wrapped in a function so `baseline`/`current` themselves never end up in
+# .GlobalEnv -- otherwise each would show up as "added" in the diff below,
+# simply for having been assigned in between the two snapshots
+take_diff <- function() {
+  baseline <- sessionstate()
+  assign("some_result", 1:10, envir = .GlobalEnv)
+  current <- sessionstate()
+  compare_sessionstates(baseline, current)
+}
+diff <- take_diff()
+diff
+```
+
+```{r, include = FALSE}
+rm(some_result, envir = .GlobalEnv)
+```
+
+By default, `print()`/`format()` collapse every section with nothing to report down to a single "(no changes)" line (`changed_only = TRUE`, as seen above for every section but `globalenv` and `timing`); pass `changed_only = FALSE` to see every field for the record-shaped sections (`platform`, `locale`, `matrix`, `document`, `machine`, `git`, `rng`) regardless of whether it changed. `timing` is always shown in full, since `captured_at`/`elapsed_sec` necessarily differ between any two `sessionstate()` calls -- there's no "unchanged" case to collapse.
+
+Like `sessionstate()`'s three tabular sections, the diff's `packages`/`globalenv`/`attachments` sections can be coerced with `as.data.frame()`, though the shape is different: one row per key and tracked field, tagged `"added"`, `"removed"`, or `"modified"` rather than one row per key overall.
+
+```{r}
+as.data.frame(diff, which = "globalenv")
+```
+
+`globalenv`'s rows also carry a `verified` column. `sessionstate()` fingerprints each global environment object's value (an MD5 hash of its serialized form), so a value change can be detected even when an object's class and size stay the same; when both snapshots have a usable hash for an object, a hash mismatch is authoritative (`verified = TRUE`). When an object can't be hashed at all (e.g. one holding a database connection), the comparison falls back to `class`/`size` only (`verified = FALSE`) -- and if neither of those changed either, a value change could have happened invisibly.
+
+`compare_sessionstates()` also warns if `new` looks like it was captured *before* `old`, in case the two arguments were passed in the wrong order. See `?compare_sessionstates` for the full per-section diff semantics.
+
 ## Suggested next step
 
 Because `machine`, `libpaths`, and `packages$ondisk_path`/`loaded_path` are the fields most likely to carry personal information, it's worth deciding *before* you start using `sessionstate()` in scripts or reports whether its output will ever leave your machine (e.g. committed logs, shared reports, public CI artifacts) and, if so, which fields you're comfortable including.
