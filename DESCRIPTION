@@ -12,7 +12,8 @@ Description:
     system environment variables. Intended as a safer replacement for the
     common 'rm(list = ls())' idiom: rather than silently wiping the global
     environment, sessioncheck() surfaces problems so the user can make an
-    informed decision.
+    informed decision. The package also supplies tools for documenting the
+    session state, to aid in the overall process.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en-US
