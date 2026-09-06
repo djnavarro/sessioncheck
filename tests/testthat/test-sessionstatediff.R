@@ -44,6 +44,10 @@ test_that(".diff_record() flags only fields that differ", {
   expect_identical(df$new[df$field == "b"], "z")
 })
 
+test_that(".diff_display_value() comma-joins a multi-element value", {
+  expect_identical(.diff_display_value(c(1, 2, 3)), "1, 2, 3")
+})
+
 test_that(".diff_record() uses identical(), not string comparison", {
   old <- list(a = 1L)
   new <- list(a = "1")
@@ -148,6 +152,22 @@ test_that(".diff_globalenv() falls back to class/size and marks unverified when 
   diff <- .diff_globalenv(old, new)
   expect_identical(nrow(diff$modified), 1L)
   expect_false(diff$modified$verified)
+})
+
+test_that(".diff_globalenv() with an unverifiable hash and no class/size change is not modified", {
+  old <- data.frame(name = "x", class = "numeric", size = 100, hash = NA_character_, stringsAsFactors = FALSE)
+  new <- data.frame(name = "x", class = "numeric", size = 100, hash = NA_character_, stringsAsFactors = FALSE)
+  diff <- .diff_globalenv(old, new)
+  expect_identical(nrow(diff$modified), 0L)
+})
+
+test_that(".diff_globalenv() reports class and size fields alongside a verified hash change", {
+  old <- data.frame(name = "x", class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE)
+  new <- data.frame(name = "x", class = "character", size = 200, hash = "h2", stringsAsFactors = FALSE)
+  diff <- .diff_globalenv(old, new)
+  expect_identical(nrow(diff$modified), 3L)
+  expect_setequal(diff$modified$field, c("hash", "class", "size"))
+  expect_true(all(diff$modified$verified))
 })
 
 test_that(".diff_globalenv() treats an unchanged hash as no modification", {
@@ -274,6 +294,39 @@ test_that("format.sessioncheck_sessionstatediff() reports added/removed/modified
   txt <- format(diff)
   expect_match(txt, "Modified \\[n = ", fixed = FALSE)
   expect_match(txt, "pkgA", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstatediff() reports added and removed packages without any modified", {
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11),
+    packages = data.frame(
+      package = c("base", "pkgC"), attached = c(TRUE, TRUE),
+      ondisk_version = c("1.0", "1.0"), loaded_version = c("1.0", "1.0"),
+      source = c("base", "CRAN"), stringsAsFactors = FALSE
+    )
+  ))
+  diff <- compare_sessionstates(old, new)
+  txt <- format(diff)
+  expect_match(txt, "Added \\[n = 1\\]", fixed = FALSE)
+  expect_match(txt, "Removed \\[n = 1\\]", fixed = FALSE)
+  expect_no_match(txt, "Modified \\[n = ", fixed = FALSE)
+  expect_match(txt, "pkgC", fixed = TRUE)
+  expect_match(txt, "pkgA", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstatediff() reports added and removed library paths", {
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11),
+    libpaths = c("/lib/a", "/lib/c")
+  ))
+  diff <- compare_sessionstates(old, new)
+  txt <- format(diff)
+  expect_match(txt, "Added:", fixed = TRUE)
+  expect_match(txt, "/lib/c", fixed = TRUE)
+  expect_match(txt, "Removed:", fixed = TRUE)
+  expect_match(txt, "/lib/b", fixed = TRUE)
 })
 
 # as.data.frame.sessioncheck_sessionstatediff() ------
