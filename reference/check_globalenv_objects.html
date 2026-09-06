@@ -102,6 +102,15 @@ For example, <code>.Random.seed</code> and <code>.Last.value</code> do not trigg
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">check_globalenv_objects</span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># a session with no unexpected objects in the global environment: a</span></span></span>
+<span class="r-in"><span><span class="co"># passing check is always silent regardless of `action`, so print() the</span></span></span>
+<span class="r-in"><span><span class="co"># returned status directly to see the "no issues" wording</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">check_globalenv_objects</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  action <span class="op">=</span> <span class="st">"none"</span>,</span></span>
+<span class="r-in"><span>  allow_globalenv_objects <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ls.html" class="external-link">ls</a></span><span class="op">(</span>envir <span class="op">=</span> <span class="va">.GlobalEnv</span>, all.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> No unexpected objects in global environment</span>
 <span class="r-in"><span> </span></span>
 </code></pre></div>
     </div>

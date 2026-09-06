@@ -55,5 +55,11 @@ actions.
 
 ``` r
 check_attached_environments(action = "message")
+
+# a session with no unexpected environments attached: a passing check
+# is always silent regardless of `action`, so print() the returned
+# status directly to see the "no issues" wording
+print(check_attached_environments(action = "none", allow_attached_environments = search()))
+#> ✔ No unexpected environments attached
  
 ```

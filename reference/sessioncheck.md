@@ -68,8 +68,23 @@ Other arguments are ignored.
 ``` r
 sessioncheck(action = "message")
 #> Session check results:
-#> ✔ Objects in global environment: [no issues detected]
-#> ✖ Attached packages: sessioncheck
-#> ✔ Attached environments: [no issues detected]
+#> ✔ No unexpected objects in global environment
+#> ✖ Unexpected packages: sessioncheck
+#> ✔ No unexpected environments attached
+
+# a session with nothing flagged by the default checks: like every
+# check_*() function, a passing check is silent regardless of `action`
+# (that argument only controls what happens when a problem *is* found),
+# so print() the returned status directly to see the "no issues" wording
+print(sessioncheck(
+  action = "none",
+  allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE),
+  allow_attached_packages = .packages(),
+  allow_attached_environments = search()
+))
+#> Session check results:
+#> ✔ No unexpected objects in global environment
+#> ✔ No unexpected packages attached
+#> ✔ No unexpected environments attached
  
 ```

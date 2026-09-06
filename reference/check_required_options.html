@@ -92,7 +92,50 @@ missing or have different values to the required values, an action is triggered.
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">check_required_options</span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, required_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>scipen <span class="op">=</span> <span class="fl">0L</span>, max.print <span class="op">=</span> <span class="fl">50L</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Unexpected options: max.print</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Unexpected options:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     max.print: expected 50, got 99999</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># a required option that is present, but has a different value: reports</span></span></span>
+<span class="r-in"><span><span class="co"># the expected and actual values</span></span></span>
+<span class="r-in"><span><span class="va">old</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>scipen <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">check_required_options</span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, required_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>scipen <span class="op">=</span> <span class="fl">100L</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Unexpected options:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     scipen: expected 100, got 0</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="va">old</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># a required option that is not set at all: reported as missing, rather</span></span></span>
+<span class="r-in"><span><span class="co"># than lumped in with the mismatched-value case above</span></span></span>
+<span class="r-in"><span><span class="fu">check_required_options</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  action <span class="op">=</span> <span class="st">"message"</span>,</span></span>
+<span class="r-in"><span>  required_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>a_totally_unset_option <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Unexpected options:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     a_totally_unset_option: missing (expected TRUE)</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># a long vector value is summarized rather than printed in full</span></span></span>
+<span class="r-in"><span><span class="va">old</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>scipen <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">check_required_options</span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, required_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>scipen <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5000</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Unexpected options:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     scipen: expected c(1, 2, 3, 4, 5, ... [5000 total]), got 0</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="va">old</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># non-atomic values (e.g. lists) are described by role -- "user-supplied"</span></span></span>
+<span class="r-in"><span><span class="co"># vs. "a different" -- rather than by content, since two unequal lists</span></span></span>
+<span class="r-in"><span><span class="co"># would otherwise both print as the uninformative "&lt;list&gt;"</span></span></span>
+<span class="r-in"><span><span class="va">old</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>sessioncheck_example <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">check_required_options</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  action <span class="op">=</span> <span class="st">"message"</span>,</span></span>
+<span class="r-in"><span>  required_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sessioncheck_example <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>b <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Unexpected options:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     sessioncheck_example: expected user-supplied &lt;list&gt;, got a different &lt;list&gt;</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="va">old</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># a required option matching its current value: a passing check is</span></span></span>
+<span class="r-in"><span><span class="co"># always silent regardless of `action`, so print() the returned status</span></span></span>
+<span class="r-in"><span><span class="co"># directly to see the "no issues" wording</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">check_required_options</span><span class="op">(</span>action <span class="op">=</span> <span class="st">"none"</span>, required_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>digits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"digits"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> No unexpected options detected</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

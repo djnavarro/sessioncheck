@@ -92,7 +92,30 @@ are missing or have different values to the required values, an action is trigge
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">check_required_locale</span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, required_locale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>LC_TIME <span class="op">=</span> <span class="st">"en_US.UTF-8"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Unexpected locale settings: LC_TIME</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Unexpected locale settings:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     LC_TIME: expected en_US.UTF-8, got C.UTF-8</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># a required locale setting that is present, but has a different value:</span></span></span>
+<span class="r-in"><span><span class="co"># reports the expected and actual values</span></span></span>
+<span class="r-in"><span><span class="fu">check_required_locale</span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, required_locale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>LC_CTYPE <span class="op">=</span> <span class="st">"not-a-real-locale"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Unexpected locale settings:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     LC_CTYPE: expected not-a-real-locale, got C.UTF-8</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># a required locale setting that isn't part of the current locale at</span></span></span>
+<span class="r-in"><span><span class="co"># all: reported as missing, rather than lumped in with the</span></span></span>
+<span class="r-in"><span><span class="co"># mismatched-value case above</span></span></span>
+<span class="r-in"><span><span class="fu">check_required_locale</span><span class="op">(</span>action <span class="op">=</span> <span class="st">"message"</span>, required_locale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>LC_MADEUP <span class="op">=</span> <span class="st">"en_US.UTF-8"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Unexpected locale settings:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     LC_MADEUP: missing (expected en_US.UTF-8)</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># a required locale setting matching its current value: a passing check</span></span></span>
+<span class="r-in"><span><span class="co"># is always silent regardless of `action`, so print() the returned</span></span></span>
+<span class="r-in"><span><span class="co"># status directly to see the "no issues" wording</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">check_required_locale</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  action <span class="op">=</span> <span class="st">"none"</span>,</span></span>
+<span class="r-in"><span>  required_locale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>LC_COLLATE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/locales.html" class="external-link">Sys.getlocale</a></span><span class="op">(</span><span class="st">"LC_COLLATE"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> No unexpected locale settings detected</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

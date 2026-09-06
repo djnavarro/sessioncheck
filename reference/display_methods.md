@@ -5,6 +5,8 @@ Format and print sessioncheck objects
 ## Usage
 
 ``` r
+.status_prefix
+
 # S3 method for class 'sessioncheck_status'
 format(x, ...)
 

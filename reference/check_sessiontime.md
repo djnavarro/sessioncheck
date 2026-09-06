@@ -41,4 +41,16 @@ Invisibly returns an object of class `sessioncheck_status`.
 
 ``` r
 check_sessiontime(action = "message")
+
+# a session that has run past the threshold: reports the elapsed time
+# and the threshold together, both in human-readable units
+check_sessiontime(action = "message", max_sessiontime = 0)
+#> ✖ Session runtime (37.77 secs) exceeds threshold of 0 secs
+
+# a session comfortably within the threshold: a passing check is always
+# silent regardless of `action` (that argument only controls what
+# happens when a problem *is* found), so print() the returned status
+# directly to see the "no issues" wording
+print(check_sessiontime(action = "none", max_sessiontime = Inf))
+#> ✔ Session runtime (37.77 secs) below threshold of Inf days
 ```

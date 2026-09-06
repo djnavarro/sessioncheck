@@ -9,6 +9,14 @@
   messages/warnings raised by `action = "message"`/`"warn"`) is now
   nicer to read, with a cli-like style.
 
+- Messaging for
+  [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
+  and the individual `check_*()` functions is more informative and more
+  consistent across checkers, including a clearer distinction between
+  “missing” and “mismatched” for the options/locale/sysenv checks, and a
+  dedicated message for
+  [`check_sessiontime()`](https://sessioncheck.djnavarro.net/reference/check_sessiontime.md).
+
 ### New features
 
 - Added

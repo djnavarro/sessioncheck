@@ -126,7 +126,7 @@ triggered:</p>
 <span><span class="va">.hidden_1</span> <span class="op">&lt;-</span> <span class="st">"but this will not"</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: ✖ Objects in global environment: visible_1, visible_2</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: ✖ Unexpected objects in global environment: visible_1, visible_2</span></span></code></pre></div>
 <p>The output indicates that the script has detected
 <code>visible_1</code> and <code>visible_2</code> in the global
 environment, and issues a warning to suggest that the R session may be
@@ -143,8 +143,8 @@ variables in the global environment regardless of their name, set
 <code>allow_globalenv_objects = ""</code>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_globalenv_objects.html">check_globalenv_objects</a></span><span class="op">(</span>allow_globalenv_objects <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: ✖ Objects in global environment: .hidden_1, .Random.seed, visible_1,</span></span>
-<span><span class="co">#&gt; visible_2</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: ✖ Unexpected objects in global environment: .hidden_1, .Random.seed,</span></span>
+<span><span class="co">#&gt; visible_1, visible_2</span></span></code></pre></div>
 <p>This time the check detects the <code>.hidden_1</code> variable and
 the <code>.Random.seed</code> variable. To see this in a little more
 detail, we can convert the result to a data frame:</p>
@@ -172,14 +172,14 @@ errors, or messages.</p>
 search path to see which packages have been attached:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_attached_packages.html">check_attached_packages</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: ✖ Attached packages: sessioncheck</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: ✖ Unexpected packages: sessioncheck</span></span></code></pre></div>
 <p>The warning notes that in addition to the base R packages (which are
 always ignored), the <strong>sessioncheck</strong> package has been
 attached. To see this a little more explicitly, we can coerce the output
 to a data frame:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/check_attached_packages.html">check_attached_packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: ✖ Attached packages: sessioncheck</span></span>
+<span><span class="co">#&gt; Warning: ✖ Unexpected packages: sessioncheck</span></span>
 <span><span class="co">#&gt;      type       entity status</span></span>
 <span><span class="co">#&gt; 1 package sessioncheck   TRUE</span></span>
 <span><span class="co">#&gt; 2 package        stats  FALSE</span></span>
@@ -253,7 +253,7 @@ would prefer to have these trigger an action, the
 manually specify the names of allowed non-package environments:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_attached_environments.html">check_attached_environments</a></span><span class="op">(</span>allow_attached_environments <span class="op">=</span> <span class="st">"Autoloads"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: ✖ Attached environments: tools:callr</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: ✖ Unexpected environments attached: tools:callr</span></span></code></pre></div>
 <p>The warning is now triggered because <code>"Autoloads"</code> is
 whitelisted, but <code>"tools:callr"</code> is not.</p>
 </div>
@@ -262,7 +262,7 @@ whitelisted, but <code>"tools:callr"</code> is not.</p>
 </h3>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_loaded_namespaces.html">check_loaded_namespaces</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: ✖ Loaded namespaces: digest, desc, R6, fastmap, and 20 more</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: ✖ Unexpected namespaces: digest, desc, R6, fastmap, and 20 more</span></span></code></pre></div>
 <p>To understand this result, it is important to recall that the current
 document is rendered using <a href="https://pkgdown.r-lib.org/" class="external-link"><strong>pkgdown</strong></a>, with the
 consequence that <strong>pkgdown</strong> and its dependencies appear as
@@ -326,7 +326,7 @@ use the <code>allow_loaded_namespaces</code> argument:</p>
 <span>    <span class="st">"jsonlite"</span>, <span class="st">"rlang"</span>, <span class="st">"fs"</span>, <span class="st">"htmlwidgets"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: ✖ Loaded namespaces: otel</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: ✖ Unexpected namespaces: otel</span></span></code></pre></div>
 <p>Having whitelisted these namespaces, the check now passes and the
 warning is no longer triggered.</p>
 </div>
@@ -349,7 +349,7 @@ action is triggered. If no value is supplied, it defaults to 300
 seconds. The customization is illustrated below:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_sessiontime.html">check_sessiontime</a></span><span class="op">(</span>max_sessiontime <span class="op">=</span> <span class="fl">.0001</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: ✖ Session runtime: 1.218 sec elapsed</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: ✖ Session runtime (1.81 secs) exceeds threshold of 0 secs</span></span></code></pre></div>
 <p>Note that this check is not one of the default checks performed by
 the <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> function.</p>
 </div>

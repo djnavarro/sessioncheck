@@ -137,7 +137,7 @@ function created the status object.</li>
 the user in any message, warning, or error:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pkg_status</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ✖ Attached packages: sessioncheck</span></span></code></pre></div>
+<span><span class="co">#&gt; ✖ Unexpected packages: sessioncheck</span></span></code></pre></div>
 <p>As a convenience, an <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> method is also
 supplied:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -199,9 +199,9 @@ are used to construct the text to be displayed to the user:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">session_check</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Session check results:</span></span>
-<span><span class="co">#&gt; ✖ Objects in global environment: obj_status, pkg_status</span></span>
-<span><span class="co">#&gt; ✖ Attached packages: sessioncheck</span></span>
-<span><span class="co">#&gt; ✔ Attached environments: [no issues detected]</span></span></code></pre></div>
+<span><span class="co">#&gt; ✖ Unexpected objects in global environment: obj_status, pkg_status</span></span>
+<span><span class="co">#&gt; ✖ Unexpected packages: sessioncheck</span></span>
+<span><span class="co">#&gt; ✔ No unexpected environments attached</span></span></code></pre></div>
 <p>Similarly, there is an <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> method provided
 as a convenience:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -289,12 +289,12 @@ columns to display, without touching the underlying object:</p>
 <span><span class="co">#&gt; ─ Machine ──────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • commit sha          fac18285c7365cec3f3734b90587cbca38801efa</span></span>
+<span><span class="co">#&gt; • commit sha          7242cffd8349407816c97d51b999015d01ccf4f7</span></span>
 <span><span class="co">#&gt; • dirty               FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • captured at         2026-09-06 05:32:35 UTC</span></span>
-<span><span class="co">#&gt; • session uptime      0.663 sec</span></span>
+<span><span class="co">#&gt; • captured at         2026-09-06 08:54:15 UTC</span></span>
+<span><span class="co">#&gt; • session uptime      0.862 sec</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; • kind                Mersenne-Twister</span></span>

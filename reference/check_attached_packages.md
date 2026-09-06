@@ -50,6 +50,12 @@ will not trigger actions.
 
 ``` r
 check_attached_packages(action = "message")
-#> ✖ Attached packages: sessioncheck
+#> ✖ Unexpected packages: sessioncheck
+
+# a session with no unexpected packages attached: a passing check is
+# always silent regardless of `action`, so print() the returned status
+# directly to see the "no issues" wording
+print(check_attached_packages(action = "none", allow_attached_packages = .packages()))
+#> ✔ No unexpected packages attached
  
 ```

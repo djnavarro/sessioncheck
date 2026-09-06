@@ -74,7 +74,7 @@ any message, warning, or error:
 ``` r
 
 print(pkg_status)
-#> ✖ Attached packages: sessioncheck
+#> ✖ Unexpected packages: sessioncheck
 ```
 
 As a convenience, an
@@ -149,9 +149,9 @@ construct the text to be displayed to the user:
 
 print(session_check)
 #> Session check results:
-#> ✖ Objects in global environment: obj_status, pkg_status
-#> ✖ Attached packages: sessioncheck
-#> ✔ Attached environments: [no issues detected]
+#> ✖ Unexpected objects in global environment: obj_status, pkg_status
+#> ✖ Unexpected packages: sessioncheck
+#> ✔ No unexpected environments attached
 ```
 
 Similarly, there is an
@@ -248,12 +248,12 @@ print(session_state, packages = "package", globalenv = "class", machine = charac
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          fac18285c7365cec3f3734b90587cbca38801efa
+#> • commit sha          7242cffd8349407816c97d51b999015d01ccf4f7
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-06 05:32:35 UTC
-#> • session uptime      0.663 sec
+#> • captured at         2026-09-06 08:54:15 UTC
+#> • session uptime      0.862 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister

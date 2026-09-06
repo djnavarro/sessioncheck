@@ -41,5 +41,28 @@ Invisibly returns an object of class `sessioncheck_status`.
 
 ``` r
 check_required_locale(action = "message", required_locale = list(LC_TIME = "en_US.UTF-8"))
-#> ✖ Unexpected locale settings: LC_TIME
+#> ✖ Unexpected locale settings:
+#>     LC_TIME: expected en_US.UTF-8, got C.UTF-8
+
+# a required locale setting that is present, but has a different value:
+# reports the expected and actual values
+check_required_locale(action = "message", required_locale = list(LC_CTYPE = "not-a-real-locale"))
+#> ✖ Unexpected locale settings:
+#>     LC_CTYPE: expected not-a-real-locale, got C.UTF-8
+
+# a required locale setting that isn't part of the current locale at
+# all: reported as missing, rather than lumped in with the
+# mismatched-value case above
+check_required_locale(action = "message", required_locale = list(LC_MADEUP = "en_US.UTF-8"))
+#> ✖ Unexpected locale settings:
+#>     LC_MADEUP: missing (expected en_US.UTF-8)
+
+# a required locale setting matching its current value: a passing check
+# is always silent regardless of `action`, so print() the returned
+# status directly to see the "no issues" wording
+print(check_required_locale(
+  action = "none",
+  required_locale = list(LC_COLLATE = Sys.getlocale("LC_COLLATE"))
+))
+#> ✔ No unexpected locale settings detected
 ```

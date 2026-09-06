@@ -49,6 +49,12 @@ must be loaded in order to call the function.
 
 ``` r
 check_loaded_namespaces(action = "message")
-#> ✖ Loaded namespaces: jsonlite, brio, xml2, jquerylib, and 42 more
+#> ✖ Unexpected namespaces: jsonlite, brio, xml2, jquerylib, and 42 more
+
+# a session with no unexpected namespaces loaded: a passing check is
+# always silent regardless of `action`, so print() the returned status
+# directly to see the "no issues" wording
+print(check_loaded_namespaces(action = "none", allow_loaded_namespaces = loadedNamespaces()))
+#> ✔ No unexpected namespaces loaded
  
 ```

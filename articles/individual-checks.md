@@ -57,7 +57,7 @@ visible_2 <- "so will this"
 .hidden_1 <- "but this will not"
 
 check_globalenv_objects()
-#> Warning: ✖ Objects in global environment: visible_1, visible_2
+#> Warning: ✖ Unexpected objects in global environment: visible_1, visible_2
 ```
 
 The output indicates that the script has detected `visible_1` and
@@ -78,8 +78,8 @@ set `allow_globalenv_objects = ""`:
 ``` r
 
 check_globalenv_objects(allow_globalenv_objects = "")
-#> Warning: ✖ Objects in global environment: .hidden_1, .Random.seed, visible_1,
-#> visible_2
+#> Warning: ✖ Unexpected objects in global environment: .hidden_1, .Random.seed,
+#> visible_1, visible_2
 ```
 
 This time the check detects the `.hidden_1` variable and the
@@ -114,7 +114,7 @@ is to inspect the search path to see which packages have been attached:
 ``` r
 
 check_attached_packages()
-#> Warning: ✖ Attached packages: sessioncheck
+#> Warning: ✖ Unexpected packages: sessioncheck
 ```
 
 The warning notes that in addition to the base R packages (which are
@@ -124,7 +124,7 @@ this a little more explicitly, we can coerce the output to a data frame:
 ``` r
 
 as.data.frame(check_attached_packages())
-#> Warning: ✖ Attached packages: sessioncheck
+#> Warning: ✖ Unexpected packages: sessioncheck
 #>      type       entity status
 #> 1 package sessioncheck   TRUE
 #> 2 package        stats  FALSE
@@ -214,7 +214,7 @@ the names of allowed non-package environments:
 ``` r
 
 check_attached_environments(allow_attached_environments = "Autoloads")
-#> Warning: ✖ Attached environments: tools:callr
+#> Warning: ✖ Unexpected environments attached: tools:callr
 ```
 
 The warning is now triggered because `"Autoloads"` is whitelisted, but
@@ -225,7 +225,7 @@ The warning is now triggered because `"Autoloads"` is whitelisted, but
 ``` r
 
 check_loaded_namespaces()
-#> Warning: ✖ Loaded namespaces: digest, desc, R6, fastmap, and 20 more
+#> Warning: ✖ Unexpected namespaces: digest, desc, R6, fastmap, and 20 more
 ```
 
 To understand this result, it is important to recall that the current
@@ -297,7 +297,7 @@ check_loaded_namespaces(
     "jsonlite", "rlang", "fs", "htmlwidgets"
   )
 )
-#> Warning: ✖ Loaded namespaces: otel
+#> Warning: ✖ Unexpected namespaces: otel
 ```
 
 Having whitelisted these namespaces, the check now passes and the
@@ -327,7 +327,7 @@ illustrated below:
 ``` r
 
 check_sessiontime(max_sessiontime = .0001)
-#> Warning: ✖ Session runtime: 1.218 sec elapsed
+#> Warning: ✖ Session runtime (1.81 secs) exceeds threshold of 0 secs
 ```
 
 Note that this check is not one of the default checks performed by the
