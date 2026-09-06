@@ -535,7 +535,8 @@ check_required_sysenv <- function(action = "warn", required_sysenv = NULL, actio
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param required_wd A single character path giving the working directory the
 #' session is expected to be in. If any other directory is currently in use,
-#' an action is triggered.
+#' an action is triggered. The default is `required_wd = NULL`, which means
+#' there is nothing to compare against, so the check always passes.
 #' @param action_on_pass Behavior to take if the status is clean. Possible values
 #' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
