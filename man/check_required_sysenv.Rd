@@ -24,6 +24,23 @@ Session checkers can produce errors, warnings, or messages if requested.
 \examples{
 check_required_sysenv(action = "message", required_sysenv = list(R_TEST = "value"))
 
+# a required variable that is present, but has a different value: reports
+# the expected and actual values (R_HOME is set by R itself, so this is
+# reliably a mismatch rather than a missing variable)
+check_required_sysenv(action = "message", required_sysenv = list(R_HOME = "not-the-real-path"))
+
+# a required variable that is not set at all: reported as missing,
+# rather than lumped in with the mismatched-value case above
+check_required_sysenv(
+  action = "message",
+  required_sysenv = list(SESSIONCHECK_EXAMPLE_UNSET_VAR = "value")
+)
+
+# a required variable matching its current value: a passing check is
+# always silent regardless of `action`, so print() the returned status
+# directly to see the "no issues" wording
+print(check_required_sysenv(action = "none", required_sysenv = list(R_HOME = Sys.getenv("R_HOME"))))
+
 }
 \seealso{
 \code{\link[=check_attached_packages]{check_attached_packages()}},

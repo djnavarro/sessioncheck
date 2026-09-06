@@ -57,6 +57,29 @@ test_that("format.sessioncheck_status() falls back to the plain name list for ha
   expect_equal(format(loc), "x Unexpected locale settings: x")
 })
 
+test_that("format.sessioncheck_status() uses a consistent 'Unexpected <thing>:' failure prefix for every check type", {
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  expect_equal(format(gg),  "x Unexpected objects in global environment: x")
+  expect_equal(format(nm),  "x Unexpected namespaces: x")
+  expect_equal(format(pac), "x Unexpected packages: x")
+  expect_equal(format(att), "x Unexpected environments attached: x")
+  expect_equal(format(st),  "x Session runtime exceeded: x")
+})
+
+test_that("format.sessioncheck_status() uses a checker-specific pass message instead of the generic '[no issues detected]'", {
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  clean <- function(type) new_status(status = c(x = FALSE), type = type)
+
+  expect_equal(format(clean("globalenv")),   "v No unexpected objects in global environment")
+  expect_equal(format(clean("namespace")),   "v No unexpected namespaces loaded")
+  expect_equal(format(clean("package")),     "v No unexpected packages attached")
+  expect_equal(format(clean("attachment")),  "v No unexpected environments attached")
+  expect_equal(format(clean("sessiontime")), "v Session runtime within limits")
+  expect_equal(format(clean("options")),     "v No unexpected options detected")
+  expect_equal(format(clean("sysenv")),      "v No unexpected system environment variables detected")
+  expect_equal(format(clean("locale")),      "v No unexpected locale settings detected")
+})
+
 test_that("as.data.frame methods return data frames", {
   d1 <- as.data.frame(gg)
   d2 <- as.data.frame(ss)

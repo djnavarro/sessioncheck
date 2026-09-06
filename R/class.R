@@ -110,21 +110,45 @@ new_sessionstate <- function(platform, locale, matrix, document, machine, git, t
 #'
 #' @name display_methods
 
+# fail-state prefix and pass-state message for each check type, keyed so
+# that a failing check always reads "Unexpected <thing>:" followed by its
+# summary, and a passing check always reads "No unexpected <thing>"
+# instead of the uninformative, one-size-fits-all "[no issues detected]"
+# (see #5 follow-up discussion on message framing consistency)
+.status_prefix <- c(
+  namespace   = "Unexpected namespaces:",
+  package     = "Unexpected packages:",
+  globalenv   = "Unexpected objects in global environment:",
+  attachment  = "Unexpected environments attached:",
+  sessiontime = "Session runtime exceeded:",
+  options     = "Unexpected options:",
+  sysenv      = "Unexpected system environment variables:",
+  locale      = "Unexpected locale settings:"
+)
+
+.status_clean_message <- c(
+  namespace   = "No unexpected namespaces loaded",
+  package     = "No unexpected packages attached",
+  globalenv   = "No unexpected objects in global environment",
+  attachment  = "No unexpected environments attached",
+  sessiontime = "Session runtime within limits",
+  options     = "No unexpected options detected",
+  sysenv      = "No unexpected system environment variables detected",
+  locale      = "No unexpected locale settings detected"
+)
+
 #' @rdname display_methods
 #' @exportS3Method base::format
 format.sessioncheck_status <- function(x, ...) {
-  if (x$type == "namespace")   prefix <- "Loaded namespaces:"
-  if (x$type == "package")     prefix <- "Attached packages:"
-  if (x$type == "globalenv")   prefix <- "Objects in global environment:"
-  if (x$type == "attachment")  prefix <- "Attached environments:"
-  if (x$type == "sessiontime") prefix <- "Session runtime:"
-  if (x$type == "options")     prefix <- "Unexpected options:"
-  if (x$type == "sysenv")      prefix <- "Unexpected system environment variables:"
-  if (x$type == "locale")      prefix <- "Unexpected locale settings:"
+  prefix <- .status_prefix[[x$type]]
+  clean_message <- .status_clean_message[[x$type]]
   if (x$type %in% c("options", "sysenv", "locale")) {
-    return(.message_text_detail(prefix, x$status))
+    return(.message_text_detail(prefix, x$status, clean_message = clean_message))
   }
-  .message_text(prefix, x$status)
+  if (x$type == "sessiontime") {
+    return(.message_text_sessiontime(x$status, prefix, clean_message))
+  }
+  .message_text(prefix, x$status, clean_message = clean_message)
 }
 
 #' @rdname display_methods

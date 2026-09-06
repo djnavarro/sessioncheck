@@ -29,6 +29,11 @@ since the package namespace must be loaded in order to call the function.
 }
 \examples{
 check_loaded_namespaces(action = "message")
+
+# a session with no unexpected namespaces loaded: a passing check is
+# always silent regardless of `action`, so print() the returned status
+# directly to see the "no issues" wording
+print(check_loaded_namespaces(action = "none", allow_loaded_namespaces = loadedNamespaces()))
  
 }
 \seealso{

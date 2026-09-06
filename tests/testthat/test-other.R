@@ -357,6 +357,48 @@ test_that(".message_text_detail() truncates long lists like .message_text()", {
   expect_no_match(msg, "c: missing")
 })
 
+test_that(".format_compare_value() truncates long atomic vectors instead of printing every element", {
+  expect_equal(.format_compare_value(1L), "1")
+  expect_equal(.format_compare_value(c(1L, 2L, 3L)), "c(1, 2, 3)")
+  expect_equal(
+    .format_compare_value(1:5000),
+    paste0("c(", paste(1:5, collapse = ", "), ", ... [5000 total])")
+  )
+  expect_equal(.format_compare_value(1:5), "c(1, 2, 3, 4, 5)")  # exactly at max_elements: no truncation marker
+})
+
+test_that(".format_compare_value() distinguishes same-class non-atomic values by role rather than printing identical placeholders", {
+  expect_equal(.format_compare_value(list(a = 1), role = "expected"), "user-supplied <list>")
+  expect_equal(.format_compare_value(list(a = 1), role = "actual"), "a different <list>")
+  expect_equal(.format_compare_value(data.frame(x = 1), role = "expected"), "user-supplied <data.frame>")
+  expect_equal(.format_compare_value(data.frame(x = 1), role = "actual"), "a different <data.frame>")
+})
+
+test_that(".format_compare_value() still reports NULL and scalar values plainly", {
+  expect_equal(.format_compare_value(NULL), "NULL")
+  expect_equal(.format_compare_value("x"), "x")
+  expect_equal(.format_compare_value(TRUE), "TRUE")
+})
+
+test_that(".message_text_detail() reports a truncated summary for a long atomic vector value (#5 follow-up)", {
+  status <- .get_xiny_status(x = list(scipen = 1:5000), y = list(scipen = 0L))
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_detail("Unexpected options:", status)
+
+  expect_match(msg, "... [5000 total]", fixed = TRUE)
+  expect_no_match(msg, "1000, 1001", fixed = TRUE)
+})
+
+test_that(".message_text_detail() distinguishes mismatched non-atomic values of the same class (#5 follow-up)", {
+  status <- .get_xiny_status(x = list(myopt = list(a = 1)), y = list(myopt = list(b = 2)))
+
+  local_mocked_bindings(.unicode_enabled = function() FALSE, .ansi_enabled = function() FALSE)
+  msg <- .message_text_detail("Unexpected options:", status)
+
+  expect_match(msg, "myopt: expected user-supplied <list>, got a different <list>", fixed = TRUE)
+})
+
 test_that(".message_text_detail() falls back to .message_text() without detail attributes", {
   status <- c(a = FALSE, b = TRUE, c = TRUE, d = TRUE)
 
