@@ -133,11 +133,12 @@
 #' `hash` (an MD5 fingerprint of the object's serialized value, in the same
 #' spirit as `rng$seed_hash`: [serialize()] the object, then run
 #' [tools::md5sum()] on the result). `hash` is `NA` when an object cannot be
-#' serialized at all (e.g. one holding an external pointer, such as a
-#' database connection) -- this is reported rather than silently treated as
-#' "unchanged" by anything comparing two snapshots. Only object names,
-#' classes, sizes, and value fingerprints are captured, never values
-#' themselves. Because a long-running script can accumulate many objects,
+#' serialized at all, which is rare in practice -- objects backed by an
+#' external pointer (e.g. a database connection) typically still serialize
+#' to a placeholder rather than erroring. This is reported rather than
+#' silently treated as "unchanged" by anything comparing two snapshots. Only
+#' object names, classes, sizes, and value fingerprints are captured, never
+#' values themselves. Because a long-running script can accumulate many objects,
 #' the default display shows only the largest few, and omits `hash` (see
 #' "Selecting which elements are displayed" below); the captured object
 #' itself always holds every object and every column.
@@ -411,11 +412,18 @@ sessionstate <- function() {
 # compare_sessionstates()) detect that a global environment object's value
 # changed even when its class and size did not (e.g. a numeric vector whose
 # elements were modified in place). Returns NA when the object cannot be
-# serialized at all -- objects holding external pointers (e.g. database
-# connections, some R6/S4/xptr-backed objects) can error under serialize();
-# rather than letting that abort the whole snapshot, the failure is
-# recorded as "not verifiable" and left for the caller to decide how to
-# treat it
+# serialized at all; rather than letting that abort the whole snapshot,
+# the failure is recorded as "not verifiable" and left for the caller to
+# decide how to treat it. Only `error` is caught, not `warning`: as of
+# current R (>= 3.5.0), plain serialize(obj, connection = NULL) does not
+# error on external pointers, weak references, or non-.GlobalEnv
+# environments either -- with no refhook supplied, ?serialize documents
+# that these reference-type objects fall back to a placeholder rather
+# than erroring. Deliberate probing across a range of such objects (open
+# connections, xptr slots, weak refs, R5/S4 instances, active bindings,
+# locked/self-referential environments) found no case that errors, let
+# alone warns, so the asymmetric error-only handling here is believed
+# safe; revisit if a concrete warning-raising case turns up
 .hash_object <- function(obj) {
   tmp <- tempfile()
   on.exit(unlink(tmp))
