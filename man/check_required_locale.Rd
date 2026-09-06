@@ -4,7 +4,11 @@
 \alias{check_required_locale}
 \title{Check required values for locale settings}
 \usage{
-check_required_locale(action = "warn", required_locale = NULL)
+check_required_locale(
+  action = "warn",
+  required_locale = NULL,
+  action_on_pass = "none"
+)
 }
 \arguments{
 \item{action}{Behavior to take if the status is not clean. Possible values are
@@ -12,6 +16,9 @@ check_required_locale(action = "warn", required_locale = NULL)
 
 \item{required_locale}{A named list of required locale settings. If any of these
 are missing or have different values to the required values, an action is triggered.}
+
+\item{action_on_pass}{Behavior to take if the status is clean. Possible values
+are "message" and "none". The default is \code{action_on_pass = "none"}.}
 }
 \value{
 Invisibly returns an object of class \code{sessioncheck_status}.
@@ -32,13 +39,14 @@ check_required_locale(action = "message", required_locale = list(LC_CTYPE = "not
 # mismatched-value case above
 check_required_locale(action = "message", required_locale = list(LC_MADEUP = "en_US.UTF-8"))
 
-# a required locale setting matching its current value: a passing check
-# is always silent regardless of `action`, so print() the returned
-# status directly to see the "no issues" wording
-print(check_required_locale(
+# a required locale setting matching its current value: `action` only
+# controls what happens when a problem *is* found, so use
+# `action_on_pass = "message"` to confirm the clean result instead
+check_required_locale(
   action = "none",
-  required_locale = list(LC_COLLATE = Sys.getlocale("LC_COLLATE"))
-))
+  required_locale = list(LC_COLLATE = Sys.getlocale("LC_COLLATE")),
+  action_on_pass = "message"
+)
 
 }
 \seealso{

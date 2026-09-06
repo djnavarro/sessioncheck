@@ -6,7 +6,8 @@
 \usage{
 check_attached_environments(
   action = "warn",
-  allow_attached_environments = NULL
+  allow_attached_environments = NULL,
+  action_on_pass = "none"
 )
 }
 \arguments{
@@ -15,6 +16,9 @@ check_attached_environments(
 
 \item{allow_attached_environments}{Character vector containing names of environments
 that are "allowed", and will not trigger an action if attached to the search path.}
+
+\item{action_on_pass}{Behavior to take if the status is clean. Possible values
+are "message" and "none". The default is \code{action_on_pass = "none"}.}
 }
 \value{
 Invisibly returns an object of class \code{sessioncheck_status}.
@@ -34,10 +38,14 @@ never trigger actions.
 \examples{
 check_attached_environments(action = "message")
 
-# a session with no unexpected environments attached: a passing check
-# is always silent regardless of `action`, so print() the returned
-# status directly to see the "no issues" wording
-print(check_attached_environments(action = "none", allow_attached_environments = search()))
+# a session with no unexpected environments attached: `action` only
+# controls what happens when a problem *is* found, so use
+# `action_on_pass = "message"` to confirm the clean result instead
+check_attached_environments(
+  action = "none",
+  allow_attached_environments = search(),
+  action_on_pass = "message"
+)
  
 }
 \seealso{

@@ -4,7 +4,11 @@
 \alias{check_sessiontime}
 \title{Check session run time}
 \usage{
-check_sessiontime(action = "warn", max_sessiontime = NULL)
+check_sessiontime(
+  action = "warn",
+  max_sessiontime = NULL,
+  action_on_pass = "none"
+)
 }
 \arguments{
 \item{action}{Behavior to take if the status is not clean. Possible values are
@@ -12,6 +16,9 @@ check_sessiontime(action = "warn", max_sessiontime = NULL)
 
 \item{max_sessiontime}{Maximum session time permitted in seconds before the checker
 takes action}
+
+\item{action_on_pass}{Behavior to take if the status is clean. Possible values
+are "message" and "none". The default is \code{action_on_pass = "none"}.}
 }
 \value{
 Invisibly returns an object of class \code{sessioncheck_status}.
@@ -27,11 +34,10 @@ check_sessiontime(action = "message")
 # and the threshold together, both in human-readable units
 check_sessiontime(action = "message", max_sessiontime = 0)
 
-# a session comfortably within the threshold: a passing check is always
-# silent regardless of `action` (that argument only controls what
-# happens when a problem *is* found), so print() the returned status
-# directly to see the "no issues" wording
-print(check_sessiontime(action = "none", max_sessiontime = Inf))
+# a session comfortably within the threshold: `action` only controls
+# what happens when a problem *is* found, so use
+# `action_on_pass = "message"` to confirm the clean result instead
+check_sessiontime(action = "none", max_sessiontime = Inf, action_on_pass = "message")
 
 }
 \seealso{

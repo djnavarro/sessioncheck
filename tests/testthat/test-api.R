@@ -62,6 +62,126 @@ test_that("sessioncheck() tolerates options(sessioncheck = NULL)", {
   options(opts)
 })
 
+test_that("check_*() functions default to action_on_pass = \"none\" (silent on a clean pass)", {
+  expect_no_message(check_attached_packages(action = "none", allow_attached_packages = .packages()))
+  expect_no_message(check_loaded_namespaces(action = "none", allow_loaded_namespaces = loadedNamespaces()))
+  expect_no_message(check_globalenv_objects(
+    action = "none",
+    allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE)
+  ))
+  expect_no_message(check_attached_environments(action = "none", allow_attached_environments = search()))
+  expect_no_message(check_sessiontime(action = "none", max_sessiontime = Inf))
+  expect_no_message(check_required_options(
+    action = "none",
+    required_options = list(digits = getOption("digits"))
+  ))
+  expect_no_message(check_required_locale(
+    action = "none",
+    required_locale = list(LC_COLLATE = Sys.getlocale("LC_COLLATE"))
+  ))
+  expect_no_message(check_required_sysenv(
+    action = "none",
+    required_sysenv = list(R_HOME = Sys.getenv("R_HOME"))
+  ))
+})
+
+test_that("check_*() functions confirm a clean pass when action_on_pass = \"message\"", {
+  expect_message(check_attached_packages(
+    action = "none", allow_attached_packages = .packages(), action_on_pass = "message"
+  ))
+  expect_message(check_loaded_namespaces(
+    action = "none", allow_loaded_namespaces = loadedNamespaces(), action_on_pass = "message"
+  ))
+  expect_message(check_globalenv_objects(
+    action = "none",
+    allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE),
+    action_on_pass = "message"
+  ))
+  expect_message(check_attached_environments(
+    action = "none", allow_attached_environments = search(), action_on_pass = "message"
+  ))
+  expect_message(check_sessiontime(action = "none", max_sessiontime = Inf, action_on_pass = "message"))
+  expect_message(check_required_options(
+    action = "none",
+    required_options = list(digits = getOption("digits")),
+    action_on_pass = "message"
+  ))
+  expect_message(check_required_locale(
+    action = "none",
+    required_locale = list(LC_COLLATE = Sys.getlocale("LC_COLLATE")),
+    action_on_pass = "message"
+  ))
+  expect_message(check_required_sysenv(
+    action = "none",
+    required_sysenv = list(R_HOME = Sys.getenv("R_HOME")),
+    action_on_pass = "message"
+  ))
+})
+
+test_that("check_*() functions do not confirm when the status is unclean, even with action_on_pass = \"message\"", {
+  expect_no_message(suppressWarnings(check_attached_packages(
+    action = "warn", allow_attached_packages = character(0L), action_on_pass = "message"
+  )))
+})
+
+test_that("check_*() functions validate `action_on_pass`", {
+  expect_error(check_attached_packages(action_on_pass = "warn"))
+  expect_error(check_loaded_namespaces(action_on_pass = "warn"))
+  expect_error(check_globalenv_objects(action_on_pass = "warn"))
+  expect_error(check_attached_environments(action_on_pass = "warn"))
+  expect_error(check_sessiontime(action_on_pass = "warn"))
+  expect_error(check_required_options(action_on_pass = "warn"))
+  expect_error(check_required_locale(action_on_pass = "warn"))
+  expect_error(check_required_sysenv(action_on_pass = "warn"))
+})
+
+test_that("sessioncheck() defaults to action_on_pass = \"none\" (silent on a clean pass)", {
+  expect_no_message(sessioncheck(
+    action = "none",
+    allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE),
+    allow_attached_packages = .packages(),
+    allow_attached_environments = search()
+  ))
+})
+
+test_that("sessioncheck() confirms a clean pass when action_on_pass = \"message\"", {
+  expect_message(sessioncheck(
+    action = "none",
+    allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE),
+    allow_attached_packages = .packages(),
+    allow_attached_environments = search(),
+    action_on_pass = "message"
+  ))
+})
+
+test_that("sessioncheck() respects action_on_pass set via options()", {
+  opts <- options(sessioncheck = list(
+    action = "none",
+    action_on_pass = "message",
+    allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE),
+    allow_attached_packages = .packages(),
+    allow_attached_environments = search()
+  ))
+  expect_message(sessioncheck())
+  options(opts)
+})
+
+test_that("an explicit action_on_pass argument overrides options(sessioncheck = ...)", {
+  opts <- options(sessioncheck = list(
+    action = "none",
+    action_on_pass = "message",
+    allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE),
+    allow_attached_packages = .packages(),
+    allow_attached_environments = search()
+  ))
+  expect_no_message(sessioncheck(action_on_pass = "none"))
+  options(opts)
+})
+
+test_that("sessioncheck() validates `action_on_pass`", {
+  expect_error(sessioncheck(action_on_pass = "warn"))
+})
+
 test_that("sessioncheck `checks` argument returns expected results", {
   checks_to_test <- c("sessiontime", "required_options", "required_locale", "required_sysenv")
 

@@ -39,6 +39,32 @@ test_that(".action() produces the requested action for sessioncheck objects", {
   expect_no_message(.action(action = "none", status = sessioncheck_true))
 })
 
+test_that(".action() is silent on a clean status when action_on_pass = \"none\" (the default)", {
+  expect_no_message(.action(action = "warn", status = status_false))
+  expect_no_message(.action(action = "warn", status = status_false, action_on_pass = "none"))
+  expect_no_message(.action(action = "warn", status = sessioncheck_false))
+  expect_no_message(.action(action = "warn", status = sessioncheck_false, action_on_pass = "none"))
+})
+
+test_that(".action() confirms a clean status when action_on_pass = \"message\"", {
+  expect_message(.action(action = "warn", status = status_false, action_on_pass = "message"))
+  expect_message(.action(action = "none", status = status_false, action_on_pass = "message"))
+  expect_message(.action(action = "warn", status = sessioncheck_false, action_on_pass = "message"))
+  expect_message(.action(action = "none", status = sessioncheck_false, action_on_pass = "message"))
+})
+
+test_that(".action() ignores action_on_pass when status is unclean", {
+  # `action` still governs the unclean case; action_on_pass never adds a
+  # second, redundant confirmation on top of it
+  expect_warning(.action(action = "warn", status = status_true, action_on_pass = "message"))
+  expect_no_message(suppressWarnings(.action(action = "warn", status = status_true, action_on_pass = "message")))
+  expect_error(.action(action = "error", status = sessioncheck_true, action_on_pass = "message"))
+})
+
+test_that(".action() returns the status object invisibly regardless of action_on_pass", {
+  expect_equal(.action(action = "warn", status = status_false, action_on_pass = "message"), status_false)
+})
+
 test_that(".message_text() prefixes with a cross symbol when issues are found", {
   ss <- c(a = FALSE, b = TRUE, c = TRUE, d = TRUE)
 

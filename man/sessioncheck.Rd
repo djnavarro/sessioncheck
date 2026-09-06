@@ -4,7 +4,7 @@
 \alias{sessioncheck}
 \title{Checks the overall status of the R session}
 \usage{
-sessioncheck(action = NULL, checks = NULL, ...)
+sessioncheck(action = NULL, checks = NULL, action_on_pass = NULL, ...)
 }
 \arguments{
 \item{action}{Behavior to take if the status is not clean. Possible values are
@@ -14,6 +14,10 @@ the default to set \code{action = "warn"}.}
 \item{checks}{Character vector listing the checks to run. If the user does not
 specify the checks, the default is to run
 \code{checks = c("globalenv_objects", "attached_packages", "attached_environments")}.}
+
+\item{action_on_pass}{Behavior to take if the status is clean. Possible values
+are "message" and "none". If the user does not specify a value, the default
+is \code{action_on_pass = "none"}.}
 
 \item{...}{Arguments passed to individual checks.}
 }
@@ -44,15 +48,15 @@ Other arguments are ignored.
 \examples{
 sessioncheck(action = "message")
 
-# a session with nothing flagged by the default checks: like every
-# check_*() function, a passing check is silent regardless of `action`
-# (that argument only controls what happens when a problem *is* found),
-# so print() the returned status directly to see the "no issues" wording
-print(sessioncheck(
+# a session with nothing flagged by the default checks: `action` only
+# controls what happens when a problem *is* found, so pass
+# `action_on_pass = "message"` to confirm the clean result instead
+sessioncheck(
   action = "none",
   allow_globalenv_objects = ls(envir = .GlobalEnv, all.names = TRUE),
   allow_attached_packages = .packages(),
-  allow_attached_environments = search()
-))
+  allow_attached_environments = search(),
+  action_on_pass = "message"
+)
  
 }
