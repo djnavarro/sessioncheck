@@ -50,6 +50,16 @@
 #'   (`package`/`name`, `field`, `old`, `new` for `packages`; see below for
 #'   `globalenv`'s slightly different `modified` columns).
 #'
+#' Keyed-table diffing is purely key-based: it has no way to detect a
+#' rename. A package or global environment object that is renamed but
+#' otherwise unchanged between `old` and `new` (e.g. `pkgA` reinstalled
+#' under a new name, or `x` renamed to `y` via `assign()`) is reported as
+#' one `removed` row (the old key) plus one `added` row (the new key),
+#' never as a single "renamed" entry -- there is no general way to tell a
+#' rename apart from an unrelated removal-plus-addition that happens to
+#' involve similar values. This is inherent to any key-based diff, not a
+#' bug to be fixed.
+#'
 #' `globalenv`'s `modified` table relies on the `hash` column
 #' `sessionstate()` records for each object (an MD5 fingerprint of the
 #' object's serialized value). When both snapshots have a non-`NA` hash for
