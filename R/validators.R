@@ -31,6 +31,14 @@
   stopifnot("`tol` must be a single numeric value or NULL" = is.numeric(tol) & length(tol) == 1L)
 }
 
+.validate_wd <- function(wd) {
+  if (is.null(wd)) return(invisible(NULL))
+  stopifnot(
+    "`required_wd` must be a single character string or NULL" =
+      is.character(wd) && length(wd) == 1L && !is.na(wd)
+  )
+}
+
 .validate_settings <- function(settings) {
   stopifnot("`settings` must be a list or NULL" = is.list(settings) | is.null(settings))
 }
@@ -40,7 +48,7 @@
   valid <- c(
     "globalenv_objects", "attached_packages", "loaded_namespaces",
     "attached_environments", "sessiontime", "required_options",
-    "required_locale", "required_sysenv"
+    "required_locale", "required_sysenv", "working_directory"
   )
   stopifnot(
     "`checks` must be a character vector" = is.character(checks),

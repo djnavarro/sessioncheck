@@ -41,6 +41,7 @@ The following arguments are recognized via \code{...}:
 \item \code{required_options} is passed to \code{check_required_options()}
 \item \code{required_locale} is passed to \code{check_required_locale()}
 \item \code{required_sysenv} is passed to \code{check_required_sysenv()}
+\item \code{required_wd} is passed to \code{check_working_directory()}
 }
 
 Other arguments are ignored.

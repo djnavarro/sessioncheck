@@ -16,6 +16,7 @@ reference:
   - check_attached_packages
   - check_loaded_namespaces
   - check_sessiontime
+  - check_working_directory
   - check_required_options
   - check_required_locale
   - check_required_sysenv

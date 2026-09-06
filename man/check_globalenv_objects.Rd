@@ -54,5 +54,6 @@ check_globalenv_objects(
 \code{\link[=check_sessiontime]{check_sessiontime()}},
 \code{\link[=check_required_options]{check_required_options()}},
 \code{\link[=check_required_locale]{check_required_locale()}},
-\code{\link[=check_required_sysenv]{check_required_sysenv()}}
+\code{\link[=check_required_sysenv]{check_required_sysenv()}},
+\code{\link[=check_working_directory]{check_working_directory()}}
 }

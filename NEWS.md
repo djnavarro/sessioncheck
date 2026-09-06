@@ -12,6 +12,9 @@
 
 ## New features
 
+- Added `check_working_directory()`, which checks the session's working
+  directory against an expected path (#11).
+
 - Added an `action_on_pass` argument to `sessioncheck()` and the individual
   `check_*()` functions, allowing a clean result to be confirmed with a message
   rather than remaining silent (#10).

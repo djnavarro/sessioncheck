@@ -15,7 +15,8 @@
     proc_time = proc.time(),
     globalenv =  ls(envir = .GlobalEnv, all.names = TRUE),
     locale = Sys.getlocale(),
-    sys_env = Sys.getenv()
+    sys_env = Sys.getenv(),
+    wd = getwd()
   )
 }
 

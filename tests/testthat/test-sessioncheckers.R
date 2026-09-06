@@ -204,5 +204,26 @@ test_that("locale settings are flaggable", {
   Sys.setlocale(category = "LC_TIME", locale = old)
 })
 
+# working directory checks ------
+
+test_that("working directory check passes when required_wd is NULL", {
+  ss <- .get_working_directory_status(required = NULL)
+  expect_s3_class(ss, "sessioncheck_status")
+  expect_false(ss$status)
+  expect_equal(names(ss$status), getwd())
+})
+
+test_that("working directory check flags a mismatched path", {
+  expect_true(.get_working_directory_status(required = tempdir())$status)
+})
+
+test_that("working directory check passes when required_wd matches getwd()", {
+  expect_false(.get_working_directory_status(required = getwd())$status)
+})
+
+test_that("working directory check tolerates trailing-slash differences via normalizePath()", {
+  expect_false(.get_working_directory_status(required = paste0(getwd(), "/"))$status)
+})
+
 
 

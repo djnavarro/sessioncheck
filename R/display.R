@@ -224,6 +224,37 @@
   ))
 }
 
+# bespoke formatter for the "working_directory" check type. Like
+# .message_text_sessiontime(), this checker reports on a single scalar (the
+# current working directory) rather than a list of named entities, so it
+# gets its own message template instead of the generic "Unexpected <thing>:"
+# pattern. When no `required_wd` was supplied, the check always passes and
+# this simply reports the current working directory rather than pretending
+# to have compared it against anything. Uses the "actual"/"required"
+# attributes attached by .get_working_directory_status(); falls back to the
+# generic prefix/clean_message pair (via .message_text()) when those
+# attributes are absent, e.g. a sessioncheck_status of type
+# "working_directory" built by hand.
+.message_text_working_directory <- function(status, prefix, clean_message) {
+  actual <- attr(status, "actual")
+  required <- attr(status, "required")
+  if (is.null(actual)) {
+    return(.message_text(prefix, status, clean_message = clean_message))
+  }
+  if (is.null(required)) {
+    symbol <- .colored_symbol("tick")
+    return(paste(symbol, "Working directory:", actual))
+  }
+  mismatch <- isTRUE(unname(status))
+  symbol <- .colored_symbol(if (mismatch) "cross" else "tick")
+  if (mismatch) {
+    return(paste(symbol, sprintf(
+      "Working directory (%s) does not match required path (%s)", actual, required
+    )))
+  }
+  paste(symbol, sprintf("Working directory matches required path (%s)", required))
+}
+
 # draws a horizontal rule with a left-aligned title, used as a section
 # heading in format.sessioncheck_sessionstate() -- similar in spirit to the
 # section dividers in sessioninfo::session_info() and to mcli_rule() from
