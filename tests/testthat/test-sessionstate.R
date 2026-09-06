@@ -78,12 +78,38 @@ test_that(".get_globalenv_info() captures every object in .GlobalEnv, never valu
   on.exit(rm(list = c("sc_test_obj_a", "sc_test_obj_b"), envir = .GlobalEnv), add = TRUE)
 
   df <- .get_globalenv_info()
-  expect_named(df, c("name", "class", "size"))
+  expect_named(df, c("name", "class", "size", "hash"))
   expect_true(all(c("sc_test_obj_a", "sc_test_obj_b") %in% df$name))
   expect_identical(df$class[df$name == "sc_test_obj_a"], "integer")
   expect_identical(df$class[df$name == "sc_test_obj_b"], "character")
   expect_true(is.numeric(df$size))
   expect_false(any(grepl("some string", unlist(df), fixed = TRUE)))
+})
+
+test_that(".hash_object() is stable for an unchanged value and changes when the value changes", {
+  h1 <- .hash_object(1:10)
+  h2 <- .hash_object(1:10)
+  expect_identical(h1, h2)
+  h3 <- .hash_object(1:11)
+  expect_false(identical(h1, h3))
+})
+
+test_that(".hash_object() returns NA when the object cannot be serialized", {
+  local_mocked_bindings(serialize = function(...) stop("boom"), .package = "base")
+  expect_identical(.hash_object(1:10), NA_character_)
+})
+
+test_that(".get_globalenv_info() records a hash per object", {
+  assign("sc_test_hash_a", 1:5, envir = .GlobalEnv)
+  assign("sc_test_hash_b", 1:5, envir = .GlobalEnv)
+  on.exit(rm(list = c("sc_test_hash_a", "sc_test_hash_b"), envir = .GlobalEnv), add = TRUE)
+
+  df <- .get_globalenv_info()
+  expect_identical(
+    df$hash[df$name == "sc_test_hash_a"],
+    df$hash[df$name == "sc_test_hash_b"]
+  )
+  expect_identical(df$hash[df$name == "sc_test_hash_a"], .hash_object(1:5))
 })
 
 test_that(".get_search_path_info() classifies packages vs. other attachments", {
@@ -125,7 +151,7 @@ test_that("as.data.frame.sessioncheck_sessionstate() can return the globalenv ta
   x <- sessionstate()
   df <- as.data.frame(x, which = "globalenv")
   expect_identical(df, x$globalenv)
-  expect_named(df, c("name", "class", "size"))
+  expect_named(df, c("name", "class", "size", "hash"))
 })
 
 test_that("as.data.frame.sessioncheck_sessionstate() can return the attachments table", {
@@ -423,7 +449,7 @@ test_that("format.sessioncheck_sessionstate() reports '(not found)' when pandoc/
   expect_match(txt, "quarto.*\\(not found\\)", fixed = FALSE)
 })
 
-test_that("format.sessioncheck_sessionstate() defaults globalenv to every column but only the 10 largest rows", {
+test_that("format.sessioncheck_sessionstate() defaults globalenv to name/class/size (omitting hash) and only the 10 largest rows", {
   # mocked rather than populating the real .GlobalEnv: doing the latter mixes
   # in whatever else happens to be present ambiently (e.g. leftover objects
   # from devtools::load_all() or earlier tests), and if any of those has a
@@ -434,6 +460,7 @@ test_that("format.sessioncheck_sessionstate() defaults globalenv to every column
       name = paste0("sc_test_genv_", 1:15),
       class = "numeric",
       size = as.numeric(15:1),
+      hash = paste0("hash_", 1:15),
       stringsAsFactors = FALSE
     )
   })
@@ -443,7 +470,17 @@ test_that("format.sessioncheck_sessionstate() defaults globalenv to every column
   lines <- strsplit(txt, "\n")[[1]]
   header_line <- lines[grep("^\\s*name\\s+class\\s+size\\s*$", lines)]
   expect_length(header_line, 1L)
+  expect_no_match(txt, "hash_1", fixed = TRUE)
   expect_match(txt, "... and", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstate() can request the hash column explicitly", {
+  local_mocked_bindings(.get_globalenv_info = function() {
+    data.frame(name = "a", class = "numeric", size = 56, hash = "abc123", stringsAsFactors = FALSE)
+  })
+  x <- sessionstate()
+  txt <- format(x, globalenv = c("name", "hash"))
+  expect_match(txt, "abc123", fixed = TRUE)
 })
 
 test_that("format.sessioncheck_sessionstate() shows every globalenv row when there are 10 or fewer", {

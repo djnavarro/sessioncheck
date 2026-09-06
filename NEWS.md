@@ -12,6 +12,11 @@
 
 ## New features
 
+- Added `compare_sessionstates()`, which reports how two `sessionstate()`
+  snapshots differ -- take a baseline snapshot, do some work, take another,
+  and diff them. Returns an object of class `sessioncheck_sessionstatediff`
+  with `format()`, `print()`, and `as.data.frame()` methods.
+
 - Added `check_working_directory()`, which checks the session's working
   directory against an expected path (#11).
 

@@ -1,0 +1,272 @@
+
+#' @title Compare two session state snapshots
+#'
+#' @description
+#' `compare_sessionstates()` reports how two [sessionstate()] snapshots
+#' differ. This is the comparison counterpart to `sessionstate()`'s
+#' point-in-time capture: take a snapshot with `sessionstate()`, do some
+#' work, take a second snapshot, and pass both to `compare_sessionstates()`
+#' to see what changed.
+#'
+#' @param old A `sessioncheck_sessionstate` object (from [sessionstate()]),
+#' treated as the baseline.
+#' @param new A `sessioncheck_sessionstate` object (from [sessionstate()]),
+#' treated as the later snapshot.
+#'
+#' @returns An object of class `sessioncheck_sessionstatediff`, a list with
+#' the same 12 elements as [sessionstate()] (`platform`, `locale`, `matrix`,
+#' `document`, `machine`, `git`, `timing`, `rng`, `libpaths`, `packages`,
+#' `globalenv`, `attachments`), each holding a diff rather than a raw
+#' snapshot. See Details for the shape of each element.
+#'
+#' @details
+#' `sessionstate()`'s 12 elements fall into four shapes, and each is
+#' diffed differently:
+#'
+#' - **Record** elements (`platform`, `locale`, `matrix`, `document`,
+#'   `machine`, `git`, `rng`) are named lists of scalar fields. Each is
+#'   diffed field-by-field via [identical()], producing a data frame with
+#'   columns `field`, `old`, `new`, and `changed`.
+#' - **`timing`** is a record element, but `captured_at`/`elapsed_sec`
+#'   necessarily differ between any two calls to `sessionstate()`, so
+#'   flagging them as "changed" the way other fields are would be noise
+#'   every time. Instead `timing` reports `captured_at_old`,
+#'   `captured_at_new`, `wall_elapsed` (the difference between the two
+#'   capture times, in seconds), and `uptime_elapsed` (the difference
+#'   between the two `elapsed_sec` values). The two are usually equal; a
+#'   mismatch (e.g. the machine slept between snapshots) is itself worth
+#'   noticing.
+#' - **`libpaths`** is a plain character vector, diffed via [setdiff()] in
+#'   both directions: `list(added = ..., removed = ...)`. Paths present in
+#'   both snapshots but reordered are not reported as a change.
+#' - **Keyed table** elements (`packages`, `globalenv`, `attachments`) are
+#'   data frames. Each is diffed into `list(added = <data frame>, removed =
+#'   <data frame>, modified = <data frame>)` (`attachments` has no
+#'   `modified` table -- a `type` change for the same search-path entry
+#'   isn't a realistic scenario). `added`/`removed` are rows present in only
+#'   one snapshot (keyed by `package`/`name`/`name` respectively);
+#'   `modified` covers rows present in both where a tracked column
+#'   differs, in a long format with one row per changed field
+#'   (`package`/`name`, `field`, `old`, `new` for `packages`; see below for
+#'   `globalenv`'s slightly different `modified` columns).
+#'
+#' `globalenv`'s `modified` table relies on the `hash` column
+#' `sessionstate()` records for each object (an MD5 fingerprint of the
+#' object's serialized value). When both snapshots have a non-`NA` hash for
+#' an object, a hash mismatch is what marks it modified (`verified = TRUE`);
+#' when either side's hash is `NA` (the object couldn't be serialized --
+#' see [sessionstate()]'s Global environment section), the comparison falls
+#' back to `class`/`size` only, and the row is marked `verified = FALSE` to
+#' be explicit that a value change could have gone undetected.
+#'
+#' A warning is issued if `new$timing$captured_at` is earlier than
+#' `old$timing$captured_at`, since that usually means the two arguments
+#' were passed in the wrong order; the comparison is still computed either
+#' way.
+#'
+#' @examples
+#' baseline <- sessionstate()
+#' # assign() into .GlobalEnv explicitly (rather than `x <- 1:10`) so this
+#' # example is correct wherever it's evaluated: sessionstate() specifically
+#' # inspects .GlobalEnv, but some example/doc runners (e.g. pkgdown) do not
+#' # evaluate example code there
+#' assign("sessioncheck_example_obj", 1:10, envir = .GlobalEnv)
+#' current <- sessionstate()
+#' compare_sessionstates(baseline, current)
+#' rm(sessioncheck_example_obj, envir = .GlobalEnv)
+#'
+#' @seealso [sessionstate()]
+#'
+#' @export
+compare_sessionstates <- function(old, new) {
+  .validate_sessionstate(old, "old")
+  .validate_sessionstate(new, "new")
+
+  if (new$timing$captured_at < old$timing$captured_at) {
+    warning(
+      "`new` was captured before `old`; check whether the arguments are in the intended order",
+      call. = FALSE
+    )
+  }
+
+  new_sessionstatediff(
+    platform    = .diff_record(old$platform, new$platform),
+    locale      = .diff_record(old$locale, new$locale),
+    matrix      = .diff_record(old$matrix, new$matrix),
+    document    = .diff_record(old$document, new$document),
+    machine     = .diff_record(old$machine, new$machine),
+    git         = .diff_record(old$git, new$git),
+    timing      = .diff_timing(old$timing, new$timing),
+    rng         = .diff_record(old$rng, new$rng),
+    libpaths    = .diff_vector(old$libpaths, new$libpaths),
+    packages    = .diff_packages(old$packages, new$packages),
+    globalenv   = .diff_globalenv(old$globalenv, new$globalenv),
+    attachments = .diff_attachments(old$attachments, new$attachments)
+  )
+}
+
+# sessionstate diff helpers ------
+
+# renders a single scalar field value for display in a diff table; NULL/NA
+# both collapse to NA_character_ (rather than the string "NA") so
+# .na_display() (in sessionstatediff-format.R) can special-case them
+# uniformly, and multi-element values (there are none among current record
+# fields, but this stays defensive against future ones) are comma-joined
+# rather than erroring
+.diff_display_value <- function(v) {
+  if (is.null(v) || (length(v) == 1L && is.na(v))) return(NA_character_)
+  if (length(v) == 1L) return(as.character(v))
+  paste(format(v), collapse = ", ")
+}
+
+# generic diff for a "record" section: a named list of scalar fields
+# (platform, locale, matrix, document, machine, git, rng). Compares by
+# identical() rather than the display strings, so e.g. numeric vs. character
+# "same-looking" values are not treated as equal
+.diff_record <- function(old, new) {
+  fields <- union(names(old), names(new))
+  changed <- vapply(fields, function(f) !identical(old[[f]], new[[f]]), logical(1L))
+  old_chr <- vapply(fields, function(f) .diff_display_value(old[[f]]), character(1L))
+  new_chr <- vapply(fields, function(f) .diff_display_value(new[[f]]), character(1L))
+  df <- data.frame(
+    field = fields, old = old_chr, new = new_chr, changed = unname(changed),
+    stringsAsFactors = FALSE
+  )
+  rownames(df) <- NULL
+  df
+}
+
+# bespoke diff for `timing`: captured_at/elapsed_sec differ by construction
+# between any two sessionstate() calls, so there is no "changed" concept
+# here -- just the two raw values and the two derived deltas (see
+# compare_sessionstates()'s @details for why they might disagree)
+.diff_timing <- function(old, new) {
+  list(
+    captured_at_old = old$captured_at,
+    captured_at_new = new$captured_at,
+    wall_elapsed    = as.numeric(difftime(new$captured_at, old$captured_at, units = "secs")),
+    uptime_elapsed  = new$elapsed_sec - old$elapsed_sec
+  )
+}
+
+# diff for `libpaths`: a bare character vector, not a keyed table. Order
+# changes are deliberately not reported -- the same paths being searched in
+# a different order is not treated as a change
+.diff_vector <- function(old, new) {
+  list(added = setdiff(new, old), removed = setdiff(old, new))
+}
+
+# shared added/removed logic for the three keyed-table sections
+# (packages/globalenv/attachments), keyed by `key` (package/name/name
+# respectively)
+.diff_table_added_removed <- function(old_df, new_df, key) {
+  added <- new_df[!(new_df[[key]] %in% old_df[[key]]), , drop = FALSE]
+  removed <- old_df[!(old_df[[key]] %in% new_df[[key]]), , drop = FALSE]
+  rownames(added) <- NULL
+  rownames(removed) <- NULL
+  list(added = added, removed = removed)
+}
+
+# builds the long-format "modified" table shared by .diff_packages() and
+# .diff_globalenv(): one row per (key, changed field) pair, comparing
+# `compare_cols` via identical(). `extra_cols` (if supplied) is a function
+# of (old_row, new_row) returning a named list of extra columns to attach
+# to every row for that key (used by globalenv for `verified`); this keeps
+# the per-key looping logic in one place while letting each caller shape
+# its own output columns
+.diff_modified_table <- function(old_df, new_df, key, compare_cols, empty_extra_cols = list()) {
+  common <- intersect(old_df[[key]], new_df[[key]])
+  rows <- lapply(common, function(kk) {
+    o <- old_df[old_df[[key]] == kk, , drop = FALSE]
+    n <- new_df[new_df[[key]] == kk, , drop = FALSE]
+    changed_cols <- compare_cols[vapply(compare_cols, function(cc) !identical(o[[cc]], n[[cc]]), logical(1L))]
+    if (length(changed_cols) == 0L) return(NULL)
+    data.frame(
+      key = kk,
+      field = changed_cols,
+      old = vapply(changed_cols, function(cc) .diff_display_value(o[[cc]]), character(1L)),
+      new = vapply(changed_cols, function(cc) .diff_display_value(n[[cc]]), character(1L)),
+      stringsAsFactors = FALSE
+    )
+  })
+  rows <- rows[!vapply(rows, is.null, logical(1L))]
+  if (length(rows) == 0L) {
+    out <- data.frame(key = character(), field = character(), old = character(), new = character(), stringsAsFactors = FALSE)
+  } else {
+    out <- do.call(rbind, rows)
+    rownames(out) <- NULL
+  }
+  names(out)[names(out) == "key"] <- key
+  out
+}
+
+.diff_packages <- function(old, new) {
+  ar <- .diff_table_added_removed(old, new, "package")
+  modified <- .diff_modified_table(
+    old, new, "package",
+    compare_cols = c("attached", "ondisk_version", "loaded_version", "source")
+  )
+  list(added = ar$added, removed = ar$removed, modified = modified)
+}
+
+.diff_attachments <- function(old, new) {
+  ar <- .diff_table_added_removed(old, new, "name")
+  list(added = ar$added, removed = ar$removed)
+}
+
+# globalenv's "modified" logic differs from .diff_modified_table()'s generic
+# shape because the notion of "changed" depends on whether a trustworthy
+# `hash` is available on both sides. When it is, a hash mismatch is
+# authoritative: if the hash is unchanged, serialize() must have produced
+# byte-identical output, so class/size cannot have changed either and no
+# further comparison is needed; if the hash *did* change, a "hash" field
+# row is always emitted (the definitive evidence something changed), plus
+# "class"/"size" rows for whichever of those also happened to differ. When
+# a trustworthy hash isn't available on both sides (an object that failed
+# to serialize -- see .hash_object()), the comparison falls back to
+# class/size only, and every row is marked verified = FALSE so that
+# fallback stays visible rather than silently indistinguishable from a
+# hash-verified result. The resulting shape -- one row per (name, changed
+# field), in `field`/`old`/`new` form -- deliberately matches
+# .diff_packages()'s modified table, so both the print method and
+# as.data.frame() can treat "modified" uniformly across sections
+.diff_globalenv <- function(old, new) {
+  ar <- .diff_table_added_removed(old, new, "name")
+  common <- intersect(old$name, new$name)
+  rows <- lapply(common, function(nm) {
+    o <- old[old$name == nm, , drop = FALSE]
+    n <- new[new$name == nm, , drop = FALSE]
+    hash_verifiable <- !is.na(o$hash) && !is.na(n$hash)
+    if (hash_verifiable) {
+      if (identical(o$hash, n$hash)) return(NULL)
+      fields <- "hash"
+      if (!identical(o$class, n$class)) fields <- c(fields, "class")
+      if (!identical(o$size, n$size)) fields <- c(fields, "size")
+    } else {
+      class_changed <- !identical(o$class, n$class)
+      size_changed <- !identical(o$size, n$size)
+      if (!class_changed && !size_changed) return(NULL)
+      fields <- c(if (class_changed) "class", if (size_changed) "size")
+    }
+    data.frame(
+      name = nm,
+      field = fields,
+      old = vapply(fields, function(f) .diff_display_value(o[[f]]), character(1L)),
+      new = vapply(fields, function(f) .diff_display_value(n[[f]]), character(1L)),
+      verified = hash_verifiable,
+      stringsAsFactors = FALSE
+    )
+  })
+  rows <- rows[!vapply(rows, is.null, logical(1L))]
+  modified <- if (length(rows) == 0L) {
+    data.frame(
+      name = character(), field = character(), old = character(), new = character(),
+      verified = logical(), stringsAsFactors = FALSE
+    )
+  } else {
+    out <- do.call(rbind, rows)
+    rownames(out) <- NULL
+    out
+  }
+  list(added = ar$added, removed = ar$removed, modified = modified)
+}

@@ -65,3 +65,18 @@
     )
   }
 }
+
+# `label` names the offending argument in the error (e.g. "old"/"new" for
+# compare_sessionstates()) so a mistaken sessioncheck() or bare list gets a
+# message pointing at the specific argument rather than a generic complaint
+.validate_sessionstate <- function(x, label) {
+  if (!inherits(x, "sessioncheck_sessionstate")) {
+    stop(
+      sprintf(
+        "`%s` must be an object of class 'sessioncheck_sessionstate' (see sessionstate())",
+        label
+      ),
+      call. = FALSE
+    )
+  }
+}

@@ -179,7 +179,10 @@ format.sessioncheck_sessionstate <- function(x, platform = NULL, locale = NULL, 
   genv_df_full <- x$globalenv
   # largest objects first, independent of which columns end up displayed
   genv_df_full <- genv_df_full[order(-genv_df_full$size), , drop = FALSE]
-  globalenv <- .resolve_field_selection(globalenv, "sessionstate_globalenv", NULL)
+  globalenv <- .resolve_field_selection(
+    globalenv, "sessionstate_globalenv",
+    c("name", "class", "size")
+  )
   genv_cols <- .select_fields(names(genv_df_full), globalenv, "globalenv")
   genv_df <- genv_df_full[, genv_cols, drop = FALSE]
   n_total <- nrow(genv_df)

@@ -8,6 +8,7 @@ reference:
 - contents:
   - sessioncheck
   - sessionstate
+  - compare_sessionstates
 - title: Session checkers 
   desc: Individual session check functions
 - contents:

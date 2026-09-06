@@ -25,6 +25,17 @@ new_sessionstate <- function(platform, locale, matrix, document, machine, git, t
   )
 }
 
+new_sessionstatediff <- function(platform, locale, matrix, document, machine, git, timing, rng, libpaths, packages, globalenv, attachments) {
+  structure(
+    list(
+      platform = platform, locale = locale, matrix = matrix, document = document, machine = machine,
+      git = git, timing = timing, rng = rng, libpaths = libpaths, packages = packages,
+      globalenv = globalenv, attachments = attachments
+    ),
+    class = "sessioncheck_sessionstatediff"
+  )
+}
+
 
 # status message tables ------
 
@@ -69,7 +80,11 @@ new_sessionstate <- function(platform, locale, matrix, document, machine, git, t
 #' that report be filtered down to specific fields or columns per section.
 #'
 #' @param x An object of class `sessioncheck_status`, `sessioncheck_sessioncheck`,
-#' or `sessioncheck_sessionstate`
+#' `sessioncheck_sessionstate`, or `sessioncheck_sessionstatediff`
+#' @param changed_only For `sessioncheck_sessionstatediff` objects, whether to
+#' collapse sections/fields with no detected change down to a single "(no
+#' changes)" line (`TRUE`, the default) or always show every field. Ignored
+#' for other classes.
 #' @param platform For `sessioncheck_sessionstate` objects, an optional character
 #' vector selecting which platform fields to display (from `"version"`, `"os"`,
 #' `"system"`, `"ui"`, `"tz"`, `"date"`). Defaults to showing all fields.
@@ -110,7 +125,9 @@ new_sessionstate <- function(platform, locale, matrix, document, machine, git, t
 #' classes. See Details for how the default is resolved.
 #' @param globalenv For `sessioncheck_sessionstate` objects, an optional
 #' character vector selecting which global environment columns to display
-#' (from `"name"`, `"class"`, `"size"`). Defaults to showing all columns.
+#' (from `"name"`, `"class"`, `"size"`, `"hash"`). Defaults to
+#' `c("name", "class", "size")` (omitting `"hash"`, a long fingerprint
+#' mainly useful programmatically -- see [compare_sessionstates()]).
 #' Ignored for other classes. See Details for how the default is resolved,
 #' and for how `globalenv_n` separately controls the number of rows shown.
 #' @param globalenv_n For `sessioncheck_sessionstate` objects, an optional
@@ -139,7 +156,8 @@ new_sessionstate <- function(platform, locale, matrix, document, machine, git, t
 #' (respectively); if neither is set, a
 #' built-in default is used (showing every field/column, except for
 #' `packages`, which defaults to
-#' `c("package", "attached", "loaded_version", "source")`, and
+#' `c("package", "attached", "loaded_version", "source")`,
+#' `globalenv`, which defaults to `c("name", "class", "size")`, and
 #' `globalenv_n`, which defaults to `10`). This selection only affects what
 #' is displayed; it never changes the underlying object, so
 #' [`as.data.frame()`][coercion_methods] always returns the full package
@@ -202,12 +220,15 @@ print.sessioncheck_sessioncheck <- function(x, ...) {
 #' joining, export) instead of only being inspected via `print()`/`format()`.
 #'
 #' @param x An object of class `sessioncheck_status`, `sessioncheck_sessioncheck`,
-#' or `sessioncheck_sessionstate`
+#' `sessioncheck_sessionstate`, or `sessioncheck_sessionstatediff`
 #' @param row.names Ignored
 #' @param optional Ignored
 #' @param which For `sessioncheck_sessionstate` objects, which tabular
 #' component to return: one of `"packages"` (the default), `"globalenv"`,
-#' or `"attachments"`. Ignored for other classes.
+#' or `"attachments"`. For `sessioncheck_sessionstatediff` objects, the same
+#' three section names instead select a long-format diff table (see
+#' Details); the default is likewise `"packages"`. Ignored for other
+#' classes.
 #' @param ... Ignored
 #'
 #' @returns A data frame
@@ -225,6 +246,26 @@ print.sessioncheck_sessioncheck <- function(x, ...) {
 #' fields or `libpaths` are represented in the result. Use `x$platform`,
 #' `x$machine`, `x$git`, `x$libpaths`, etc. (or `unclass(x)` for everything
 #' at once) to access those directly.
+#'
+#' `sessioncheck_sessionstatediff` objects (from [compare_sessionstates()])
+#' coerce differently again: each `which` selects a single long-format
+#' table with one row per key (`package`/`name`/`name`, for
+#' `"packages"`/`"globalenv"`/`"attachments"` respectively) and tracked
+#' field, with columns `<key>`, `change` (`"added"`, `"removed"`, or
+#' `"modified"`), `field`, `old`, and `new`. A key present in only one
+#' snapshot contributes one row per tracked field, all with the same
+#' `change`, and `old`/`new` `NA` on whichever side it didn't exist; a key
+#' present in both snapshots contributes a row only for fields that
+#' actually changed. The tracked fields are
+#' `attached`/`ondisk_version`/`loaded_version`/`source` for `"packages"`,
+#' `class`/`size`/`hash` for `"globalenv"`, and `type` for `"attachments"`
+#' -- the same fields [compare_sessionstates()] tracks for its own
+#' `modified` tables. `"globalenv"` additionally has a `verified` column
+#' (`NA` for `"added"`/`"removed"` rows, since there is nothing to verify
+#' when a key only exists in one snapshot; `TRUE`/`FALSE` for `"modified"`
+#' rows -- see [compare_sessionstates()] for what `verified` means).
+#' `"attachments"` never has `"modified"` rows, since a `type` change for an
+#' existing search-path entry isn't a realistic scenario.
 #'
 #' @name coercion_methods
 
