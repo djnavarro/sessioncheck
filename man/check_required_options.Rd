@@ -15,7 +15,9 @@ check_required_options(
 "error", "warn", "message", and "none". The default is \code{action = "warn"}.}
 
 \item{required_options}{A named list of required options. If any of these options are
-missing or have different values to the required values, an action is triggered.}
+missing or have different values to the required values, an action is triggered. The
+default is \code{required_options = NULL}, which means there is nothing to compare
+against, so the check always passes.}
 
 \item{action_on_pass}{Behavior to take if the status is clean. Possible values
 are "message" and "none". The default is \code{action_on_pass = "none"}.}

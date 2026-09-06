@@ -345,7 +345,9 @@ check_sessiontime <- function(action = "warn", max_sessiontime = NULL, action_on
 #' @param action Behavior to take if the status is not clean. Possible values are 
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param required_options A named list of required options. If any of these options are 
-#' missing or have different values to the required values, an action is triggered.
+#' missing or have different values to the required values, an action is triggered. The
+#' default is `required_options = NULL`, which means there is nothing to compare
+#' against, so the check always passes.
 #' @param action_on_pass Behavior to take if the status is clean. Possible values
 #' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
@@ -420,6 +422,8 @@ check_required_options <- function(action = "warn", required_options = NULL, act
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param required_locale A named list of required locale settings. If any of these 
 #' are missing or have different values to the required values, an action is triggered.
+#' The default is `required_locale = NULL`, which means there is nothing to compare
+#' against, so the check always passes.
 #' @param action_on_pass Behavior to take if the status is clean. Possible values
 #' are "message" and "none". The default is `action_on_pass = "none"`.
 #'
@@ -475,7 +479,8 @@ check_required_locale <- function(action = "warn", required_locale = NULL, actio
 #' "error", "warn", "message", and "none". The default is `action = "warn"`.
 #' @param required_sysenv A named list of required system environment variables. 
 #' If any of these variables are missing or have different values to the required 
-#' values, an action is triggered.
+#' values, an action is triggered. The default is `required_sysenv = NULL`, which
+#' means there is nothing to compare against, so the check always passes.
 #' @param action_on_pass Behavior to take if the status is clean. Possible values
 #' are "message" and "none". The default is `action_on_pass = "none"`.
 #'

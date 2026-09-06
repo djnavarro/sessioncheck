@@ -16,7 +16,8 @@ check_required_sysenv(
 
 \item{required_sysenv}{A named list of required system environment variables.
 If any of these variables are missing or have different values to the required
-values, an action is triggered.}
+values, an action is triggered. The default is \code{required_sysenv = NULL}, which
+means there is nothing to compare against, so the check always passes.}
 
 \item{action_on_pass}{Behavior to take if the status is clean. Possible values
 are "message" and "none". The default is \code{action_on_pass = "none"}.}
