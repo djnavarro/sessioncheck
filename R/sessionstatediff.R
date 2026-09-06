@@ -167,14 +167,12 @@ compare_sessionstates <- function(old, new) {
   list(added = added, removed = removed)
 }
 
-# builds the long-format "modified" table shared by .diff_packages() and
-# .diff_globalenv(): one row per (key, changed field) pair, comparing
-# `compare_cols` via identical(). `extra_cols` (if supplied) is a function
-# of (old_row, new_row) returning a named list of extra columns to attach
-# to every row for that key (used by globalenv for `verified`); this keeps
-# the per-key looping logic in one place while letting each caller shape
-# its own output columns
-.diff_modified_table <- function(old_df, new_df, key, compare_cols, empty_extra_cols = list()) {
+# builds the long-format "modified" table used by .diff_packages(): one row
+# per (key, changed field) pair, comparing `compare_cols` via identical().
+# .diff_globalenv() has its own bespoke, hash-aware implementation instead
+# (see below) rather than calling this one, since its notion of "changed"
+# depends on hash verifiability rather than a flat list of compare_cols
+.diff_modified_table <- function(old_df, new_df, key, compare_cols) {
   common <- intersect(old_df[[key]], new_df[[key]])
   rows <- lapply(common, function(kk) {
     o <- old_df[old_df[[key]] == kk, , drop = FALSE]
