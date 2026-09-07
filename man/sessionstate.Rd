@@ -168,6 +168,19 @@ values themselves. Because a long-running script can accumulate many objects,
 the default display shows only the largest few, and omits \code{hash} (see
 "Selecting which elements are displayed" below); the captured object
 itself always holds every object and every column.
+
+Hashing cost scales linearly with an object's size (roughly 5-6 seconds
+per GB, dominated by \code{\link[=serialize]{serialize()}} itself rather than the disk I/O
+\code{tools::md5sum()} requires). For a workspace holding very large objects
+(e.g. multi-GB models or data frames), this can add a noticeable amount
+of time to a single \code{sessionstate()} call. Setting a
+\code{sessionstate_hash_max_size} field (a number of bytes) via
+\code{options(sessioncheck = list(...))} caps this: any object larger than
+the limit gets \code{hash = NA} instead of being serialized at all, using the
+same "not verifiable" semantics as an object that fails to serialize
+(see above). There is no corresponding function argument -- \code{sessionstate()}
+takes none -- so this is resolved purely as option-or-default (\code{Inf} by
+default, i.e. no size limit and no change to prior behavior).
 }
 
 \section{Attachments}{

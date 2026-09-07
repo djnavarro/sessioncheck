@@ -143,6 +143,19 @@
 #' "Selecting which elements are displayed" below); the captured object
 #' itself always holds every object and every column.
 #'
+#' Hashing cost scales linearly with an object's size (roughly 5-6 seconds
+#' per GB, dominated by [serialize()] itself rather than the disk I/O
+#' `tools::md5sum()` requires). For a workspace holding very large objects
+#' (e.g. multi-GB models or data frames), this can add a noticeable amount
+#' of time to a single `sessionstate()` call. Setting a
+#' `sessionstate_hash_max_size` field (a number of bytes) via
+#' `options(sessioncheck = list(...))` caps this: any object larger than
+#' the limit gets `hash = NA` instead of being serialized at all, using the
+#' same "not verifiable" semantics as an object that fails to serialize
+#' (see above). There is no corresponding function argument -- `sessionstate()`
+#' takes none -- so this is resolved purely as option-or-default (`Inf` by
+#' default, i.e. no size limit and no change to prior behavior).
+#'
 #' @section Attachments:
 #' The `attachments` element is a data frame with one row per entry on the
 #' search path (as returned by [search()]), with columns `name` and `type`
@@ -395,9 +408,25 @@ sessionstate <- function() {
     function(nm) as.numeric(utils::object.size(get(nm, envir = .GlobalEnv))),
     numeric(1L)
   )
+  # hashing cost scales linearly with object size (measured at ~5-6 sec/GB,
+  # dominated by serialize() itself rather than the writeBin()/md5sum() disk
+  # round trip -- see .hash_object()); sessionstate_hash_max_size lets a
+  # workspace holding very large objects (e.g. multi-GB models or data
+  # frames) cap that cost, at the price of those objects' hash being
+  # reported as NA (the same "not verifiable" semantics .hash_object()
+  # already uses for objects that fail to serialize at all). Defaults to
+  # Inf, i.e. no size limit and no change to prior behavior, unless a
+  # sessionstate_hash_max_size field is set via options(sessioncheck = ...)
+  max_size <- .resolve_field_selection(NULL, "sessionstate_hash_max_size", Inf)
+  if (!is.numeric(max_size) || length(max_size) != 1L) {
+    stop("`sessionstate_hash_max_size` option must be a single number", call. = FALSE)
+  }
   hash <- vapply(
-    objs,
-    function(nm) .hash_object(get(nm, envir = .GlobalEnv)),
+    seq_along(objs),
+    function(i) {
+      if (size[[i]] > max_size) return(NA_character_)
+      .hash_object(get(objs[[i]], envir = .GlobalEnv))
+    },
     character(1L)
   )
   df <- data.frame(name = objs, class = cls, size = size, hash = hash, stringsAsFactors = FALSE)
