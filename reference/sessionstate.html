@@ -236,14 +236,59 @@ remote metadata is available.</p>
 <code>hash</code> (an MD5 fingerprint of the object's serialized value, in the same
 spirit as <code>rng$seed_hash</code>: <code><a href="https://rdrr.io/r/base/serialize.html" class="external-link">serialize()</a></code> the object, then run
 <code><a href="https://rdrr.io/r/tools/md5sum.html" class="external-link">tools::md5sum()</a></code> on the result). <code>hash</code> is <code>NA</code> when an object cannot be
-serialized at all (e.g. one holding an external pointer, such as a
-database connection) – this is reported rather than silently treated as
-"unchanged" by anything comparing two snapshots. Only object names,
-classes, sizes, and value fingerprints are captured, never values
-themselves. Because a long-running script can accumulate many objects,
+serialized at all, which is rare in practice – objects backed by an
+external pointer (e.g. a database connection) typically still serialize
+to a placeholder rather than erroring. This is reported rather than
+silently treated as "unchanged" by anything comparing two snapshots. Only
+object names, classes, sizes, and value fingerprints are captured, never
+values themselves. Because a long-running script can accumulate many objects,
 the default display shows only the largest few, and omits <code>hash</code> (see
 "Selecting which elements are displayed" below); the captured object
 itself always holds every object and every column.</p>
+<p>Hashing cost scales linearly with an object's size (roughly 5-6 seconds
+per GB, dominated by <code><a href="https://rdrr.io/r/base/serialize.html" class="external-link">serialize()</a></code> itself rather than the disk I/O
+<code><a href="https://rdrr.io/r/tools/md5sum.html" class="external-link">tools::md5sum()</a></code> requires). For a workspace holding very large objects
+(e.g. multi-GB models or data frames), this can add a noticeable amount
+of time to a single <code>sessionstate()</code> call. Setting a
+<code>sessionstate_hash_max_size</code> field (a number of bytes) via
+<code>options(sessioncheck = list(...))</code> caps this: any object larger than
+the limit gets <code>hash = NA</code> instead of being serialized at all, using the
+same "not verifiable" semantics as an object that fails to serialize
+(see above). There is no corresponding function argument – <code>sessionstate()</code>
+takes none – so this is resolved purely as option-or-default (<code>Inf</code> by
+default, i.e. no size limit and no change to prior behavior).</p>
+<p>A related but distinct limitation: some R objects are thin wrappers
+around state that lives outside R's memory entirely – a
+<a href="https://cran.r-project.org/package=magick" class="external-link">magick</a> image, an
+<a href="https://cran.r-project.org/package=arrow" class="external-link">Arrow</a> <code>Table</code> or
+<code>RecordBatchReader</code>, a database connection, a memory-mapped file.
+Hashing such an object only fingerprints its R-level representation –
+typically a fixed placeholder for the underlying pointer itself, per
+<code><a href="https://rdrr.io/r/base/serialize.html" class="external-link">serialize()</a></code>'s handling of external pointers (see
+<code><a href="compare_sessionstates.html">compare_sessionstates()</a></code>'s Details) – not the external data it points
+to. If that external state changes without the R-level object itself
+being reassigned (e.g. writing to a database connection, advancing a
+stream's read position, mutating a file the object references), <code>hash</code>
+can stay unchanged even though the object's real, externally-held
+content did not. This is a limitation of what <code>sessionstate()</code> can
+observe from within R, not a defect in the hashing itself: it never
+inspects state outside R's memory, and so cannot distinguish "genuinely
+unchanged" from "changed only outside R" for objects like these.</p>
+<p>A different limitation runs in the opposite direction: for an object
+that is, or contains, an environment – an
+<a href="https://cran.r-project.org/package=R6" class="external-link">R6</a> object, a closure (via its
+enclosing environment), a reference class instance – <code><a href="https://rdrr.io/r/base/serialize.html" class="external-link">serialize()</a></code>'s
+traversal of an environment's bindings depends on insertion history, not
+only on the environment's current contents. Two environments holding
+identical bindings, populated in a different order, can therefore
+serialize (and hash) differently even though nothing about them has
+meaningfully changed. Where the external-pointer limitation above can
+hide a real change (a false negative), this one can report a change that
+never happened (a false positive) in <code><a href="compare_sessionstates.html">compare_sessionstates()</a></code>'s
+<code>globalenv$modified</code> table. There is no general fix for this within base
+R's <code><a href="https://rdrr.io/r/base/serialize.html" class="external-link">serialize()</a></code>; avoiding it would require a custom, order-independent
+serialization of environment-backed objects, which <code>sessionstate()</code> does
+not attempt.</p>
     </div>
     <div class="section level2">
     <h2 id="attachments">Attachments<a class="anchor" aria-label="anchor" href="#attachments"></a></h2>
@@ -289,7 +334,7 @@ unlike the one for <code><a href="sessioncheck.html">sessioncheck()</a></code>, 
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> system              x86_64, linux-gnu</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> ui                  non-interactive</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> tz                  UTC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> date                2026-09-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> date                2026-09-07</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ Locale ───────────────────────────────────────────────────────────────────────</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> language            en-US</span>
@@ -310,12 +355,12 @@ unlike the one for <code><a href="sessioncheck.html">sessioncheck()</a></code>, 
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> working directory   /home/runner/work/sessioncheck/sessioncheck/docs/reference</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> commit sha          d77a93c504a6065fb5b42513b01194d737433f7f</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> commit sha          fb42b1e50b8c92ac71f42e64178bfa336bde6103</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> dirty               FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> captured at         2026-09-06 14:21:32 UTC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> session uptime      7.928 sec</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> captured at         2026-09-07 01:03:29 UTC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> session uptime      8.742 sec</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> kind                Mersenne-Twister</span>

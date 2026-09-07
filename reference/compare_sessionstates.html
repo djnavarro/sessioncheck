@@ -119,14 +119,54 @@ one snapshot (keyed by <code>package</code>/<code>name</code>/<code>name</code> 
 differs, in a long format with one row per changed field
 (<code>package</code>/<code>name</code>, <code>field</code>, <code>old</code>, <code>new</code> for <code>packages</code>; see below for
 <code>globalenv</code>'s slightly different <code>modified</code> columns).</p></li>
-</ul><p><code>globalenv</code>'s <code>modified</code> table relies on the <code>hash</code> column
+</ul><p>Keyed-table diffing assumes each key (<code>package</code> for <code>packages</code>; <code>name</code>
+for <code>globalenv</code>/<code>attachments</code>) appears at most once per snapshot – true
+for anything <code><a href="sessionstate.html">sessionstate()</a></code> itself produces. <code>old</code>/<code>new</code> are checked
+for this on every keyed-table section, and <code>compare_sessionstates()</code>
+errors with an informative message identifying the offending snapshot,
+section, and duplicated value(s) if it doesn't hold (e.g. for a
+hand-constructed or corrupted <code>sessioncheck_sessionstate</code> object).</p>
+<p>Keyed-table diffing is purely key-based: it has no way to detect a
+rename. A package or global environment object that is renamed but
+otherwise unchanged between <code>old</code> and <code>new</code> (e.g. <code>pkgA</code> reinstalled
+under a new name, or <code>x</code> renamed to <code>y</code> via <code><a href="https://rdrr.io/r/base/assign.html" class="external-link">assign()</a></code>) is reported as
+one <code>removed</code> row (the old key) plus one <code>added</code> row (the new key),
+never as a single "renamed" entry – there is no general way to tell a
+rename apart from an unrelated removal-plus-addition that happens to
+involve similar values. This is inherent to any key-based diff, not a
+bug to be fixed.</p>
+<p><code>globalenv</code>'s <code>modified</code> table relies on the <code>hash</code> column
 <code><a href="sessionstate.html">sessionstate()</a></code> records for each object (an MD5 fingerprint of the
 object's serialized value). When both snapshots have a non-<code>NA</code> hash for
 an object, a hash mismatch is what marks it modified (<code>verified = TRUE</code>);
 when either side's hash is <code>NA</code> (the object couldn't be serialized –
 see <code><a href="sessionstate.html">sessionstate()</a></code>'s Global environment section), the comparison falls
 back to <code>class</code>/<code>size</code> only, and the row is marked <code>verified = FALSE</code> to
-be explicit that a value change could have gone undetected.</p>
+be explicit that a value change could have gone undetected. If an
+object's hash goes from <code>NA</code> to non-<code>NA</code> or vice versa between snapshots
+– e.g. it shrank below <code>sessionstate_hash_max_size</code>, or started/stopped
+failing to serialize – that is reported as its own <code>"hash"</code> row (with
+<code>verified = FALSE</code>), even when <code>class</code>/<code>size</code> are unchanged, since the
+object's verifiability itself changed.</p>
+<p><code>verified = TRUE</code> means the hash comparison itself is trustworthy as far
+as R's serialization can see – it does not mean every possible kind of
+change is detectable. For an object that is a thin wrapper around state
+living outside R's memory (e.g. a database connection, an Arrow
+<code>Table</code>/<code>RecordBatchReader</code>, a magick image; see <code><a href="sessionstate.html">sessionstate()</a></code>'s
+Global environment section), <code>hash</code> fingerprints the R-level wrapper,
+typically a fixed placeholder for the underlying pointer, not the
+external data. A <code>verified = TRUE</code>, unchanged-hash result for such an
+object means "unchanged as far as R can observe", not "definitely
+unchanged" – the external state could have changed without the R-level
+object being reassigned. This is inherent to hashing via R-level
+serialization, not a defect in the comparison logic.</p>
+<p>A related, opposite-direction limitation: <code><a href="https://rdrr.io/r/base/serialize.html" class="external-link">serialize()</a></code>'s traversal of
+an environment's bindings is order-dependent, not purely
+content-dependent (see <code><a href="sessionstate.html">sessionstate()</a></code>'s Global environment section).
+For an object that is, or contains, an environment – an R6 object, a
+closure, a reference class instance – this can produce a hash mismatch,
+and so a false <code>modified</code> row here, even when the object's actual
+contents are unchanged. <code>verified = TRUE</code> does not rule this out.</p>
 <p>A warning is issued if <code>new$timing$captured_at</code> is earlier than
 <code>old$timing$captured_at</code>, since that usually means the two arguments
 were passed in the wrong order; the comparison is still computed either
@@ -166,10 +206,10 @@ way.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> (no changes)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> captured at (old)     2026-09-06 14:21:31 UTC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> captured at (new)     2026-09-06 14:21:31 UTC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> wall clock elapsed    0.06 secs</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> session uptime delta  0.06 secs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> captured at (old)     2026-09-07 01:03:28 UTC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> captured at (new)     2026-09-07 01:03:28 UTC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> wall clock elapsed    0.07 secs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> session uptime delta  0.07 secs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> (no changes)</span>
@@ -182,8 +222,8 @@ way.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ Global environment ───────────────────────────────────────────────────────────</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Added [n = 1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                      name   class size                             hash</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  sessioncheck_example_obj integer   96 85ee0eceeffb89a47e4f4af1e6e38395</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                      name   class size</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  sessioncheck_example_obj integer   96</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">─ Attached environments ────────────────────────────────────────────────────────</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">•</span> (no changes) </span>

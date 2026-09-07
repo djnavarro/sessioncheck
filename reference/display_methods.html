@@ -115,10 +115,26 @@ that report be filtered down to specific fields or columns per section.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'sessioncheck_sessionstatediff'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">x</span>, changed_only <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  changed_only <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  packages <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  globalenv <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  attachments <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max_rows <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'sessioncheck_sessionstatediff'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, changed_only <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  changed_only <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  packages <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  globalenv <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  attachments <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max_rows <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -195,8 +211,12 @@ resolved.</p></dd>
 <dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional character
 vector selecting which package inventory columns to display (see
 <code><a href="sessionstate.html">sessionstate()</a></code> for the full list of columns). Defaults to
-<code>c("package", "attached", "loaded_version", "source")</code>. Ignored for other
-classes. See Details for how the default is resolved.</p></dd>
+<code>c("package", "attached", "loaded_version", "source")</code>. For
+<code>sessioncheck_sessionstatediff</code> objects, the same column selection and
+default apply to the <code>added</code>/<code>removed</code> blocks of the "Packages" section
+(the <code>modified</code> block always shows its own fixed <code>field</code>/<code>old</code>/<code>new</code>
+columns, so <code>packages</code> does not affect it). Ignored for other classes.
+See Details for how the default is resolved.</p></dd>
 
 
 <dt id="arg-globalenv">globalenv<a class="anchor" aria-label="anchor" href="#arg-globalenv"></a></dt>
@@ -205,8 +225,12 @@ character vector selecting which global environment columns to display
 (from <code>"name"</code>, <code>"class"</code>, <code>"size"</code>, <code>"hash"</code>). Defaults to
 <code>c("name", "class", "size")</code> (omitting <code>"hash"</code>, a long fingerprint
 mainly useful programmatically – see <code><a href="compare_sessionstates.html">compare_sessionstates()</a></code>).
-Ignored for other classes. See Details for how the default is resolved,
-and for how <code>globalenv_n</code> separately controls the number of rows shown.</p></dd>
+For <code>sessioncheck_sessionstatediff</code> objects, the same column selection
+and default apply to the <code>added</code>/<code>removed</code> blocks of the "Global
+environment" section (the <code>modified</code> block is unaffected – see
+<code>packages</code> above). Ignored for other classes. See Details for how the
+default is resolved, and for how <code>globalenv_n</code> separately controls the
+number of rows shown for <code>sessioncheck_sessionstate</code> objects.</p></dd>
 
 
 <dt id="arg-globalenv-n">globalenv_n<a class="anchor" aria-label="anchor" href="#arg-globalenv-n"></a></dt>
@@ -219,15 +243,27 @@ Details for how the default is resolved.</p></dd>
 <dt id="arg-attachments">attachments<a class="anchor" aria-label="anchor" href="#arg-attachments"></a></dt>
 <dd><p>For <code>sessioncheck_sessionstate</code> objects, an optional
 character vector selecting which attached-environment columns to display
-(from <code>"name"</code>, <code>"type"</code>). Defaults to showing all columns. Ignored for
-other classes. See Details for how the default is resolved.</p></dd>
+(from <code>"name"</code>, <code>"type"</code>). Defaults to showing all columns. For
+<code>sessioncheck_sessionstatediff</code> objects, the same column selection
+applies to the <code>added</code>/<code>removed</code> blocks of the "Attached environments"
+section (which has no <code>modified</code> block at all – see
+<code><a href="compare_sessionstates.html">compare_sessionstates()</a></code>). Ignored for other classes. See Details for
+how the default is resolved.</p></dd>
 
 
 <dt id="arg-changed-only">changed_only<a class="anchor" aria-label="anchor" href="#arg-changed-only"></a></dt>
 <dd><p>For <code>sessioncheck_sessionstatediff</code> objects, whether to
 collapse sections/fields with no detected change down to a single "(no
-changes)" line (<code>TRUE</code>, the default) or always show every field. Ignored
-for other classes.</p></dd>
+changes)" line (<code>TRUE</code> by default) or always show every field. Ignored
+for other classes. See Details for how the default is resolved.</p></dd>
+
+
+<dt id="arg-max-rows">max_rows<a class="anchor" aria-label="anchor" href="#arg-max-rows"></a></dt>
+<dd><p>For <code>sessioncheck_sessionstatediff</code> objects, an optional
+single number giving the maximum number of rows to display in each
+<code>added</code>/<code>removed</code>/<code>modified</code> block of the "Packages", "Global
+environment", and "Attached environments" sections. Defaults to <code>10</code>.
+Ignored for other classes. See Details for how the default is resolved.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -256,6 +292,19 @@ is displayed; it never changes the underlying object, so
 <code><a href="coercion_methods.html">as.data.frame()</a></code> always returns the full package
 inventory, and <code>x$globalenv</code>/<code>x$attachments</code> always return their full
 data frames, regardless of any selection in effect.</p>
+<p>For <code>sessioncheck_sessionstatediff</code> objects, <code>changed_only</code>/<code>packages</code>/
+<code>globalenv</code>/<code>attachments</code>/<code>max_rows</code> are resolved through the same
+precedence: an explicit argument always wins; otherwise
+<code>getOption("sessioncheck")</code> is checked for a
+<code>sessionstatediff_changed_only</code>, <code>sessionstatediff_packages</code>,
+<code>sessionstatediff_globalenv</code>, <code>sessionstatediff_attachments</code>, or
+<code>sessionstatediff_max_rows</code> field (respectively); if neither is set, a
+built-in default is used: <code>TRUE</code> for <code>changed_only</code>, <code>10</code> for
+<code>max_rows</code>, and the same <code>packages</code>/<code>globalenv</code>/<code>attachments</code> defaults
+as <code>sessioncheck_sessionstate</code> objects use (see above). <code>max_rows</code>
+applies independently to every <code>added</code>/<code>removed</code>/<code>modified</code> block, and
+does not affect the underlying object – <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> on a
+<code>sessioncheck_sessionstatediff</code> always returns every row.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

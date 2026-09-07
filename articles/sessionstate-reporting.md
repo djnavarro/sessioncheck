@@ -101,7 +101,7 @@ sessioninfo::session_info()
 #>  collate  C.UTF-8
 #>  ctype    C.UTF-8
 #>  tz       UTC
-#>  date     2026-09-06
+#>  date     2026-09-07
 #>  pandoc   3.8.3 @ /opt/hostedtoolcache/pandoc/3.8.3/x64/ (via rmarkdown)
 #>  quarto   NA
 #> 
@@ -127,7 +127,7 @@ sessioninfo::session_info()
 #>  rlang          1.3.0      2026-07-05 [1] RSPM
 #>  rmarkdown      2.32       2026-09-01 [1] RSPM
 #>  sass           0.4.10     2025-04-11 [1] RSPM
-#>  sessioncheck * 0.1.1.9000 2026-09-06 [1] local
+#>  sessioncheck * 0.1.1.9000 2026-09-07 [1] local
 #>  sessioninfo    1.2.4      2026-06-04 [1] RSPM
 #>  systemfonts    1.3.2      2026-03-05 [1] RSPM
 #>  textshaping    1.0.5      2026-03-06 [1] RSPM
@@ -151,7 +151,7 @@ sessionstate()
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
-#> • date                2026-09-06
+#> • date                2026-09-07
 #> 
 #> ─ Locale ───────────────────────────────────────────────────────────────────────
 #> • language            en-US
@@ -172,12 +172,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          d77a93c504a6065fb5b42513b01194d737433f7f
+#> • commit sha          fb42b1e50b8c92ac71f42e64178bfa336bde6103
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-06 14:21:42 UTC
-#> • session uptime      0.963 sec
+#> • captured at         2026-09-07 01:03:41 UTC
+#> • session uptime      1.036 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -361,7 +361,7 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
-#> • date                2026-09-06
+#> • date                2026-09-07
 #> 
 #> ─ Locale ───────────────────────────────────────────────────────────────────────
 #> • language            en-US
@@ -379,12 +379,12 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          d77a93c504a6065fb5b42513b01194d737433f7f
+#> • commit sha          fb42b1e50b8c92ac71f42e64178bfa336bde6103
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-06 14:21:43 UTC
-#> • session uptime      1.067 sec
+#> • captured at         2026-09-07 01:03:41 UTC
+#> • session uptime      1.162 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -506,10 +506,10 @@ diff
 #> • (no changes)
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at (old)     2026-09-06 14:21:43 UTC
-#> • captured at (new)     2026-09-06 14:21:43 UTC
-#> • wall clock elapsed    0.04 secs
-#> • session uptime delta  0.04 secs
+#> • captured at (old)     2026-09-07 01:03:41 UTC
+#> • captured at (new)     2026-09-07 01:03:41 UTC
+#> • wall clock elapsed    0.05 secs
+#> • session uptime delta  0.05 secs
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • (no changes)
@@ -522,8 +522,8 @@ diff
 #> 
 #> ─ Global environment ───────────────────────────────────────────────────────────
 #> Added [n = 1]
-#>         name   class size                             hash
-#>  some_result integer   96 85ee0eceeffb89a47e4f4af1e6e38395
+#>         name   class size
+#>  some_result integer   96
 #> 
 #> ─ Attached environments ────────────────────────────────────────────────────────
 #> • (no changes)

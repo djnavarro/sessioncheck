@@ -60,10 +60,26 @@ print(
 )
 
 # S3 method for class 'sessioncheck_sessionstatediff'
-format(x, changed_only = TRUE, ...)
+format(
+  x,
+  changed_only = NULL,
+  packages = NULL,
+  globalenv = NULL,
+  attachments = NULL,
+  max_rows = NULL,
+  ...
+)
 
 # S3 method for class 'sessioncheck_sessionstatediff'
-print(x, changed_only = TRUE, ...)
+print(
+  x,
+  changed_only = NULL,
+  packages = NULL,
+  globalenv = NULL,
+  attachments = NULL,
+  max_rows = NULL,
+  ...
+)
 ```
 
 ## Arguments
@@ -141,8 +157,13 @@ print(x, changed_only = TRUE, ...)
   selecting which package inventory columns to display (see
   [`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
   for the full list of columns). Defaults to
-  `c("package", "attached", "loaded_version", "source")`. Ignored for
-  other classes. See Details for how the default is resolved.
+  `c("package", "attached", "loaded_version", "source")`. For
+  `sessioncheck_sessionstatediff` objects, the same column selection and
+  default apply to the `added`/`removed` blocks of the "Packages"
+  section (the `modified` block always shows its own fixed
+  `field`/`old`/`new` columns, so `packages` does not affect it).
+  Ignored for other classes. See Details for how the default is
+  resolved.
 
 - globalenv:
 
@@ -152,9 +173,12 @@ print(x, changed_only = TRUE, ...)
   `c("name", "class", "size")` (omitting `"hash"`, a long fingerprint
   mainly useful programmatically – see
   [`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)).
-  Ignored for other classes. See Details for how the default is
-  resolved, and for how `globalenv_n` separately controls the number of
-  rows shown.
+  For `sessioncheck_sessionstatediff` objects, the same column selection
+  and default apply to the `added`/`removed` blocks of the "Global
+  environment" section (the `modified` block is unaffected – see
+  `packages` above). Ignored for other classes. See Details for how the
+  default is resolved, and for how `globalenv_n` separately controls the
+  number of rows shown for `sessioncheck_sessionstate` objects.
 
 - globalenv_n:
 
@@ -167,15 +191,29 @@ print(x, changed_only = TRUE, ...)
 
   For `sessioncheck_sessionstate` objects, an optional character vector
   selecting which attached-environment columns to display (from
-  `"name"`, `"type"`). Defaults to showing all columns. Ignored for
-  other classes. See Details for how the default is resolved.
+  `"name"`, `"type"`). Defaults to showing all columns. For
+  `sessioncheck_sessionstatediff` objects, the same column selection
+  applies to the `added`/`removed` blocks of the "Attached environments"
+  section (which has no `modified` block at all – see
+  [`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)).
+  Ignored for other classes. See Details for how the default is
+  resolved.
 
 - changed_only:
 
   For `sessioncheck_sessionstatediff` objects, whether to collapse
   sections/fields with no detected change down to a single "(no
-  changes)" line (`TRUE`, the default) or always show every field.
-  Ignored for other classes.
+  changes)" line (`TRUE` by default) or always show every field. Ignored
+  for other classes. See Details for how the default is resolved.
+
+- max_rows:
+
+  For `sessioncheck_sessionstatediff` objects, an optional single number
+  giving the maximum number of rows to display in each
+  `added`/`removed`/`modified` block of the "Packages", "Global
+  environment", and "Attached environments" sections. Defaults to `10`.
+  Ignored for other classes. See Details for how the default is
+  resolved.
 
 ## Value
 
@@ -204,3 +242,18 @@ never changes the underlying object, so
 always returns the full package inventory, and
 `x$globalenv`/`x$attachments` always return their full data frames,
 regardless of any selection in effect.
+
+For `sessioncheck_sessionstatediff` objects, `changed_only`/`packages`/
+`globalenv`/`attachments`/`max_rows` are resolved through the same
+precedence: an explicit argument always wins; otherwise
+`getOption("sessioncheck")` is checked for a
+`sessionstatediff_changed_only`, `sessionstatediff_packages`,
+`sessionstatediff_globalenv`, `sessionstatediff_attachments`, or
+`sessionstatediff_max_rows` field (respectively); if neither is set, a
+built-in default is used: `TRUE` for `changed_only`, `10` for
+`max_rows`, and the same `packages`/`globalenv`/`attachments` defaults
+as `sessioncheck_sessionstate` objects use (see above). `max_rows`
+applies independently to every `added`/`removed`/`modified` block, and
+does not affect the underlying object –
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) on a
+`sessioncheck_sessionstatediff` always returns every row.

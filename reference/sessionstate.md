@@ -173,15 +173,70 @@ The `globalenv` element is a data frame with one row per object in
 spirit as `rng$seed_hash`:
 [`serialize()`](https://rdrr.io/r/base/serialize.html) the object, then
 run [`tools::md5sum()`](https://rdrr.io/r/tools/md5sum.html) on the
-result). `hash` is `NA` when an object cannot be serialized at all (e.g.
-one holding an external pointer, such as a database connection) – this
-is reported rather than silently treated as "unchanged" by anything
-comparing two snapshots. Only object names, classes, sizes, and value
-fingerprints are captured, never values themselves. Because a
-long-running script can accumulate many objects, the default display
-shows only the largest few, and omits `hash` (see "Selecting which
-elements are displayed" below); the captured object itself always holds
-every object and every column.
+result). `hash` is `NA` when an object cannot be serialized at all,
+which is rare in practice – objects backed by an external pointer (e.g.
+a database connection) typically still serialize to a placeholder rather
+than erroring. This is reported rather than silently treated as
+"unchanged" by anything comparing two snapshots. Only object names,
+classes, sizes, and value fingerprints are captured, never values
+themselves. Because a long-running script can accumulate many objects,
+the default display shows only the largest few, and omits `hash` (see
+"Selecting which elements are displayed" below); the captured object
+itself always holds every object and every column.
+
+Hashing cost scales linearly with an object's size (roughly 5-6 seconds
+per GB, dominated by
+[`serialize()`](https://rdrr.io/r/base/serialize.html) itself rather
+than the disk I/O
+[`tools::md5sum()`](https://rdrr.io/r/tools/md5sum.html) requires). For
+a workspace holding very large objects (e.g. multi-GB models or data
+frames), this can add a noticeable amount of time to a single
+`sessionstate()` call. Setting a `sessionstate_hash_max_size` field (a
+number of bytes) via `options(sessioncheck = list(...))` caps this: any
+object larger than the limit gets `hash = NA` instead of being
+serialized at all, using the same "not verifiable" semantics as an
+object that fails to serialize (see above). There is no corresponding
+function argument – `sessionstate()` takes none – so this is resolved
+purely as option-or-default (`Inf` by default, i.e. no size limit and no
+change to prior behavior).
+
+A related but distinct limitation: some R objects are thin wrappers
+around state that lives outside R's memory entirely – a
+[magick](https://cran.r-project.org/package=magick) image, an
+[Arrow](https://cran.r-project.org/package=arrow) `Table` or
+`RecordBatchReader`, a database connection, a memory-mapped file.
+Hashing such an object only fingerprints its R-level representation –
+typically a fixed placeholder for the underlying pointer itself, per
+[`serialize()`](https://rdrr.io/r/base/serialize.html)'s handling of
+external pointers (see
+[`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)'s
+Details) – not the external data it points to. If that external state
+changes without the R-level object itself being reassigned (e.g. writing
+to a database connection, advancing a stream's read position, mutating a
+file the object references), `hash` can stay unchanged even though the
+object's real, externally-held content did not. This is a limitation of
+what `sessionstate()` can observe from within R, not a defect in the
+hashing itself: it never inspects state outside R's memory, and so
+cannot distinguish "genuinely unchanged" from "changed only outside R"
+for objects like these.
+
+A different limitation runs in the opposite direction: for an object
+that is, or contains, an environment – an
+[R6](https://cran.r-project.org/package=R6) object, a closure (via its
+enclosing environment), a reference class instance –
+[`serialize()`](https://rdrr.io/r/base/serialize.html)'s traversal of an
+environment's bindings depends on insertion history, not only on the
+environment's current contents. Two environments holding identical
+bindings, populated in a different order, can therefore serialize (and
+hash) differently even though nothing about them has meaningfully
+changed. Where the external-pointer limitation above can hide a real
+change (a false negative), this one can report a change that never
+happened (a false positive) in
+[`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)'s
+`globalenv$modified` table. There is no general fix for this within base
+R's [`serialize()`](https://rdrr.io/r/base/serialize.html); avoiding it
+would require a custom, order-independent serialization of
+environment-backed objects, which `sessionstate()` does not attempt.
 
 ## Attachments
 
@@ -231,7 +286,7 @@ sessionstate()
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
-#> • date                2026-09-06
+#> • date                2026-09-07
 #> 
 #> ─ Locale ───────────────────────────────────────────────────────────────────────
 #> • language            en-US
@@ -252,12 +307,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/docs/reference
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          d77a93c504a6065fb5b42513b01194d737433f7f
+#> • commit sha          fb42b1e50b8c92ac71f42e64178bfa336bde6103
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-06 14:21:32 UTC
-#> • session uptime      7.928 sec
+#> • captured at         2026-09-07 01:03:29 UTC
+#> • session uptime      8.742 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
