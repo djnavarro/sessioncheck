@@ -156,6 +156,24 @@
 #' takes none -- so this is resolved purely as option-or-default (`Inf` by
 #' default, i.e. no size limit and no change to prior behavior).
 #'
+#' A related but distinct limitation: some R objects are thin wrappers
+#' around state that lives outside R's memory entirely -- a
+#' [magick](https://cran.r-project.org/package=magick) image, an
+#' [Arrow](https://cran.r-project.org/package=arrow) `Table` or
+#' `RecordBatchReader`, a database connection, a memory-mapped file.
+#' Hashing such an object only fingerprints its R-level representation --
+#' typically a fixed placeholder for the underlying pointer itself, per
+#' [serialize()]'s handling of external pointers (see
+#' [compare_sessionstates()]'s Details) -- not the external data it points
+#' to. If that external state changes without the R-level object itself
+#' being reassigned (e.g. writing to a database connection, advancing a
+#' stream's read position, mutating a file the object references), `hash`
+#' can stay unchanged even though the object's real, externally-held
+#' content did not. This is a limitation of what `sessionstate()` can
+#' observe from within R, not a defect in the hashing itself: it never
+#' inspects state outside R's memory, and so cannot distinguish "genuinely
+#' unchanged" from "changed only outside R" for objects like these.
+#'
 #' @section Attachments:
 #' The `attachments` element is a data frame with one row per entry on the
 #' search path (as returned by [search()]), with columns `name` and `type`

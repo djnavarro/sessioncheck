@@ -77,6 +77,19 @@
 #' back to `class`/`size` only, and the row is marked `verified = FALSE` to
 #' be explicit that a value change could have gone undetected.
 #'
+#' `verified = TRUE` means the hash comparison itself is trustworthy as far
+#' as R's serialization can see -- it does not mean every possible kind of
+#' change is detectable. For an object that is a thin wrapper around state
+#' living outside R's memory (e.g. a database connection, an Arrow
+#' `Table`/`RecordBatchReader`, a magick image; see [sessionstate()]'s
+#' Global environment section), `hash` fingerprints the R-level wrapper,
+#' typically a fixed placeholder for the underlying pointer, not the
+#' external data. A `verified = TRUE`, unchanged-hash result for such an
+#' object means "unchanged as far as R can observe", not "definitely
+#' unchanged" -- the external state could have changed without the R-level
+#' object being reassigned. This is inherent to hashing via R-level
+#' serialization, not a defect in the comparison logic.
+#'
 #' A warning is issued if `new$timing$captured_at` is earlier than
 #' `old$timing$captured_at`, since that usually means the two arguments
 #' were passed in the wrong order; the comparison is still computed either

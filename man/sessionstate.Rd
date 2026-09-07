@@ -181,6 +181,24 @@ same "not verifiable" semantics as an object that fails to serialize
 (see above). There is no corresponding function argument -- \code{sessionstate()}
 takes none -- so this is resolved purely as option-or-default (\code{Inf} by
 default, i.e. no size limit and no change to prior behavior).
+
+A related but distinct limitation: some R objects are thin wrappers
+around state that lives outside R's memory entirely -- a
+\href{https://cran.r-project.org/package=magick}{magick} image, an
+\href{https://cran.r-project.org/package=arrow}{Arrow} \code{Table} or
+\code{RecordBatchReader}, a database connection, a memory-mapped file.
+Hashing such an object only fingerprints its R-level representation --
+typically a fixed placeholder for the underlying pointer itself, per
+\code{\link[=serialize]{serialize()}}'s handling of external pointers (see
+\code{\link[=compare_sessionstates]{compare_sessionstates()}}'s Details) -- not the external data it points
+to. If that external state changes without the R-level object itself
+being reassigned (e.g. writing to a database connection, advancing a
+stream's read position, mutating a file the object references), \code{hash}
+can stay unchanged even though the object's real, externally-held
+content did not. This is a limitation of what \code{sessionstate()} can
+observe from within R, not a defect in the hashing itself: it never
+inspects state outside R's memory, and so cannot distinguish "genuinely
+unchanged" from "changed only outside R" for objects like these.
 }
 
 \section{Attachments}{
