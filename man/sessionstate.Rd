@@ -159,14 +159,62 @@ The \code{globalenv} element is a data frame with one row per object in
 \code{hash} (an MD5 fingerprint of the object's serialized value, in the same
 spirit as \code{rng$seed_hash}: \code{\link[=serialize]{serialize()}} the object, then run
 \code{\link[tools:md5sum]{tools::md5sum()}} on the result). \code{hash} is \code{NA} when an object cannot be
-serialized at all (e.g. one holding an external pointer, such as a
-database connection) -- this is reported rather than silently treated as
-"unchanged" by anything comparing two snapshots. Only object names,
-classes, sizes, and value fingerprints are captured, never values
-themselves. Because a long-running script can accumulate many objects,
+serialized at all, which is rare in practice -- objects backed by an
+external pointer (e.g. a database connection) typically still serialize
+to a placeholder rather than erroring. This is reported rather than
+silently treated as "unchanged" by anything comparing two snapshots. Only
+object names, classes, sizes, and value fingerprints are captured, never
+values themselves. Because a long-running script can accumulate many objects,
 the default display shows only the largest few, and omits \code{hash} (see
 "Selecting which elements are displayed" below); the captured object
 itself always holds every object and every column.
+
+Hashing cost scales linearly with an object's size (roughly 5-6 seconds
+per GB, dominated by \code{\link[=serialize]{serialize()}} itself rather than the disk I/O
+\code{tools::md5sum()} requires). For a workspace holding very large objects
+(e.g. multi-GB models or data frames), this can add a noticeable amount
+of time to a single \code{sessionstate()} call. Setting a
+\code{sessionstate_hash_max_size} field (a number of bytes) via
+\code{options(sessioncheck = list(...))} caps this: any object larger than
+the limit gets \code{hash = NA} instead of being serialized at all, using the
+same "not verifiable" semantics as an object that fails to serialize
+(see above). There is no corresponding function argument -- \code{sessionstate()}
+takes none -- so this is resolved purely as option-or-default (\code{Inf} by
+default, i.e. no size limit and no change to prior behavior).
+
+A related but distinct limitation: some R objects are thin wrappers
+around state that lives outside R's memory entirely -- a
+\href{https://cran.r-project.org/package=magick}{magick} image, an
+\href{https://cran.r-project.org/package=arrow}{Arrow} \code{Table} or
+\code{RecordBatchReader}, a database connection, a memory-mapped file.
+Hashing such an object only fingerprints its R-level representation --
+typically a fixed placeholder for the underlying pointer itself, per
+\code{\link[=serialize]{serialize()}}'s handling of external pointers (see
+\code{\link[=compare_sessionstates]{compare_sessionstates()}}'s Details) -- not the external data it points
+to. If that external state changes without the R-level object itself
+being reassigned (e.g. writing to a database connection, advancing a
+stream's read position, mutating a file the object references), \code{hash}
+can stay unchanged even though the object's real, externally-held
+content did not. This is a limitation of what \code{sessionstate()} can
+observe from within R, not a defect in the hashing itself: it never
+inspects state outside R's memory, and so cannot distinguish "genuinely
+unchanged" from "changed only outside R" for objects like these.
+
+A different limitation runs in the opposite direction: for an object
+that is, or contains, an environment -- an
+\href{https://cran.r-project.org/package=R6}{R6} object, a closure (via its
+enclosing environment), a reference class instance -- \code{\link[=serialize]{serialize()}}'s
+traversal of an environment's bindings depends on insertion history, not
+only on the environment's current contents. Two environments holding
+identical bindings, populated in a different order, can therefore
+serialize (and hash) differently even though nothing about them has
+meaningfully changed. Where the external-pointer limitation above can
+hide a real change (a false negative), this one can report a change that
+never happened (a false positive) in \code{\link[=compare_sessionstates]{compare_sessionstates()}}'s
+\code{globalenv$modified} table. There is no general fix for this within base
+R's \code{\link[=serialize]{serialize()}}; avoiding it would require a custom, order-independent
+serialization of environment-backed objects, which \code{sessionstate()} does
+not attempt.
 }
 
 \section{Attachments}{

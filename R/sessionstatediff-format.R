@@ -55,23 +55,47 @@
   c(.rule("Library paths"), lines)
 }
 
+# renders one added/removed/modified block within a keyed-table section:
+# caps display at max_rows (largest-first ordering is left to the caller,
+# since added/removed/modified rows have no natural size to sort by, unlike
+# sessionstate()'s globalenv), appending a "... and N more" line -- mirrors
+# how format.sessioncheck_sessionstate() truncates globalenv
+.render_table_block <- function(label, df, max_rows) {
+  if (nrow(df) == 0L) return(character(0L))
+  n_total <- nrow(df)
+  n_shown <- min(max_rows, n_total)
+  show_df <- df[seq_len(n_shown), , drop = FALSE]
+  lines <- c(sprintf("%s [n = %d]", label, n_total), utils::capture.output(print(show_df, row.names = FALSE)))
+  if (n_shown < n_total) {
+    lines <- c(lines, sprintf(" ... and %d more", n_total - n_shown))
+  }
+  lines
+}
+
 # renders a keyed-table section (packages/globalenv/attachments): each of
 # added/removed/modified is its own sub-block, omitted when empty;
-# `modified` is NULL for attachments, which has no modified concept
-.render_table_section <- function(title, added, removed, modified = NULL) {
+# `modified` is NULL for attachments, which has no modified concept.
+# `cols` (if supplied) selects which columns to display on the
+# added/removed blocks only -- `modified` always has its own fixed
+# field/old/new(/verified) shape, so column selection doesn't apply to it.
+# `max_rows` caps each block independently (see .render_table_block())
+.render_table_section <- function(title, added, removed, modified = NULL, cols = NULL, max_rows = 10L) {
   has_changes <- nrow(added) > 0L || nrow(removed) > 0L || (!is.null(modified) && nrow(modified) > 0L)
   if (!has_changes) {
     return(c(.rule(title), .bullet_line("(no changes)")))
   }
-  lines <- character(0L)
-  if (nrow(added) > 0L) {
-    lines <- c(lines, sprintf("Added [n = %d]", nrow(added)), utils::capture.output(print(added, row.names = FALSE)))
+  if (!is.null(cols)) {
+    added_cols <- .select_fields(names(added), cols, title)
+    removed_cols <- .select_fields(names(removed), cols, title)
+    added <- added[, added_cols, drop = FALSE]
+    removed <- removed[, removed_cols, drop = FALSE]
   }
-  if (nrow(removed) > 0L) {
-    lines <- c(lines, sprintf("Removed [n = %d]", nrow(removed)), utils::capture.output(print(removed, row.names = FALSE)))
-  }
-  if (!is.null(modified) && nrow(modified) > 0L) {
-    lines <- c(lines, sprintf("Modified [n = %d]", nrow(modified)), utils::capture.output(print(modified, row.names = FALSE)))
+  lines <- c(
+    .render_table_block("Added", added, max_rows),
+    .render_table_block("Removed", removed, max_rows)
+  )
+  if (!is.null(modified)) {
+    lines <- c(lines, .render_table_block("Modified", modified, max_rows))
   }
   c(.rule(title), lines)
 }
@@ -80,7 +104,15 @@
 
 #' @rdname display_methods
 #' @exportS3Method base::format
-format.sessioncheck_sessionstatediff <- function(x, changed_only = TRUE, ...) {
+format.sessioncheck_sessionstatediff <- function(x, changed_only = NULL, packages = NULL, globalenv = NULL, attachments = NULL, max_rows = NULL, ...) {
+  changed_only <- .resolve_field_selection(changed_only, "sessionstatediff_changed_only", TRUE)
+  packages <- .resolve_field_selection(packages, "sessionstatediff_packages", c("package", "attached", "loaded_version", "source"))
+  globalenv <- .resolve_field_selection(globalenv, "sessionstatediff_globalenv", c("name", "class", "size"))
+  attachments <- .resolve_field_selection(attachments, "sessionstatediff_attachments", NULL)
+  max_rows <- .resolve_field_selection(max_rows, "sessionstatediff_max_rows", 10L)
+  if (!is.numeric(max_rows) || length(max_rows) != 1L) {
+    stop("`max_rows` must be a single number", call. = FALSE)
+  }
   sections <- list(
     .render_record_section("Platform", x$platform, changed_only),
     .render_record_section("Locale", x$locale, changed_only),
@@ -91,9 +123,9 @@ format.sessioncheck_sessionstatediff <- function(x, changed_only = TRUE, ...) {
     .render_timing_section(x$timing),
     .render_record_section("RNG state", x$rng, changed_only),
     .render_libpaths_section(x$libpaths),
-    .render_table_section("Packages", x$packages$added, x$packages$removed, x$packages$modified),
-    .render_table_section("Global environment", x$globalenv$added, x$globalenv$removed, x$globalenv$modified),
-    .render_table_section("Attached environments", x$attachments$added, x$attachments$removed)
+    .render_table_section("Packages", x$packages$added, x$packages$removed, x$packages$modified, cols = packages, max_rows = max_rows),
+    .render_table_section("Global environment", x$globalenv$added, x$globalenv$removed, x$globalenv$modified, cols = globalenv, max_rows = max_rows),
+    .render_table_section("Attached environments", x$attachments$added, x$attachments$removed, cols = attachments, max_rows = max_rows)
   )
   paste(
     unlist(mapply(
@@ -107,8 +139,14 @@ format.sessioncheck_sessionstatediff <- function(x, changed_only = TRUE, ...) {
 
 #' @rdname display_methods
 #' @exportS3Method base::print
-print.sessioncheck_sessionstatediff <- function(x, changed_only = TRUE, ...) {
-  cat(format(x, changed_only = changed_only, ...), "\n")
+print.sessioncheck_sessionstatediff <- function(x, changed_only = NULL, packages = NULL, globalenv = NULL, attachments = NULL, max_rows = NULL, ...) {
+  cat(
+    format(
+      x, changed_only = changed_only, packages = packages, globalenv = globalenv,
+      attachments = attachments, max_rows = max_rows, ...
+    ),
+    "\n"
+  )
   invisible(x)
 }
 

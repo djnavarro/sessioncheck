@@ -112,6 +112,34 @@ test_that(".get_globalenv_info() records a hash per object", {
   expect_identical(df$hash[df$name == "sc_test_hash_a"], .hash_object(1:5))
 })
 
+test_that(".get_globalenv_info() skips hashing objects above sessionstate_hash_max_size", {
+  assign("sc_test_maxsize_small", 1:5, envir = .GlobalEnv)
+  assign("sc_test_maxsize_big", 1:1000, envir = .GlobalEnv)
+  on.exit(rm(list = c("sc_test_maxsize_small", "sc_test_maxsize_big"), envir = .GlobalEnv), add = TRUE)
+
+  small_size <- as.numeric(object.size(1:5))
+  big_size <- as.numeric(object.size(1:1000))
+  old_opt <- options(sessioncheck = list(sessionstate_hash_max_size = (small_size + big_size) / 2))
+  on.exit(options(old_opt), add = TRUE)
+
+  df <- .get_globalenv_info()
+  expect_false(is.na(df$hash[df$name == "sc_test_maxsize_small"]))
+  expect_true(is.na(df$hash[df$name == "sc_test_maxsize_big"]))
+})
+
+test_that(".get_globalenv_info() hashes everything when sessionstate_hash_max_size is unset (default Inf)", {
+  assign("sc_test_nomax_obj", 1:1e4, envir = .GlobalEnv)
+  on.exit(rm(sc_test_nomax_obj, envir = .GlobalEnv), add = TRUE)
+  df <- .get_globalenv_info()
+  expect_false(is.na(df$hash[df$name == "sc_test_nomax_obj"]))
+})
+
+test_that(".get_globalenv_info() errors informatively on a non-numeric sessionstate_hash_max_size", {
+  old_opt <- options(sessioncheck = list(sessionstate_hash_max_size = "big"))
+  on.exit(options(old_opt), add = TRUE)
+  expect_error(.get_globalenv_info(), "sessionstate_hash_max_size")
+})
+
 test_that(".get_search_path_info() classifies packages vs. other attachments", {
   df <- .get_search_path_info()
   expect_named(df, c("name", "type"))

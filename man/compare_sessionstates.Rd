@@ -58,6 +58,24 @@ differs, in a long format with one row per changed field
 \code{globalenv}'s slightly different \code{modified} columns).
 }
 
+Keyed-table diffing assumes each key (\code{package} for \code{packages}; \code{name}
+for \code{globalenv}/\code{attachments}) appears at most once per snapshot -- true
+for anything \code{\link[=sessionstate]{sessionstate()}} itself produces. \code{old}/\code{new} are checked
+for this on every keyed-table section, and \code{compare_sessionstates()}
+errors with an informative message identifying the offending snapshot,
+section, and duplicated value(s) if it doesn't hold (e.g. for a
+hand-constructed or corrupted \code{sessioncheck_sessionstate} object).
+
+Keyed-table diffing is purely key-based: it has no way to detect a
+rename. A package or global environment object that is renamed but
+otherwise unchanged between \code{old} and \code{new} (e.g. \code{pkgA} reinstalled
+under a new name, or \code{x} renamed to \code{y} via \code{assign()}) is reported as
+one \code{removed} row (the old key) plus one \code{added} row (the new key),
+never as a single "renamed" entry -- there is no general way to tell a
+rename apart from an unrelated removal-plus-addition that happens to
+involve similar values. This is inherent to any key-based diff, not a
+bug to be fixed.
+
 \code{globalenv}'s \code{modified} table relies on the \code{hash} column
 \code{sessionstate()} records for each object (an MD5 fingerprint of the
 object's serialized value). When both snapshots have a non-\code{NA} hash for
@@ -65,7 +83,33 @@ an object, a hash mismatch is what marks it modified (\code{verified = TRUE});
 when either side's hash is \code{NA} (the object couldn't be serialized --
 see \code{\link[=sessionstate]{sessionstate()}}'s Global environment section), the comparison falls
 back to \code{class}/\code{size} only, and the row is marked \code{verified = FALSE} to
-be explicit that a value change could have gone undetected.
+be explicit that a value change could have gone undetected. If an
+object's hash goes from \code{NA} to non-\code{NA} or vice versa between snapshots
+-- e.g. it shrank below \code{sessionstate_hash_max_size}, or started/stopped
+failing to serialize -- that is reported as its own \code{"hash"} row (with
+\code{verified = FALSE}), even when \code{class}/\code{size} are unchanged, since the
+object's verifiability itself changed.
+
+\code{verified = TRUE} means the hash comparison itself is trustworthy as far
+as R's serialization can see -- it does not mean every possible kind of
+change is detectable. For an object that is a thin wrapper around state
+living outside R's memory (e.g. a database connection, an Arrow
+\code{Table}/\code{RecordBatchReader}, a magick image; see \code{\link[=sessionstate]{sessionstate()}}'s
+Global environment section), \code{hash} fingerprints the R-level wrapper,
+typically a fixed placeholder for the underlying pointer, not the
+external data. A \code{verified = TRUE}, unchanged-hash result for such an
+object means "unchanged as far as R can observe", not "definitely
+unchanged" -- the external state could have changed without the R-level
+object being reassigned. This is inherent to hashing via R-level
+serialization, not a defect in the comparison logic.
+
+A related, opposite-direction limitation: \code{\link[=serialize]{serialize()}}'s traversal of
+an environment's bindings is order-dependent, not purely
+content-dependent (see \code{\link[=sessionstate]{sessionstate()}}'s Global environment section).
+For an object that is, or contains, an environment -- an R6 object, a
+closure, a reference class instance -- this can produce a hash mismatch,
+and so a false \code{modified} row here, even when the object's actual
+contents are unchanged. \code{verified = TRUE} does not rule this out.
 
 A warning is issued if \code{new$timing$captured_at} is earlier than
 \code{old$timing$captured_at}, since that usually means the two arguments

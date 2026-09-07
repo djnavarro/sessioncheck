@@ -80,3 +80,27 @@
     )
   }
 }
+
+# keyed-table diffing (.diff_table_added_removed(), and the modified-table
+# logic built on top of it in .diff_packages()/.diff_globalenv()) assumes
+# at most one row per `key` value in each snapshot -- true for anything
+# sessionstate() itself produces (ls()/union()/sort(union(...)) all
+# guarantee uniqueness), but not otherwise enforced. A duplicated key would
+# make old[[key]] == kk/o$hash etc. resolve to a length > 1 vector inside
+# those lookups, producing confusing recycling behavior (or the exact kind
+# of length-zero/length>1 logical error .diff_globalenv() was hardened
+# against for a missing hash column) rather than a clear error. `snapshot`
+# ("old"/"new") and `section` (e.g. "packages") name the offending table in
+# the error so it points at a specific compare_sessionstates() argument
+.validate_unique_key <- function(df, key, section, snapshot) {
+  vals <- df[[key]]
+  dup <- unique(vals[duplicated(vals)])
+  if (length(dup) == 0L) return(invisible(NULL))
+  stop(
+    sprintf(
+      "`%s`'s `%s` table has duplicate `%s` value(s): %s. compare_sessionstates() assumes each key appears at most once per sessionstate() snapshot.",
+      snapshot, section, key, paste(dup, collapse = ", ")
+    ),
+    call. = FALSE
+  )
+}

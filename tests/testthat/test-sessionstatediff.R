@@ -93,6 +93,72 @@ test_that(".diff_vector() reports added/removed but ignores reordering", {
   expect_identical(diff2$removed, "/a")
 })
 
+# .validate_unique_key() ------
+
+test_that(".validate_unique_key() is silent when keys are unique", {
+  df <- data.frame(package = c("a", "b"), stringsAsFactors = FALSE)
+  expect_silent(.validate_unique_key(df, "package", "packages", "old"))
+})
+
+test_that(".validate_unique_key() errors informatively on duplicate keys", {
+  df <- data.frame(package = c("a", "a", "b"), stringsAsFactors = FALSE)
+  expect_error(
+    .validate_unique_key(df, "package", "packages", "old"),
+    "`old`'s `packages` table has duplicate `package` value\\(s\\): a"
+  )
+})
+
+# .diff_table_added_removed() / duplicate-key propagation ------
+
+test_that(".diff_table_added_removed() rejects duplicate keys in old_df", {
+  old <- data.frame(package = c("a", "a"), stringsAsFactors = FALSE)
+  new <- data.frame(package = "a", stringsAsFactors = FALSE)
+  expect_error(.diff_table_added_removed(old, new, "package", "packages"), "duplicate")
+})
+
+test_that(".diff_table_added_removed() rejects duplicate keys in new_df", {
+  old <- data.frame(package = "a", stringsAsFactors = FALSE)
+  new <- data.frame(package = c("a", "a"), stringsAsFactors = FALSE)
+  expect_error(.diff_table_added_removed(old, new, "package", "packages"), "duplicate")
+})
+
+test_that(".diff_packages() rejects duplicate package keys", {
+  old <- data.frame(
+    package = c("pkgA", "pkgA"), attached = TRUE, ondisk_version = "1.0",
+    loaded_version = "1.0", source = "CRAN", stringsAsFactors = FALSE
+  )
+  new <- data.frame(
+    package = "pkgA", attached = TRUE, ondisk_version = "1.0",
+    loaded_version = "1.0", source = "CRAN", stringsAsFactors = FALSE
+  )
+  expect_error(.diff_packages(old, new), "`old`'s `packages` table has duplicate")
+})
+
+test_that(".diff_attachments() rejects duplicate name keys", {
+  old <- data.frame(name = c("a", "a"), type = "package", stringsAsFactors = FALSE)
+  new <- data.frame(name = "a", type = "package", stringsAsFactors = FALSE)
+  expect_error(.diff_attachments(old, new), "`old`'s `attachments` table has duplicate")
+})
+
+test_that(".diff_globalenv() rejects duplicate name keys", {
+  old <- data.frame(
+    name = c("x", "x"), class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE
+  )
+  new <- data.frame(name = "x", class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE)
+  expect_error(.diff_globalenv(old, new), "`old`'s `globalenv` table has duplicate")
+})
+
+test_that("compare_sessionstates() rejects duplicate keys end to end", {
+  old <- .mock_sessionstate(list(
+    packages = data.frame(
+      package = c("base", "base"), attached = TRUE, ondisk_version = "1.0",
+      loaded_version = "1.0", source = "base", stringsAsFactors = FALSE
+    )
+  ))
+  new <- .mock_sessionstate()
+  expect_error(compare_sessionstates(old, new), "duplicate")
+})
+
 # .diff_packages() ------
 
 test_that(".diff_packages() detects added, removed, and modified packages", {
@@ -172,6 +238,57 @@ test_that(".diff_globalenv() reports class and size fields alongside a verified 
 
 test_that(".diff_globalenv() treats an unchanged hash as no modification", {
   old <- data.frame(name = "x", class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE)
+  new <- data.frame(name = "x", class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE)
+  diff <- .diff_globalenv(old, new)
+  expect_identical(nrow(diff$modified), 0L)
+})
+
+test_that(".diff_globalenv() falls back to class/size (without erroring) when a hash column is entirely missing", {
+  old <- data.frame(name = "x", class = "numeric", size = 100, stringsAsFactors = FALSE)
+  new <- data.frame(name = "x", class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE)
+  diff <- .diff_globalenv(old, new)
+  expect_identical(nrow(diff$modified), 0L)
+
+  new_bigger <- data.frame(name = "x", class = "numeric", size = 200, hash = "h1", stringsAsFactors = FALSE)
+  diff2 <- .diff_globalenv(old, new_bigger)
+  expect_identical(nrow(diff2$modified), 1L)
+  expect_identical(diff2$modified$field, "size")
+  expect_false(diff2$modified$verified)
+})
+
+test_that(".diff_globalenv() surfaces a hash becoming computable, even with no class/size change", {
+  old <- data.frame(name = "x", class = "numeric", size = 100, hash = NA_character_, stringsAsFactors = FALSE)
+  new <- data.frame(name = "x", class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE)
+  diff <- .diff_globalenv(old, new)
+  expect_identical(nrow(diff$modified), 1L)
+  expect_identical(diff$modified$field, "hash")
+  expect_identical(diff$modified$old, NA_character_)
+  expect_identical(diff$modified$new, "h1")
+  expect_false(diff$modified$verified)
+})
+
+test_that(".diff_globalenv() surfaces a hash ceasing to be computable, even with no class/size change", {
+  old <- data.frame(name = "x", class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE)
+  new <- data.frame(name = "x", class = "numeric", size = 100, hash = NA_character_, stringsAsFactors = FALSE)
+  diff <- .diff_globalenv(old, new)
+  expect_identical(nrow(diff$modified), 1L)
+  expect_identical(diff$modified$field, "hash")
+  expect_identical(diff$modified$old, "h1")
+  expect_identical(diff$modified$new, NA_character_)
+  expect_false(diff$modified$verified)
+})
+
+test_that(".diff_globalenv() combines a hash-availability change with class/size changes", {
+  old <- data.frame(name = "x", class = "numeric", size = 100, hash = NA_character_, stringsAsFactors = FALSE)
+  new <- data.frame(name = "x", class = "character", size = 200, hash = "h1", stringsAsFactors = FALSE)
+  diff <- .diff_globalenv(old, new)
+  expect_identical(nrow(diff$modified), 3L)
+  expect_setequal(diff$modified$field, c("hash", "class", "size"))
+  expect_true(all(!diff$modified$verified))
+})
+
+test_that(".diff_globalenv() does not treat a missing hash column on one side as an availability change", {
+  old <- data.frame(name = "x", class = "numeric", size = 100, stringsAsFactors = FALSE)
   new <- data.frame(name = "x", class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE)
   diff <- .diff_globalenv(old, new)
   expect_identical(nrow(diff$modified), 0L)
@@ -259,6 +376,30 @@ test_that("format.sessioncheck_sessionstatediff() shows changed fields with old 
   expect_match(txt, "/tmp/proj -> /tmp/other", fixed = TRUE)
 })
 
+test_that("format.sessioncheck_sessionstatediff() honors sessionstatediff_changed_only set via options(sessioncheck = ...)", {
+  old_opt <- options(sessioncheck = list(sessionstatediff_changed_only = FALSE))
+  on.exit(options(old_opt), add = TRUE)
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(timing = list(
+    captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11
+  )))
+  diff <- compare_sessionstates(old, new)
+  txt <- format(diff)
+  expect_match(txt, "TestOS", fixed = TRUE)
+})
+
+test_that("an explicit changed_only argument overrides options(sessioncheck = ...)", {
+  old_opt <- options(sessioncheck = list(sessionstatediff_changed_only = FALSE))
+  on.exit(options(old_opt), add = TRUE)
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(timing = list(
+    captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11
+  )))
+  diff <- compare_sessionstates(old, new)
+  txt <- format(diff, changed_only = TRUE)
+  expect_no_match(txt, "TestOS", fixed = TRUE)
+})
+
 test_that("format.sessioncheck_sessionstatediff() with changed_only = FALSE shows unchanged fields too", {
   old <- .mock_sessionstate()
   new <- .mock_sessionstate(list(timing = list(
@@ -278,6 +419,156 @@ test_that("format.sessioncheck_sessionstatediff() always reports timing in full"
   txt <- format(diff)
   expect_match(txt, "wall clock elapsed", fixed = TRUE)
   expect_match(txt, "session uptime delta", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstatediff() hides wide packages columns on added/removed by default", {
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11),
+    packages = data.frame(
+      package = c("base", "pkgA", "pkgC"), attached = c(TRUE, TRUE, TRUE),
+      ondisk_version = c("1.0", "1.0", "1.0"), loaded_version = c("1.0", "1.0", "1.0"),
+      ondisk_path = c("/lib/base", "/lib/pkgA", "/lib/pkgC"),
+      source = c("base", "CRAN", "CRAN"), stringsAsFactors = FALSE
+    )
+  ))
+  diff <- compare_sessionstates(old, new)
+  txt <- format(diff)
+  expect_no_match(txt, "ondisk_path", fixed = TRUE)
+  expect_match(txt, "pkgC", fixed = TRUE)
+})
+
+test_that("an explicit packages argument selects added/removed columns for the diff", {
+  pkgs_with_path <- function(pkgs) {
+    data.frame(
+      package = pkgs, attached = TRUE, ondisk_version = "1.0", loaded_version = "1.0",
+      ondisk_path = paste0("/lib/", pkgs), source = "CRAN", stringsAsFactors = FALSE
+    )
+  }
+  old <- .mock_sessionstate(list(packages = pkgs_with_path(c("base", "pkgA"))))
+  new <- .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11),
+    packages = pkgs_with_path(c("base", "pkgC"))
+  ))
+  diff <- compare_sessionstates(old, new)
+  txt <- format(diff, packages = c("package", "ondisk_path"))
+  expect_match(txt, "ondisk_path", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstatediff() hides globalenv hash column on added/removed by default", {
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11),
+    globalenv = data.frame(
+      name = c("x", "y", "z"), class = c("numeric", "character", "list"), size = c(56, 48, 10),
+      hash = c("hx1", "hy1", "hz1-should-not-print"), stringsAsFactors = FALSE
+    )
+  ))
+  diff <- compare_sessionstates(old, new)
+  txt <- format(diff)
+  expect_no_match(txt, "hz1-should-not-print", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstatediff() truncates added/removed/modified blocks at max_rows", {
+  old <- .mock_sessionstate(list(
+    packages = data.frame(
+      package = "base", attached = TRUE, ondisk_version = "1.0", loaded_version = "1.0",
+      source = "base", stringsAsFactors = FALSE
+    )
+  ))
+  new_pkgs <- data.frame(
+    package = c("base", paste0("pkg", 1:5)), attached = TRUE,
+    ondisk_version = "1.0", loaded_version = "1.0", source = "CRAN", stringsAsFactors = FALSE
+  )
+  new <- .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11),
+    packages = new_pkgs
+  ))
+  diff <- compare_sessionstates(old, new)
+  txt <- format(diff, max_rows = 2)
+  expect_match(txt, "Added \\[n = 5\\]", fixed = FALSE)
+  expect_match(txt, "\\.\\.\\. and 3 more", fixed = FALSE)
+  expect_no_match(txt, "pkg4", fixed = TRUE)
+  expect_no_match(txt, "pkg5", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstatediff() honors sessionstatediff_max_rows/packages/globalenv set via options(sessioncheck = ...)", {
+  old_opt <- options(sessioncheck = list(
+    sessionstatediff_max_rows = 1,
+    sessionstatediff_packages = c("package", "ondisk_path")
+  ))
+  on.exit(options(old_opt), add = TRUE)
+  old_pkgs <- data.frame(
+    package = "base", attached = TRUE, ondisk_version = "1.0", loaded_version = "1.0",
+    ondisk_path = "/lib/base", source = "base", stringsAsFactors = FALSE
+  )
+  old <- .mock_sessionstate(list(packages = old_pkgs))
+  new_pkgs <- data.frame(
+    package = c("base", "pkgA", "pkgB"), attached = TRUE, ondisk_version = "1.0",
+    loaded_version = "1.0", ondisk_path = c("/lib/base", "/lib/pkgA", "/lib/pkgB"),
+    source = "CRAN", stringsAsFactors = FALSE
+  )
+  new <- .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11),
+    packages = new_pkgs
+  ))
+  diff <- compare_sessionstates(old, new)
+  txt <- format(diff)
+  expect_match(txt, "ondisk_path", fixed = TRUE)
+  expect_match(txt, "\\.\\.\\. and 1 more", fixed = FALSE)
+})
+
+test_that("explicit packages/max_rows arguments override options(sessioncheck = ...)", {
+  old_opt <- options(sessioncheck = list(sessionstatediff_max_rows = 1))
+  on.exit(options(old_opt), add = TRUE)
+  old <- .mock_sessionstate()
+  new_pkgs <- data.frame(
+    package = c("base", "pkgA", "pkgB"), attached = TRUE, ondisk_version = "1.0",
+    loaded_version = "1.0", source = "CRAN", stringsAsFactors = FALSE
+  )
+  new <- .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11),
+    packages = new_pkgs
+  ))
+  diff <- compare_sessionstates(old, new)
+  txt <- format(diff, max_rows = 10)
+  expect_no_match(txt, "more", fixed = TRUE)
+})
+
+test_that("format.sessioncheck_sessionstatediff() errors informatively on a non-numeric max_rows", {
+  diff <- compare_sessionstates(.mock_sessionstate(), .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11)
+  )))
+  expect_error(format(diff, max_rows = "many"), "`max_rows` must be a single number")
+  expect_error(format(diff, max_rows = c(1, 2)), "`max_rows` must be a single number")
+})
+
+test_that("format.sessioncheck_sessionstatediff() errors informatively on an unknown packages column", {
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(timing = list(
+    captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11
+  ), packages = data.frame(
+    package = "pkgC", attached = TRUE, ondisk_version = "1.0", loaded_version = "1.0",
+    source = "CRAN", stringsAsFactors = FALSE
+  )))
+  diff <- compare_sessionstates(old, new)
+  expect_error(format(diff, packages = "bogus_column"), "Unknown")
+})
+
+test_that("format.sessioncheck_sessionstatediff() column selection never affects the modified block's own columns", {
+  old <- .mock_sessionstate()
+  new <- .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11),
+    packages = data.frame(
+      package = c("base", "pkgA"), attached = c(TRUE, TRUE),
+      ondisk_version = c("1.0", "2.0"), loaded_version = c("1.0", "2.0"),
+      source = c("base", "CRAN"), stringsAsFactors = FALSE
+    )
+  ))
+  diff <- compare_sessionstates(old, new)
+  txt <- format(diff, packages = "package")
+  expect_match(txt, "Modified \\[n = ", fixed = FALSE)
+  expect_match(txt, "ondisk_version", fixed = TRUE)
 })
 
 test_that("format.sessioncheck_sessionstatediff() reports added/removed/modified packages", {
