@@ -95,6 +95,14 @@
 #' object being reassigned. This is inherent to hashing via R-level
 #' serialization, not a defect in the comparison logic.
 #'
+#' A related, opposite-direction limitation: [serialize()]'s traversal of
+#' an environment's bindings is order-dependent, not purely
+#' content-dependent (see [sessionstate()]'s Global environment section).
+#' For an object that is, or contains, an environment -- an R6 object, a
+#' closure, a reference class instance -- this can produce a hash mismatch,
+#' and so a false `modified` row here, even when the object's actual
+#' contents are unchanged. `verified = TRUE` does not rule this out.
+#'
 #' A warning is issued if `new$timing$captured_at` is earlier than
 #' `old$timing$captured_at`, since that usually means the two arguments
 #' were passed in the wrong order; the comparison is still computed either

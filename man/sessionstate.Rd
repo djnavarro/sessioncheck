@@ -199,6 +199,22 @@ content did not. This is a limitation of what \code{sessionstate()} can
 observe from within R, not a defect in the hashing itself: it never
 inspects state outside R's memory, and so cannot distinguish "genuinely
 unchanged" from "changed only outside R" for objects like these.
+
+A different limitation runs in the opposite direction: for an object
+that is, or contains, an environment -- an
+\href{https://cran.r-project.org/package=R6}{R6} object, a closure (via its
+enclosing environment), a reference class instance -- \code{\link[=serialize]{serialize()}}'s
+traversal of an environment's bindings depends on insertion history, not
+only on the environment's current contents. Two environments holding
+identical bindings, populated in a different order, can therefore
+serialize (and hash) differently even though nothing about them has
+meaningfully changed. Where the external-pointer limitation above can
+hide a real change (a false negative), this one can report a change that
+never happened (a false positive) in \code{\link[=compare_sessionstates]{compare_sessionstates()}}'s
+\code{globalenv$modified} table. There is no general fix for this within base
+R's \code{\link[=serialize]{serialize()}}; avoiding it would require a custom, order-independent
+serialization of environment-backed objects, which \code{sessionstate()} does
+not attempt.
 }
 
 \section{Attachments}{

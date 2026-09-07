@@ -103,6 +103,14 @@ unchanged" -- the external state could have changed without the R-level
 object being reassigned. This is inherent to hashing via R-level
 serialization, not a defect in the comparison logic.
 
+A related, opposite-direction limitation: \code{\link[=serialize]{serialize()}}'s traversal of
+an environment's bindings is order-dependent, not purely
+content-dependent (see \code{\link[=sessionstate]{sessionstate()}}'s Global environment section).
+For an object that is, or contains, an environment -- an R6 object, a
+closure, a reference class instance -- this can produce a hash mismatch,
+and so a false \code{modified} row here, even when the object's actual
+contents are unchanged. \code{verified = TRUE} does not rule this out.
+
 A warning is issued if \code{new$timing$captured_at} is earlier than
 \code{old$timing$captured_at}, since that usually means the two arguments
 were passed in the wrong order; the comparison is still computed either

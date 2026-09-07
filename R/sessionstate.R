@@ -174,6 +174,22 @@
 #' inspects state outside R's memory, and so cannot distinguish "genuinely
 #' unchanged" from "changed only outside R" for objects like these.
 #'
+#' A different limitation runs in the opposite direction: for an object
+#' that is, or contains, an environment -- an
+#' [R6](https://cran.r-project.org/package=R6) object, a closure (via its
+#' enclosing environment), a reference class instance -- [serialize()]'s
+#' traversal of an environment's bindings depends on insertion history, not
+#' only on the environment's current contents. Two environments holding
+#' identical bindings, populated in a different order, can therefore
+#' serialize (and hash) differently even though nothing about them has
+#' meaningfully changed. Where the external-pointer limitation above can
+#' hide a real change (a false negative), this one can report a change that
+#' never happened (a false positive) in [compare_sessionstates()]'s
+#' `globalenv$modified` table. There is no general fix for this within base
+#' R's [serialize()]; avoiding it would require a custom, order-independent
+#' serialization of environment-backed objects, which `sessionstate()` does
+#' not attempt.
+#'
 #' @section Attachments:
 #' The `attachments` element is a data frame with one row per entry on the
 #' search path (as returned by [search()]), with columns `name` and `type`
