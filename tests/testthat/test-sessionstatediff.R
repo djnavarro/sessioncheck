@@ -256,6 +256,44 @@ test_that(".diff_globalenv() falls back to class/size (without erroring) when a 
   expect_false(diff2$modified$verified)
 })
 
+test_that(".diff_globalenv() surfaces a hash becoming computable, even with no class/size change", {
+  old <- data.frame(name = "x", class = "numeric", size = 100, hash = NA_character_, stringsAsFactors = FALSE)
+  new <- data.frame(name = "x", class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE)
+  diff <- .diff_globalenv(old, new)
+  expect_identical(nrow(diff$modified), 1L)
+  expect_identical(diff$modified$field, "hash")
+  expect_identical(diff$modified$old, NA_character_)
+  expect_identical(diff$modified$new, "h1")
+  expect_false(diff$modified$verified)
+})
+
+test_that(".diff_globalenv() surfaces a hash ceasing to be computable, even with no class/size change", {
+  old <- data.frame(name = "x", class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE)
+  new <- data.frame(name = "x", class = "numeric", size = 100, hash = NA_character_, stringsAsFactors = FALSE)
+  diff <- .diff_globalenv(old, new)
+  expect_identical(nrow(diff$modified), 1L)
+  expect_identical(diff$modified$field, "hash")
+  expect_identical(diff$modified$old, "h1")
+  expect_identical(diff$modified$new, NA_character_)
+  expect_false(diff$modified$verified)
+})
+
+test_that(".diff_globalenv() combines a hash-availability change with class/size changes", {
+  old <- data.frame(name = "x", class = "numeric", size = 100, hash = NA_character_, stringsAsFactors = FALSE)
+  new <- data.frame(name = "x", class = "character", size = 200, hash = "h1", stringsAsFactors = FALSE)
+  diff <- .diff_globalenv(old, new)
+  expect_identical(nrow(diff$modified), 3L)
+  expect_setequal(diff$modified$field, c("hash", "class", "size"))
+  expect_true(all(!diff$modified$verified))
+})
+
+test_that(".diff_globalenv() does not treat a missing hash column on one side as an availability change", {
+  old <- data.frame(name = "x", class = "numeric", size = 100, stringsAsFactors = FALSE)
+  new <- data.frame(name = "x", class = "numeric", size = 100, hash = "h1", stringsAsFactors = FALSE)
+  diff <- .diff_globalenv(old, new)
+  expect_identical(nrow(diff$modified), 0L)
+})
+
 test_that(".diff_globalenv() reports added/removed objects", {
   old <- data.frame(name = "x", class = "numeric", size = 1, hash = "h1", stringsAsFactors = FALSE)
   new <- data.frame(name = "y", class = "numeric", size = 1, hash = "h2", stringsAsFactors = FALSE)

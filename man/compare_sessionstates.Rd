@@ -83,7 +83,12 @@ an object, a hash mismatch is what marks it modified (\code{verified = TRUE});
 when either side's hash is \code{NA} (the object couldn't be serialized --
 see \code{\link[=sessionstate]{sessionstate()}}'s Global environment section), the comparison falls
 back to \code{class}/\code{size} only, and the row is marked \code{verified = FALSE} to
-be explicit that a value change could have gone undetected.
+be explicit that a value change could have gone undetected. If an
+object's hash goes from \code{NA} to non-\code{NA} or vice versa between snapshots
+-- e.g. it shrank below \code{sessionstate_hash_max_size}, or started/stopped
+failing to serialize -- that is reported as its own \code{"hash"} row (with
+\code{verified = FALSE}), even when \code{class}/\code{size} are unchanged, since the
+object's verifiability itself changed.
 
 \code{verified = TRUE} means the hash comparison itself is trustworthy as far
 as R's serialization can see -- it does not mean every possible kind of

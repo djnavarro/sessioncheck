@@ -75,7 +75,12 @@
 #' when either side's hash is `NA` (the object couldn't be serialized --
 #' see [sessionstate()]'s Global environment section), the comparison falls
 #' back to `class`/`size` only, and the row is marked `verified = FALSE` to
-#' be explicit that a value change could have gone undetected.
+#' be explicit that a value change could have gone undetected. If an
+#' object's hash goes from `NA` to non-`NA` or vice versa between snapshots
+#' -- e.g. it shrank below `sessionstate_hash_max_size`, or started/stopped
+#' failing to serialize -- that is reported as its own `"hash"` row (with
+#' `verified = FALSE`), even when `class`/`size` are unchanged, since the
+#' object's verifiability itself changed.
 #'
 #' `verified = TRUE` means the hash comparison itself is trustworthy as far
 #' as R's serialization can see -- it does not mean every possible kind of
@@ -262,7 +267,17 @@ compare_sessionstates <- function(old, new) {
 # to serialize -- see .hash_object()), the comparison falls back to
 # class/size only, and every row is marked verified = FALSE so that
 # fallback stays visible rather than silently indistinguishable from a
-# hash-verified result. The resulting shape -- one row per (name, changed
+# hash-verified result. A hash *becoming* computable (NA -> a value) or
+# *ceasing* to be computable (a value -> NA) is itself surfaced as a "hash"
+# field row -- even when class/size didn't change -- since it means the
+# object's verifiability changed (e.g. it shrank below
+# `sessionstate_hash_max_size`, or started/stopped failing to serialize);
+# silently reporting "no change" in that situation would hide the fact that
+# hash-based verification is no longer (or is now) possible for this
+# object. This only applies when both snapshots actually have a `hash`
+# column -- an old-format snapshot missing the column entirely is a schema
+# difference, not an availability change, and keeps falling back to
+# class/size unmarked. The resulting shape -- one row per (name, changed
 # field), in `field`/`old`/`new` form -- deliberately matches
 # .diff_packages()'s modified table, so both the print method and
 # as.data.frame() can treat "modified" uniformly across sections
@@ -272,8 +287,11 @@ compare_sessionstates <- function(old, new) {
   rows <- lapply(common, function(nm) {
     o <- old[old$name == nm, , drop = FALSE]
     n <- new[new$name == nm, , drop = FALSE]
-    hash_verifiable <- "hash" %in% names(o) && "hash" %in% names(n) &&
-      !is.na(o$hash) && !is.na(n$hash)
+    o_has_hash <- "hash" %in% names(o)
+    n_has_hash <- "hash" %in% names(n)
+    hash_verifiable <- o_has_hash && n_has_hash && !is.na(o$hash) && !is.na(n$hash)
+    hash_availability_changed <- o_has_hash && n_has_hash &&
+      (is.na(o$hash) != is.na(n$hash))
     if (hash_verifiable) {
       if (identical(o$hash, n$hash)) return(NULL)
       fields <- "hash"
@@ -282,8 +300,12 @@ compare_sessionstates <- function(old, new) {
     } else {
       class_changed <- !identical(o$class, n$class)
       size_changed <- !identical(o$size, n$size)
-      if (!class_changed && !size_changed) return(NULL)
-      fields <- c(if (class_changed) "class", if (size_changed) "size")
+      if (!class_changed && !size_changed && !hash_availability_changed) return(NULL)
+      fields <- c(
+        if (hash_availability_changed) "hash",
+        if (class_changed) "class",
+        if (size_changed) "size"
+      )
     }
     data.frame(
       name = nm,
