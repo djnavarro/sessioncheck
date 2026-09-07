@@ -535,6 +535,14 @@ test_that("explicit packages/max_rows arguments override options(sessioncheck = 
   expect_no_match(txt, "more", fixed = TRUE)
 })
 
+test_that("format.sessioncheck_sessionstatediff() errors informatively on a non-numeric max_rows", {
+  diff <- compare_sessionstates(.mock_sessionstate(), .mock_sessionstate(list(
+    timing = list(captured_at = as.POSIXct("2026-01-01 00:00:10", tz = "UTC"), elapsed_sec = 11)
+  )))
+  expect_error(format(diff, max_rows = "many"), "`max_rows` must be a single number")
+  expect_error(format(diff, max_rows = c(1, 2)), "`max_rows` must be a single number")
+})
+
 test_that("format.sessioncheck_sessionstatediff() errors informatively on an unknown packages column", {
   old <- .mock_sessionstate()
   new <- .mock_sessionstate(list(timing = list(
