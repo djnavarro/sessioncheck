@@ -89,6 +89,7 @@
 .col_green <- .ansi_style("32")
 .col_red   <- .ansi_style("31")
 .col_blue  <- .ansi_style("34")
+.col_cyan  <- .ansi_style("36")
 .style_dim <- .ansi_style("2")
 
 # combines a symbol with the color conventionally associated with it: green
@@ -265,5 +266,5 @@
   ch <- .symbol("line")
   label <- paste0(ch, " ", title, " ")
   fill <- max(0L, width - nchar(label))
-  .style_dim(paste0(label, strrep(ch, fill)))
+  .col_cyan(paste0(label, strrep(ch, fill)))
 }

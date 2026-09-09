@@ -147,9 +147,9 @@ test_that(".rule() never truncates the title even if it would exceed the request
   expect_equal(.rule("A very long title indeed", width = 10), "- A very long title indeed ")
 })
 
-test_that(".rule() is dimmed when ansi is enabled", {
+test_that(".rule() is cyan when ansi is enabled", {
   local_mocked_bindings(.ansi_enabled = function() TRUE, .unicode_enabled = function() FALSE)
-  expect_equal(.rule("Platform", width = 20), paste0("\033[2m", "- Platform ---------", "\033[0m"))
+  expect_equal(.rule("Platform", width = 20), paste0("\033[36m", "- Platform ---------", "\033[0m"))
 })
 
 test_that(".ansi_enabled() honors options(cli.num_colors = )", {
