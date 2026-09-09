@@ -226,11 +226,11 @@ fields or columns to display, without touching the underlying object:
 print(session_state, packages = "package", globalenv = "class", machine = character(0))
 #> ─ Platform ─────────────────────────────────────────────────────────────────────
 #> • version             R version 4.6.1 (2026-06-24)
-#> • os                  Ubuntu 24.04.4 LTS
+#> • os                  Ubuntu 24.04.5 LTS
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
-#> • date                2026-09-07
+#> • date                2026-09-09
 #> 
 #> ─ Locale ───────────────────────────────────────────────────────────────────────
 #> • language            en-US
@@ -248,12 +248,12 @@ print(session_state, packages = "package", globalenv = "class", machine = charac
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          fb42b1e50b8c92ac71f42e64178bfa336bde6103
+#> • commit sha          3df018ef59e83eb4465d6c9d48b4809a6b975e56
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-07 01:03:36 UTC
-#> • session uptime      0.863 sec
+#> • captured at         2026-09-09 20:52:30 UTC
+#> • session uptime      0.823 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister

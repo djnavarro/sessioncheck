@@ -57,7 +57,7 @@ Here’s what each of the three produces in the same session:
 utils::sessionInfo()
 #> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.4 LTS
+#> Running under: Ubuntu 24.04.5 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -80,7 +80,7 @@ utils::sessionInfo()
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] digest_0.6.39     desc_1.4.3        R6_2.6.1          fastmap_1.2.0    
-#>  [5] xfun_0.60         cachem_1.1.0      knitr_1.51        htmltools_0.5.9  
+#>  [5] xfun_0.60         cachem_1.1.0      knitr_1.52        htmltools_0.5.9  
 #>  [9] rmarkdown_2.32    lifecycle_1.0.5   cli_3.6.6         sass_0.4.10      
 #> [13] pkgdown_2.2.1     textshaping_1.0.5 jquerylib_0.1.4   systemfonts_1.3.2
 #> [17] compiler_4.6.1    tools_4.6.1       ragg_1.5.2        bslib_0.12.0     
@@ -94,14 +94,14 @@ sessioninfo::session_info()
 #> ─ Session info ───────────────────────────────────────────────────────────────
 #>  setting  value
 #>  version  R version 4.6.1 (2026-06-24)
-#>  os       Ubuntu 24.04.4 LTS
+#>  os       Ubuntu 24.04.5 LTS
 #>  system   x86_64, linux-gnu
 #>  ui       X11
 #>  language en-US
 #>  collate  C.UTF-8
 #>  ctype    C.UTF-8
 #>  tz       UTC
-#>  date     2026-09-07
+#>  date     2026-09-09
 #>  pandoc   3.8.3 @ /opt/hostedtoolcache/pandoc/3.8.3/x64/ (via rmarkdown)
 #>  quarto   NA
 #> 
@@ -118,7 +118,7 @@ sessioninfo::session_info()
 #>  htmltools      0.5.9      2025-12-04 [1] RSPM
 #>  jquerylib      0.1.4      2021-04-26 [1] RSPM
 #>  jsonlite       2.0.0      2025-03-27 [1] RSPM
-#>  knitr          1.51       2025-12-20 [1] RSPM
+#>  knitr          1.52       2026-09-06 [1] RSPM
 #>  lifecycle      1.0.5      2026-01-08 [1] RSPM
 #>  otel           0.2.0      2025-08-29 [1] RSPM
 #>  pkgdown        2.2.1      2026-07-07 [1] any (@2.2.1)
@@ -127,7 +127,7 @@ sessioninfo::session_info()
 #>  rlang          1.3.0      2026-07-05 [1] RSPM
 #>  rmarkdown      2.32       2026-09-01 [1] RSPM
 #>  sass           0.4.10     2025-04-11 [1] RSPM
-#>  sessioncheck * 0.1.1.9000 2026-09-07 [1] local
+#>  sessioncheck * 0.1.1.9000 2026-09-09 [1] local
 #>  sessioninfo    1.2.4      2026-06-04 [1] RSPM
 #>  systemfonts    1.3.2      2026-03-05 [1] RSPM
 #>  textshaping    1.0.5      2026-03-06 [1] RSPM
@@ -147,11 +147,11 @@ sessioninfo::session_info()
 sessionstate()
 #> ─ Platform ─────────────────────────────────────────────────────────────────────
 #> • version             R version 4.6.1 (2026-06-24)
-#> • os                  Ubuntu 24.04.4 LTS
+#> • os                  Ubuntu 24.04.5 LTS
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
-#> • date                2026-09-07
+#> • date                2026-09-09
 #> 
 #> ─ Locale ───────────────────────────────────────────────────────────────────────
 #> • language            en-US
@@ -167,17 +167,17 @@ sessionstate()
 #> • quarto              (not found)
 #> 
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
-#> • hostname            runnervmejwal
+#> • hostname            runnervmlun5p
 #> • user                runner
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          fb42b1e50b8c92ac71f42e64178bfa336bde6103
+#> • commit sha          3df018ef59e83eb4465d6c9d48b4809a6b975e56
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-07 01:03:41 UTC
-#> • session uptime      1.036 sec
+#> • captured at         2026-09-09 20:52:34 UTC
+#> • session uptime      1.019 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -208,7 +208,7 @@ sessionstate()
 #>     htmltools                   0.5.9 RSPM (R 4.6.0)
 #>     jquerylib                   0.1.4 RSPM (R 4.6.0)
 #>      jsonlite                   2.0.0 RSPM (R 4.6.0)
-#>         knitr                    1.51 RSPM (R 4.6.0)
+#>         knitr                    1.52 RSPM (R 4.6.0)
 #>     lifecycle                   1.0.5 RSPM (R 4.6.0)
 #>       methods        *          4.6.1           base
 #>          otel                   0.2.0 RSPM (R 4.6.0)
@@ -357,11 +357,11 @@ names that might describe their contents):
 print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Platform ─────────────────────────────────────────────────────────────────────
 #> • version             R version 4.6.1 (2026-06-24)
-#> • os                  Ubuntu 24.04.4 LTS
+#> • os                  Ubuntu 24.04.5 LTS
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
-#> • date                2026-09-07
+#> • date                2026-09-09
 #> 
 #> ─ Locale ───────────────────────────────────────────────────────────────────────
 #> • language            en-US
@@ -379,12 +379,12 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          fb42b1e50b8c92ac71f42e64178bfa336bde6103
+#> • commit sha          3df018ef59e83eb4465d6c9d48b4809a6b975e56
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-07 01:03:41 UTC
-#> • session uptime      1.162 sec
+#> • captured at         2026-09-09 20:52:34 UTC
+#> • session uptime      1.143 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -415,7 +415,7 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #>     htmltools                   0.5.9 RSPM (R 4.6.0)
 #>     jquerylib                   0.1.4 RSPM (R 4.6.0)
 #>      jsonlite                   2.0.0 RSPM (R 4.6.0)
-#>         knitr                    1.51 RSPM (R 4.6.0)
+#>         knitr                    1.52 RSPM (R 4.6.0)
 #>     lifecycle                   1.0.5 RSPM (R 4.6.0)
 #>       methods        *          4.6.1           base
 #>          otel                   0.2.0 RSPM (R 4.6.0)
@@ -506,8 +506,8 @@ diff
 #> • (no changes)
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at (old)     2026-09-07 01:03:41 UTC
-#> • captured at (new)     2026-09-07 01:03:41 UTC
+#> • captured at (old)     2026-09-09 20:52:34 UTC
+#> • captured at (new)     2026-09-09 20:52:35 UTC
 #> • wall clock elapsed    0.05 secs
 #> • session uptime delta  0.05 secs
 #> 

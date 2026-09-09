@@ -282,11 +282,11 @@ cannot be lossless.
 sessionstate()
 #> ─ Platform ─────────────────────────────────────────────────────────────────────
 #> • version             R version 4.6.1 (2026-06-24)
-#> • os                  Ubuntu 24.04.4 LTS
+#> • os                  Ubuntu 24.04.5 LTS
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
-#> • date                2026-09-07
+#> • date                2026-09-09
 #> 
 #> ─ Locale ───────────────────────────────────────────────────────────────────────
 #> • language            en-US
@@ -302,17 +302,17 @@ sessionstate()
 #> • quarto              (not found)
 #> 
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
-#> • hostname            runnervmejwal
+#> • hostname            runnervmlun5p
 #> • user                runner
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/docs/reference
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          fb42b1e50b8c92ac71f42e64178bfa336bde6103
+#> • commit sha          3df018ef59e83eb4465d6c9d48b4809a6b975e56
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-07 01:03:29 UTC
-#> • session uptime      8.742 sec
+#> • captured at         2026-09-09 20:52:23 UTC
+#> • session uptime      8.26 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -352,7 +352,7 @@ sessionstate()
 #>           httr2                   1.3.0
 #>       jquerylib                   0.1.4
 #>        jsonlite                   2.0.0
-#>           knitr                    1.51
+#>           knitr                    1.52
 #>       lifecycle                   1.0.5
 #>        magrittr                   2.0.5
 #>         memoise                   2.0.1
