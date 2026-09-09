@@ -226,7 +226,7 @@ fields or columns to display, without touching the underlying object:
 print(session_state, packages = "package", globalenv = "class", machine = character(0))
 #> ─ Platform ─────────────────────────────────────────────────────────────────────
 #> • version             R version 4.6.1 (2026-06-24)
-#> • os                  Ubuntu 24.04.5 LTS
+#> • os                  Ubuntu 24.04.4 LTS
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
@@ -248,12 +248,12 @@ print(session_state, packages = "package", globalenv = "class", machine = charac
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          3df018ef59e83eb4465d6c9d48b4809a6b975e56
+#> • commit sha          14857f7dff08f18e87a992c884da348c1f844e6e
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-09 20:52:30 UTC
-#> • session uptime      0.823 sec
+#> • captured at         2026-09-09 20:54:23 UTC
+#> • session uptime      0.708 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister

@@ -57,7 +57,7 @@ Here’s what each of the three produces in the same session:
 utils::sessionInfo()
 #> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.5 LTS
+#> Running under: Ubuntu 24.04.4 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -94,7 +94,7 @@ sessioninfo::session_info()
 #> ─ Session info ───────────────────────────────────────────────────────────────
 #>  setting  value
 #>  version  R version 4.6.1 (2026-06-24)
-#>  os       Ubuntu 24.04.5 LTS
+#>  os       Ubuntu 24.04.4 LTS
 #>  system   x86_64, linux-gnu
 #>  ui       X11
 #>  language en-US
@@ -147,7 +147,7 @@ sessioninfo::session_info()
 sessionstate()
 #> ─ Platform ─────────────────────────────────────────────────────────────────────
 #> • version             R version 4.6.1 (2026-06-24)
-#> • os                  Ubuntu 24.04.5 LTS
+#> • os                  Ubuntu 24.04.4 LTS
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
@@ -167,17 +167,17 @@ sessionstate()
 #> • quarto              (not found)
 #> 
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
-#> • hostname            runnervmlun5p
+#> • hostname            runnervmejwal
 #> • user                runner
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          3df018ef59e83eb4465d6c9d48b4809a6b975e56
+#> • commit sha          14857f7dff08f18e87a992c884da348c1f844e6e
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-09 20:52:34 UTC
-#> • session uptime      1.019 sec
+#> • captured at         2026-09-09 20:54:27 UTC
+#> • session uptime      0.778 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -357,7 +357,7 @@ names that might describe their contents):
 print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Platform ─────────────────────────────────────────────────────────────────────
 #> • version             R version 4.6.1 (2026-06-24)
-#> • os                  Ubuntu 24.04.5 LTS
+#> • os                  Ubuntu 24.04.4 LTS
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
@@ -379,12 +379,12 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          3df018ef59e83eb4465d6c9d48b4809a6b975e56
+#> • commit sha          14857f7dff08f18e87a992c884da348c1f844e6e
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-09 20:52:34 UTC
-#> • session uptime      1.143 sec
+#> • captured at         2026-09-09 20:54:27 UTC
+#> • session uptime      0.874 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -506,10 +506,10 @@ diff
 #> • (no changes)
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at (old)     2026-09-09 20:52:34 UTC
-#> • captured at (new)     2026-09-09 20:52:35 UTC
-#> • wall clock elapsed    0.05 secs
-#> • session uptime delta  0.05 secs
+#> • captured at (old)     2026-09-09 20:54:28 UTC
+#> • captured at (new)     2026-09-09 20:54:28 UTC
+#> • wall clock elapsed    0.04 secs
+#> • session uptime delta  0.04 secs
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • (no changes)
