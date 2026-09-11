@@ -328,7 +328,7 @@ illustrated below:
 ``` r
 
 check_sessiontime(max_sessiontime = .0001)
-#> Warning: ✖ Session runtime (1.2 secs) exceeds threshold of 0 secs
+#> Warning: ✖ Session runtime (1.6 secs) exceeds threshold of 0 secs
 ```
 
 Note that this check is not one of the default checks performed by the
@@ -366,7 +366,7 @@ actual and expected paths:
 check_working_directory(required_wd = tempdir())
 #> Warning: ✖ Working directory
 #> (/home/runner/work/sessioncheck/sessioncheck/vignettes/articles) does not match
-#> required path (/tmp/Rtmps4Ht3r)
+#> required path (/tmp/RtmpEDCj9V)
 ```
 
 Both paths are passed through

@@ -172,12 +172,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          14da0376be4fbddebab6b00522526fdd65e80fdf
+#> • commit sha          2de0eb1674f5aa93305994af5517776b66b04cc5
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-11 01:35:52 UTC
-#> • session uptime      0.734 sec
+#> • captured at         2026-09-11 01:37:51 UTC
+#> • session uptime      0.98 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -379,12 +379,12 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          14da0376be4fbddebab6b00522526fdd65e80fdf
+#> • commit sha          2de0eb1674f5aa93305994af5517776b66b04cc5
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-11 01:35:52 UTC
-#> • session uptime      0.813 sec
+#> • captured at         2026-09-11 01:37:51 UTC
+#> • session uptime      1.09 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -506,10 +506,10 @@ diff
 #> • (no changes)
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at (old)     2026-09-11 01:35:52 UTC
-#> • captured at (new)     2026-09-11 01:35:52 UTC
-#> • wall clock elapsed    0.03 secs
-#> • session uptime delta  0.03 secs
+#> • captured at (old)     2026-09-11 01:37:51 UTC
+#> • captured at (new)     2026-09-11 01:37:51 UTC
+#> • wall clock elapsed    0.04 secs
+#> • session uptime delta  0.04 secs
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • (no changes)
