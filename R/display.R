@@ -93,11 +93,11 @@
 .style_dim <- .ansi_style("2")
 
 # combines a symbol with the color conventionally associated with it: green
-# for "ok", red for "problem", blue for a neutral/informational bullet with
+# for "ok", red for "problem", cyan for a neutral/informational bullet with
 # no pass/fail meaning; falls back to a plain symbol when .ansi_enabled()
 # is FALSE
 .colored_symbol <- function(name) {
-  col <- switch(name, tick = .col_green, cross = .col_red, bullet = .col_blue, identity)
+  col <- switch(name, tick = .col_green, cross = .col_red, bullet = .col_cyan, identity)
   col(.symbol(name))
 }
 

@@ -109,9 +109,9 @@ test_that(".symbol() returns unicode glyphs when unicode is available", {
   expect_equal(.symbol("bullet"), "\u2022")
 })
 
-test_that(".colored_symbol() colors the bullet blue, distinct from tick/cross", {
+test_that(".colored_symbol() colors the bullet cyan, distinct from tick/cross", {
   local_mocked_bindings(.ansi_enabled = function() TRUE, .unicode_enabled = function() FALSE)
-  expect_equal(.colored_symbol("bullet"), "\033[34m*\033[0m")
+  expect_equal(.colored_symbol("bullet"), "\033[36m*\033[0m")
 })
 
 test_that(".bullet_line() prefixes text with a plain bullet when ansi is disabled", {
@@ -121,7 +121,7 @@ test_that(".bullet_line() prefixes text with a plain bullet when ansi is disable
 
 test_that(".bullet_line() prefixes text with a colored bullet when ansi is enabled", {
   local_mocked_bindings(.ansi_enabled = function() TRUE, .unicode_enabled = function() TRUE)
-  expect_equal(.bullet_line("version  1.0"), paste0("\033[34m", "\u2022", "\033[0m version  1.0"))
+  expect_equal(.bullet_line("version  1.0"), paste0("\033[36m", "\u2022", "\033[0m version  1.0"))
 })
 
 test_that(".bullet_line() is vectorized, recycling the bullet against each element", {
