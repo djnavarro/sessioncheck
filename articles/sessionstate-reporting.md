@@ -57,7 +57,7 @@ Here’s what each of the three produces in the same session:
 utils::sessionInfo()
 #> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.4 LTS
+#> Running under: Ubuntu 24.04.5 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -94,14 +94,14 @@ sessioninfo::session_info()
 #> ─ Session info ───────────────────────────────────────────────────────────────
 #>  setting  value
 #>  version  R version 4.6.1 (2026-06-24)
-#>  os       Ubuntu 24.04.4 LTS
+#>  os       Ubuntu 24.04.5 LTS
 #>  system   x86_64, linux-gnu
 #>  ui       X11
 #>  language en-US
 #>  collate  C.UTF-8
 #>  ctype    C.UTF-8
 #>  tz       UTC
-#>  date     2026-09-09
+#>  date     2026-09-11
 #>  pandoc   3.8.3 @ /opt/hostedtoolcache/pandoc/3.8.3/x64/ (via rmarkdown)
 #>  quarto   NA
 #> 
@@ -127,7 +127,7 @@ sessioninfo::session_info()
 #>  rlang          1.3.0      2026-07-05 [1] RSPM
 #>  rmarkdown      2.32       2026-09-01 [1] RSPM
 #>  sass           0.4.10     2025-04-11 [1] RSPM
-#>  sessioncheck * 0.1.1.9000 2026-09-09 [1] local
+#>  sessioncheck * 0.1.1.9000 2026-09-11 [1] local
 #>  sessioninfo    1.2.4      2026-06-04 [1] RSPM
 #>  systemfonts    1.3.2      2026-03-05 [1] RSPM
 #>  textshaping    1.0.5      2026-03-06 [1] RSPM
@@ -147,11 +147,11 @@ sessioninfo::session_info()
 sessionstate()
 #> ─ Platform ─────────────────────────────────────────────────────────────────────
 #> • version             R version 4.6.1 (2026-06-24)
-#> • os                  Ubuntu 24.04.4 LTS
+#> • os                  Ubuntu 24.04.5 LTS
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
-#> • date                2026-09-09
+#> • date                2026-09-11
 #> 
 #> ─ Locale ───────────────────────────────────────────────────────────────────────
 #> • language            en-US
@@ -167,17 +167,17 @@ sessionstate()
 #> • quarto              (not found)
 #> 
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
-#> • hostname            runnervmejwal
+#> • hostname            runnervmlun5p
 #> • user                runner
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          14857f7dff08f18e87a992c884da348c1f844e6e
+#> • commit sha          14da0376be4fbddebab6b00522526fdd65e80fdf
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-09 20:54:27 UTC
-#> • session uptime      0.778 sec
+#> • captured at         2026-09-11 01:35:52 UTC
+#> • session uptime      0.734 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -357,11 +357,11 @@ names that might describe their contents):
 print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Platform ─────────────────────────────────────────────────────────────────────
 #> • version             R version 4.6.1 (2026-06-24)
-#> • os                  Ubuntu 24.04.4 LTS
+#> • os                  Ubuntu 24.04.5 LTS
 #> • system              x86_64, linux-gnu
 #> • ui                  non-interactive
 #> • tz                  UTC
-#> • date                2026-09-09
+#> • date                2026-09-11
 #> 
 #> ─ Locale ───────────────────────────────────────────────────────────────────────
 #> • language            en-US
@@ -379,12 +379,12 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          14857f7dff08f18e87a992c884da348c1f844e6e
+#> • commit sha          14da0376be4fbddebab6b00522526fdd65e80fdf
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-09 20:54:27 UTC
-#> • session uptime      0.874 sec
+#> • captured at         2026-09-11 01:35:52 UTC
+#> • session uptime      0.813 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -506,10 +506,10 @@ diff
 #> • (no changes)
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at (old)     2026-09-09 20:54:28 UTC
-#> • captured at (new)     2026-09-09 20:54:28 UTC
-#> • wall clock elapsed    0.04 secs
-#> • session uptime delta  0.04 secs
+#> • captured at (old)     2026-09-11 01:35:52 UTC
+#> • captured at (new)     2026-09-11 01:35:52 UTC
+#> • wall clock elapsed    0.03 secs
+#> • session uptime delta  0.03 secs
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • (no changes)
