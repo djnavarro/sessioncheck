@@ -49,6 +49,7 @@ In addition to providing tools to check the session state (most useful at the st
 
 ```{r}
 #| label: session-state
+#| results: hide
 sessioncheck::sessionstate()
 ```
 
