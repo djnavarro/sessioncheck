@@ -63,9 +63,9 @@ diff
 #> • (no changes)
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at (old)     2026-09-13 09:29:51 UTC
-#> • captured at (new)     2026-09-13 09:29:51 UTC
-#> • wall clock elapsed    0.04 secs
+#> • captured at (old)     2026-09-13 09:50:09 UTC
+#> • captured at (new)     2026-09-13 09:50:09 UTC
+#> • wall clock elapsed    0.05 secs
 #> • session uptime delta  0.05 secs
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
@@ -153,7 +153,7 @@ the corresponding entry in the diff object is marked `verified = FALSE`:
 real changes could have occurred between snapshots, in a manner that the
 package is unable to check. In short, when you see `verified = FALSE` it
 should be treated as a signal to double-check manually. It doesn’t mean
-that something has gone wrong: it is an acknowledgement that
+that something has gone wrong: it is an acknowledgment that
 [`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)
 was not able to make the comparison that we might wish it were able to.
 

@@ -66,12 +66,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          3386aafd7cd36f68a28d146589bf3473a534f09f
+#> • commit sha          13b95bcc3f14b80ce8ab438f93173e1e7ec86bf8
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-13 09:29:54 UTC
-#> • session uptime      0.765 sec
+#> • captured at         2026-09-13 09:50:13 UTC
+#> • session uptime      0.816 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -285,12 +285,12 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          3386aafd7cd36f68a28d146589bf3473a534f09f
+#> • commit sha          13b95bcc3f14b80ce8ab438f93173e1e7ec86bf8
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-13 09:29:54 UTC
-#> • session uptime      0.864 sec
+#> • captured at         2026-09-13 09:50:13 UTC
+#> • session uptime      0.936 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -404,5 +404,5 @@ redacting the fields you’re not comfortable including.
   which takes two snapshots and reports exactly how they differ.
 - The [session state
   display](https://sessioncheck.djnavarro.net/articles/sessionstate-display.md)
-  article provides a more detailed discussion of how you can customise
+  article provides a more detailed discussion of how you can customize
   the information that gets displayed when a session state is printed.
