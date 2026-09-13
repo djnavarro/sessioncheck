@@ -67,7 +67,7 @@ If you want to share `sessionstate()` output but not all of it, the `print()`/`f
 print(sessionstate(), machine = character(0), globalenv = "class")
 ```
 
-This only changes what's displayed -- the underlying object is untouched, so `x$machine` and `x$globalenv` still hold everything for your own use. See `?display_methods` for the full list of selectable fields, and the [customizing sessioncheck](customizing-sessioncheck.html) article for setting these as defaults via `options(sessioncheck = list(...))`.
+This only changes what's displayed -- the underlying object is untouched, so `x$machine` and `x$globalenv` still hold everything for your own use. See `?display_methods` for the full list of selectable fields, and the [customizing sessionstate() output](sessionstate-display.html) article for setting these as defaults via `options(sessioncheck = list(...))` so you don't have to repeat them at every call site.
 
 ## Choosing between the three
 

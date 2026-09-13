@@ -39,6 +39,7 @@ articles:
     contents: 
       - articles/sessionstate-reporting
       - articles/sessionstate-comparison
+      - articles/sessionstate-display
   - title: Other topics
     navbar: Other
     contents:     
