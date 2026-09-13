@@ -9,43 +9,44 @@ knitr::opts_chunk$set(
 )
 ```
 
+Suppose you run an analysis script today and it produces a number you trust. Three months from now, you (or a colleague) run the same script again and get a slightly different number. Nothing about the code has changed, that much you know for sure. But, what *did* change? That's a little harder to answer. Maybe a package was updated in the meantime. Maybe the script relies on randomness and the seed wasn't what you thought it was. Maybe there was already something sitting in the R session, left over from earlier work, that quietly affected the result.
+
+Questions like these are hard to answer if you don't have an audit trail, because by the time you notice a discrepancy, the session that produced the original number is long gone. The fix is to capture a record of that session *while it still exists*, ideally as part of the script itself, so this audit is preserved alongside the output. That's the job of `sessionstate()`.
+
 ```{r setup}
 library(sessioncheck)
 ```
 
-## When you wish you had a record
-
-Suppose you run an analysis script today and it produces a number you trust. Three months from now, you (or a colleague) run the same script again and get a slightly different number. Nothing about the code changed -- so what did? Maybe a package was updated in the meantime. Maybe the script relies on randomness and the seed wasn't what you thought it was. Maybe there was already something sitting in the R session, left over from earlier work, that quietly affected the result.
-
-Questions like these are hard to answer after the fact, because by the time you notice a discrepancy, the session that produced the original number is long gone. The fix is to capture a record of that session *while it still exists* -- ideally as part of the script itself, so the record travels with the output. That's the job of `sessionstate()`.
 
 ## Introducing `sessionstate()`
 
-`sessionstate()` takes a snapshot of the current R session: what R version and packages are in use, what's in the global environment, what randomness has occurred, and more. Where `sessioncheck()` is called at the *start* of a script to check that the session is clean, `sessionstate()` is meant to be called at the *end* -- or embedded in a rendered report -- purely to record what actually happened, without judging it.
+The role of `sessionstate()` is to take a snapshot of the current R session: what R version and packages are in use, what's in the global environment, what random events have occurred, and more. Where `sessioncheck()` is called at the *start* of a script to check that the session is clean, `sessionstate()` is meant to be called at the *end* -- or embedded in a rendered report -- purely to record what actually happened, without judging it. Here's what it produces:
 
 ```{r}
 sessionstate()
 ```
 
-If parts of this look familiar, that's intentional: `sessionstate()` is similar in spirit to [`utils::sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html) and to the [**sessioninfo**](https://sessioninfo.r-lib.org/) package's `sessioninfo::session_info()`. All three report the R version, platform, locale, and attached/loaded packages. `sessionstate()` goes further, which is the whole point of using it -- the sections below walk through what that extra detail buys you, using the discrepancy from the scenario above as a guide.
+If parts of this look familiar, that's intentional: `sessionstate()` is similar in spirit to `utils::sessionInfo()` and to the [**sessioninfo**](https://sessioninfo.r-lib.org/) package's `sessioninfo::session_info()` function. All three report the R version, platform, locale, and attached/loaded packages. The difference lies in the details: `sessionstate()` goes a little further than either of the other two functions, and captures information that is not captured by the others. In the sections below we'll walk through these additional details, showing you both what you *gain* by using the more detailed audit, but also highlighting some of the *costs* of doing so.
 
-## What the snapshot can tell you
+## The gain: extra information captured by `sessionstate()`
 
-**Which version of the code actually ran.** The `Git` section records the current commit SHA and whether the working tree was dirty (uncommitted changes) at capture time. If the script lives in a git repository, this is the most direct way to tie a result back to an exact version of the code -- far more reliable than trusting that nobody edited anything since.
+As mentioned above, `sessionstate()` captures the same information that other session information functions do, but it also records a few extra things:
 
-**Whether a package changed underneath you.** The `Packages` section lists every attached or loaded package, alongside its installed (on-disk) and loaded version. When you set out to reproduce a result, this is usually the first thing worth checking; `sessionstate()` also flags subtler drift that a plain version listing would miss -- a package whose on-disk and loaded versions or paths disagree (`version_mismatch`, `path_mismatch`), or a loaded namespace that has since been removed from disk entirely (`removed_from_disk`).
+- **Which version of the code actually ran.** The `Git` section records the current commit SHA and whether the working tree was dirty (uncommitted changes) at capture time. If the script lives in a git repository, this is the most direct way to tie a result back to an exact version of the code -- far more reliable than trusting that nobody edited anything since.
 
-**Whether randomness was involved.** The `RNG state` section records the kind of random number generator in use, plus an MD5 fingerprint of `.Random.seed` (`seed_hash`). Comparing that fingerprint across two runs tells you whether the random state differed, without needing to store or inspect the (long, unreadable) seed itself.
+- **Whether a package changed underneath you.** The `Packages` section lists every attached or loaded package, alongside its installed (on-disk) and loaded version. When you set out to reproduce a result, this is usually the first thing worth checking; `sessionstate()` also flags subtler drift that a plain version listing would miss -- a package whose on-disk and loaded versions or paths disagree (`version_mismatch`, `path_mismatch`), or a loaded namespace that has since been removed from disk entirely (`removed_from_disk`).
 
-**What was already there before the script ran.** The `Global environment` section lists every object in `.GlobalEnv` -- name, class, size, and a value fingerprint -- and `Attached environments` lists everything on the search path, including things a package listing alone would miss, like `tools:rstudio` or an environment added with `attach()`. If a stray object from an earlier interactive session quietly fed into a calculation, this is where you'd spot it.
+- **Whether randomness was involved.** The `RNG state` section records the kind of random number generator in use, plus an MD5 fingerprint of `.Random.seed` (`seed_hash`). Comparing that fingerprint across two runs tells you whether the random state differed, without needing to store or inspect the (long, unreadable) seed itself.
 
-**When it happened, and with what tools.** `Timing` records the capture time and how long the session had already been running; `Document products` records the pandoc and quarto versions in use, since these can affect how a rendered report looks even when the R-level session is otherwise identical.
+- **What was already there before the script ran.** The `Global environment` section lists every object in `.GlobalEnv` -- name, class, size, and a value fingerprint -- and `Attached environments` lists everything on the search path, including things a package listing alone would miss, like `tools:rstudio` or an environment added with `attach()`. If a stray object from an earlier interactive session quietly fed into a calculation, this is where you'd spot it.
 
-None of this is captured by `utils::sessionInfo()` or `sessioninfo::session_info()` -- which is exactly why, for the "what changed?" question above, a plain session summary tends to run out of answers just when you need one.
+- **When it happened, and with what tools.** `Timing` records the capture time and how long the session had already been running; `Document products` records the pandoc and quarto versions in use, since these can affect how a rendered report looks even when the R-level session is otherwise identical.
+
+None of this is captured by `utils::sessionInfo()` or `sessioninfo::session_info()` -- which is exactly why, for the "what changed?" question above, a plain session summary can sometimes fail to provide you the answers you need.
 
 ## The cost: more identifying information
 
-This extra detail comes from looking at things the other two tools mostly leave alone: the filesystem, the machine, and the objects sitting in memory. That has a real privacy cost, worth thinking about *before* `sessionstate()` output ends up in a GitHub issue, a CI log, or a shared report.
+This extra detail comes from looking at things the other two tools mostly leave alone: the filesystem, the machine, and the objects sitting in memory. That has a real privacy cost, and you should think about these costs *before* you decide to allow `sessionstate()` output to appear in a document that will be shared with other people.
 
 | Information | `utils::sessionInfo()` | `sessioninfo::session_info()` | `sessionstate()` |
 |---|---|---|---|
@@ -61,13 +62,13 @@ This isn't an oversight; it's the same information that makes `sessionstate()` u
 
 ## Redacting fields when sharing
 
-If you want to share `sessionstate()` output but not all of it, the `print()`/`format()` methods accept field-selection arguments, so you don't have to hand-edit the output. For example, this hides `machine` entirely and keeps only the `class` column of `globalenv` (dropping the `name` column, which might describe the contents of your script):
+Although there are real advantages to tracking the additional information recorded by `sessionstate()`, the privacy costs should not be disregarded. Sometimes those costs will be too high, and you would be better advised to use a different reporting tool. At other times, though, you may decide that the better approach is to use `sessionstate()` but redact a few pieces of information from the output. You can do this via the `print()` method for session state objects, which accepts arguments that allow you to choose what information gets printed and what information does not. For example, the code below hides `machine` entirely and keeps only the `class` column of `globalenv` (dropping the `name` column, which might describe the contents of your script):
 
 ```{r}
 print(sessionstate(), machine = character(0), globalenv = "class")
 ```
 
-This only changes what's displayed -- the underlying object is untouched, so `x$machine` and `x$globalenv` still hold everything for your own use. See `?display_methods` for the full list of selectable fields, and the [customizing sessionstate() output](sessionstate-display.html) article for setting these as defaults via `options(sessioncheck = list(...))` so you don't have to repeat them at every call site.
+It's important to remember that this only changes what information is displayed: the underlying object is untouched. See `?display_methods` for the full list of selectable fields, and the [customizing sessionstate() output](sessionstate-display.html) article for a more detailed discussion of this topic.
 
 ## Choosing between the three
 
@@ -79,6 +80,7 @@ None of `utils::sessionInfo()`, `sessioninfo::session_info()`, and `sessionstate
 
 If you decide `sessionstate()`'s extra detail is worth it, it's worth deciding *before* you start using it in scripts or reports whether its output will ever leave your machine (committed logs, shared reports, public CI artifacts) -- and if so, redacting the fields you're not comfortable including.
 
-## Suggested next step
+## Further reading
 
-A single `sessionstate()` call is a snapshot of one moment -- on its own, it can't tell you what changed between two points in time. The [session state comparisons](sessionstate-comparison.html) article covers `compare_sessionstates()`, which takes two snapshots and reports exactly how they differ.
+- The [session state comparisons](sessionstate-comparison.html) article covers `compare_sessionstates()`, which takes two snapshots and reports exactly how they differ.
+- The [session state display](sessionstate-display.html) article provides a more detailed discussion of how you can customise the information that gets displayed when a session state is printed.
