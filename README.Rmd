@@ -27,7 +27,13 @@ The goal of **sessioncheck** is to provide simple tools that can be called at th
 
 ## Installation
 
-You can install the development version of sessioncheck from [GitHub](https://github.com/) with:
+You can install the current CRAN release of sessioncheck with:
+
+``` r
+install.packages("sessioncheck")
+```
+
+Alternatively, you can install the development version of sessioncheck from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("pak")
