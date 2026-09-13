@@ -192,6 +192,11 @@ test_that(".ansi_enabled() honors the NO_COLOR standard", {
 })
 
 test_that(".ansi_enabled() treats knitr rendering as non-interactive", {
+  # setting knitr.in.progress = TRUE makes withr::defer() (used internally by
+  # testthat's assertion machinery) evaluate knitr::knit_global(), which
+  # requires knitr to be actually loadable even though this test never calls
+  # knitr itself
+  skip_if_not_installed("knitr")
   restore <- .reset_ansi_precedence()
   on.exit(restore(), add = TRUE)
   old <- options(knitr.in.progress = TRUE)
