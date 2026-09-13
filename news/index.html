@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">sessioncheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,21 +56,21 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="sessioncheck-development-version">sessioncheck (development version)<a class="anchor" aria-label="anchor" href="#sessioncheck-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.0" id="sessioncheck-020">sessioncheck 0.2.0<a class="anchor" aria-label="anchor" href="#sessioncheck-020"></a></h2>
 <div class="section level3">
-<h3 id="improvements-development-version">Improvements<a class="anchor" aria-label="anchor" href="#improvements-development-version"></a></h3>
+<h3 id="improvements-0-2-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-2-0"></a></h3>
 <ul><li><p>Formatted output (from <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code>, and messages/warnings raised by <code>action = "message"</code>/<code>"warn"</code>) is now nicer to read, with a cli-like style.</p></li>
 <li><p>Messaging for <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> and the individual <code>check_*()</code> functions is more informative and more consistent across checkers, including a clearer distinction between “missing” and “mismatched” for the options/locale/sysenv checks, and a dedicated message for <code><a href="../reference/check_sessiontime.html">check_sessiontime()</a></code> (<a href="https://github.com/djnavarro/sessioncheck/issues/5" class="external-link">#5</a>).</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
 <ul><li><p>Added <code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code>, which reports how two <code><a href="../reference/sessionstate.html">sessionstate()</a></code> snapshots differ – take a baseline snapshot, do some work, take another, and diff them. Returns an object of class <code>sessioncheck_sessionstatediff</code> with <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code>, <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, and <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> methods.</p></li>
 <li><p>Added <code><a href="../reference/check_working_directory.html">check_working_directory()</a></code>, which checks the session’s working directory against an expected path (<a href="https://github.com/djnavarro/sessioncheck/issues/11" class="external-link">#11</a>).</p></li>
 <li><p>Added an <code>action_on_pass</code> argument to <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> and the individual <code>check_*()</code> functions, allowing a clean result to be confirmed with a message rather than remaining silent (<a href="https://github.com/djnavarro/sessioncheck/issues/10" class="external-link">#10</a>).</p></li>
 <li><p>Added <code><a href="../reference/sessionstate.html">sessionstate()</a></code>, a companion to <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> intended for use at the <em>end</em> of a script as an audit log. It reports platform details (R version, OS, matrix products, locale, timezone, UI/frontend), selected machine information from <code><a href="https://rdrr.io/r/base/Sys.info.html" class="external-link">Sys.info()</a></code>, session timing, RNG state, and an inventory of attached and loaded-namespace packages, similar to <code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code>. Returns an object of class <code>sessioncheck_sessionstate</code> with <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code>, <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, and <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> methods.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<h3 id="bug-fixes-0-2-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-0"></a></h3>
 <ul><li>Fixed <code>.get_locale_list()</code> (used by <code><a href="../reference/check_required_locale.html">check_required_locale()</a></code>) to handle the case where <code><a href="https://rdrr.io/r/base/locales.html" class="external-link">Sys.getlocale()</a></code> returns a single unprefixed value instead of the usual <code>"CATEGORY=value;..."</code> format, which happens when every locale category shares the same setting. Previously this caused every requested category to be misreported as missing.</li>
 </ul></div>
 </div>

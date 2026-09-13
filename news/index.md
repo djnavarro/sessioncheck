@@ -1,6 +1,6 @@
 # Changelog
 
-## sessioncheck (development version)
+## sessioncheck 0.2.0
 
 ### Improvements
 

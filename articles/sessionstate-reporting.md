@@ -66,12 +66,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          13b95bcc3f14b80ce8ab438f93173e1e7ec86bf8
+#> • commit sha          47716e14104ad4180aa8a486e842d5d1aff0dc24
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-13 09:50:13 UTC
-#> • session uptime      0.816 sec
+#> • captured at         2026-09-13 10:18:44 UTC
+#> • session uptime      0.795 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -112,7 +112,7 @@ sessionstate()
 #>         rlang                   1.3.0 RSPM (R 4.6.0)
 #>     rmarkdown                    2.32 RSPM (R 4.6.0)
 #>          sass                  0.4.10 RSPM (R 4.6.0)
-#>  sessioncheck        *     0.1.1.9000      local (.)
+#>  sessioncheck        *          0.2.0      local (.)
 #>         stats        *          4.6.1           base
 #>   systemfonts                   1.3.2 RSPM (R 4.6.0)
 #>   textshaping                   1.0.5 RSPM (R 4.6.0)
@@ -285,12 +285,12 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          13b95bcc3f14b80ce8ab438f93173e1e7ec86bf8
+#> • commit sha          47716e14104ad4180aa8a486e842d5d1aff0dc24
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-13 09:50:13 UTC
-#> • session uptime      0.936 sec
+#> • captured at         2026-09-13 10:18:44 UTC
+#> • session uptime      0.916 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -331,7 +331,7 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #>         rlang                   1.3.0 RSPM (R 4.6.0)
 #>     rmarkdown                    2.32 RSPM (R 4.6.0)
 #>          sass                  0.4.10 RSPM (R 4.6.0)
-#>  sessioncheck        *     0.1.1.9000      local (.)
+#>  sessioncheck        *          0.2.0      local (.)
 #>         stats        *          4.6.1           base
 #>   systemfonts                   1.3.2 RSPM (R 4.6.0)
 #>   textshaping                   1.0.5 RSPM (R 4.6.0)
