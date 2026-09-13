@@ -1,5 +1,5 @@
 ---
-title: "Reporting the session state"
+title: "Comparing session states"
 ---
 
 ```{r, include = FALSE}
@@ -13,11 +13,15 @@ knitr::opts_chunk$set(
 library(sessioncheck)
 ```
 
-In addition to tools for checking the state of an R session, **sessioncheck** also provides a `sessionstate()` function that can be used to report on the overall state of an R session. This function is similar in spirit to the [`utils::sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html) function available in base R, and also to the [**sessioninfo**](https://sessioninfo.r-lib.org/) package that offers a more detailed replacement, `sessioninfo::session_info()`. This article explains what `sessionstate()` does, and the ways in which it is similar to but also different from the existing tools. In particular, it discusses what `sessionstate()` adds over and above what the other two functions report, and -- because it does add quite a lot of new information -- what you give up in return, namely some privacy.
+The [session state reporting](sessionstate-reporting.html) article introduces `sessionstate()`, which takes a snapshot of the current R session -- packages, global environment contents, RNG state, and more. A single snapshot is useful as a standalone record, but on its own it can't answer a very natural follow-up question: *what changed?*
 
-## Comparing two snapshots
+## A concrete "what changed" question
 
-A single `sessionstate()` call is a snapshot of one moment; on its own it doesn't say what changed. `compare_sessionstates()` takes two snapshots and reports how they differ -- take one at the start of a script (or an interactive session), do some work, take another, and diff them:
+Suppose you're debugging a script that behaves inconsistently: some runs produce the expected result, others don't, and you suspect the script itself is fine but something about the session it runs in differs from one run to the next. Or perhaps you're just cautious about a chunk of code you're about to run, and want to know afterwards exactly what it did to the session -- did it leave new objects behind? Change a package version? Consume random numbers you didn't expect it to?
+
+Both questions have the same shape: take a snapshot before, take another after, and compare the two. `compare_sessionstates()` does the comparing.
+
+## A basic comparison
 
 ```{r}
 # wrapped in a function so `baseline`/`current` themselves never end up in
@@ -37,14 +41,38 @@ diff
 rm(some_result, envir = .GlobalEnv)
 ```
 
-By default, `print()`/`format()` collapse every section with nothing to report down to a single "(no changes)" line (`changed_only = TRUE`, as seen above for every section but `globalenv` and `timing`); pass `changed_only = FALSE` to see every field for the record-shaped sections (`platform`, `locale`, `matrix`, `document`, `machine`, `git`, `rng`) regardless of whether it changed. `timing` is always shown in full, since `captured_at`/`elapsed_sec` necessarily differ between any two `sessionstate()` calls -- there's no "unchanged" case to collapse.
+That comment is worth pausing on, because it's a real gotcha rather than defensive over-caution: `compare_sessionstates()` compares whatever is in `.GlobalEnv` at each snapshot, so any variable you assign there between the two calls -- including `baseline` itself, if you didn't wrap things in a function -- will show up as "added". Wrapping the two snapshots in a function keeps `baseline` and `current` local to that function, so the only real change visible in the diff is the one this example is trying to demonstrate: `some_result` being created.
 
-Like `sessionstate()`'s three tabular sections, the diff's `packages`/`globalenv`/`attachments` sections can be coerced with `as.data.frame()`, though the shape is different: one row per key and tracked field, tagged `"added"`, `"removed"`, or `"modified"` rather than one row per key overall.
+## Reading the output
+
+Most sections above collapse to a single "(no changes)" line -- that's `print()`'s default behavior (`changed_only = TRUE`), which hides any section where nothing differed between the two snapshots. `globalenv` is the exception here because `some_result` really was added; `timing` is always shown in full, since `captured_at`/`elapsed_sec` necessarily differ between any two `sessionstate()` calls, so there's no "unchanged" case for a diff to collapse. To see every field for the record-shaped sections (`platform`, `locale`, `matrix`, `document`, `machine`, `git`, `rng`) regardless of whether it changed, pass `changed_only = FALSE`.
+
+## Digging into a specific section
+
+Like `sessionstate()`'s tabular sections, `packages`/`globalenv`/`attachments` can be coerced with `as.data.frame()` for programmatic use. The shape is a little different from `sessionstate()`'s own tables, though: one row per key *and* tracked field, tagged `"added"`, `"removed"`, or `"modified"`, rather than one row per key overall.
 
 ```{r}
 as.data.frame(diff, which = "globalenv")
 ```
 
-`globalenv`'s rows also carry a `verified` column. `sessionstate()` fingerprints each global environment object's value (an MD5 hash of its serialized form), so a value change can be detected even when an object's class and size stay the same; when both snapshots have a usable hash for an object, a hash mismatch is authoritative (`verified = TRUE`). When an object can't be hashed at all (e.g. one holding a database connection), the comparison falls back to `class`/`size` only (`verified = FALSE`) -- and if neither of those changed either, a value change could have happened invisibly.
+## How much can you trust a "modified" value?
 
-`compare_sessionstates()` also warns if `new` looks like it was captured *before* `old`, in case the two arguments were passed in the wrong order. See `?compare_sessionstates` for the full per-section diff semantics.
+`globalenv`'s rows carry a `verified` column, and it's worth knowing what it does and doesn't promise. `sessionstate()` fingerprints each global environment object's serialized value, so `compare_sessionstates()` can usually detect that a value changed even when its class and size stayed the same -- for instance, an object mutated in place. When both snapshots have a usable fingerprint for an object, a mismatch is authoritative, and the row is marked `verified = TRUE`.
+
+Some objects can't be fingerprinted at all -- one holding a live database connection, for example. When that happens, the comparison falls back to `class`/`size` only, and the row is marked `verified = FALSE`: if neither of those changed either, a real value change could still have happened without being detected. `verified = FALSE` is a signal to double-check manually, not a sign that anything is broken.
+
+## One thing worth watching for
+
+`compare_sessionstates()` warns if `new` looks like it was captured *before* `old`, since that usually means the two snapshots were passed in the wrong order:
+
+```{r}
+show_backwards_order <- function() {
+  early <- sessionstate()
+  Sys.sleep(0.05)
+  late <- sessionstate()
+  invisible(compare_sessionstates(late, early))
+}
+show_backwards_order()
+```
+
+The comparison is still computed either way -- this is a nudge to double-check your arguments, not an error. See `?compare_sessionstates` for the complete per-section diff semantics, including how each of `sessionstate()`'s twelve elements is compared.
