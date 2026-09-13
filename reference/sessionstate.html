@@ -35,10 +35,18 @@ produce an audit log of the environment the script actually ran in."></head><bod
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/why-check-the-r-session.html">Why is it important to check the R session?</a></li>
-    <li><a class="dropdown-item" href="../articles/sessionstate-reporting.html">Reporting the session state</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Checking</h6></li>
+    <li><a class="dropdown-item" href="../articles/why-check-the-r-session.html">Why is it important to check the R session?</a></li>
     <li><a class="dropdown-item" href="../articles/customizing-sessioncheck.html">Customizing sessioncheck() behavior</a></li>
     <li><a class="dropdown-item" href="../articles/individual-checks.html">Individual session check functions</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Reporting</h6></li>
+    <li><a class="dropdown-item" href="../articles/sessionstate-reporting.html">Reporting the session state</a></li>
+    <li><a class="dropdown-item" href="../articles/sessionstate-comparison.html">Comparing session states</a></li>
+    <li><a class="dropdown-item" href="../articles/sessionstate-display.html">Customizing sessionstate() output</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Other</h6></li>
     <li><a class="dropdown-item" href="../articles/s3-classes.html">S3 classes and methods</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -334,7 +342,7 @@ unlike the one for <code><a href="sessioncheck.html">sessioncheck()</a></code>, 
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> system              x86_64, linux-gnu</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> ui                  non-interactive</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> tz                  UTC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> date                2026-09-11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> date                2026-09-13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">─ Locale ───────────────────────────────────────────────────────────────────────</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> language            en-US</span>
@@ -355,12 +363,12 @@ unlike the one for <code><a href="sessioncheck.html">sessioncheck()</a></code>, 
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> working directory   /home/runner/work/sessioncheck/sessioncheck/docs/reference</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> commit sha          2de0eb1674f5aa93305994af5517776b66b04cc5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> commit sha          f505d36e3763787d5fde3cae81dd04a4d6af3df0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> dirty               FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> captured at         2026-09-11 01:37:40 UTC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> session uptime      8.293 sec</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> captured at         2026-09-13 02:44:31 UTC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> session uptime      8.266 sec</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> kind                Mersenne-Twister</span>

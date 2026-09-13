@@ -6,9 +6,11 @@ articles:
   articles/individual-checks: individual-checks.html
   articles/s3-classes: s3-classes.html
   articles/sessioncheck: sessioncheck.html
+  articles/sessionstate-comparison: sessionstate-comparison.html
+  articles/sessionstate-display: sessionstate-display.html
   articles/sessionstate-reporting: sessionstate-reporting.html
   articles/why-check-the-r-session: why-check-the-r-session.html
-last_built: 2026-09-11T01:37Z
+last_built: 2026-09-13T02:44Z
 urls:
   reference: https://sessioncheck.djnavarro.net/reference
   article: https://sessioncheck.djnavarro.net/articles

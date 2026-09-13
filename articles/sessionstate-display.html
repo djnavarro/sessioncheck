@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Reporting the session state • sessioncheck</title>
+<title>Customizing sessionstate() output • sessioncheck</title>
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Atkinson_Hyperlegible-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Reporting the session state">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Customizing sessionstate() output">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -78,46 +78,181 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Reporting the session state</h1>
+      <h1>Customizing sessionstate() output</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/djnavarro/sessioncheck/blob/main/vignettes/articles/sessionstate-reporting.Rmd" class="external-link"><code>vignettes/articles/sessionstate-reporting.Rmd</code></a></small>
-      <div class="d-none name"><code>sessionstate-reporting.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/djnavarro/sessioncheck/blob/main/vignettes/articles/sessionstate-display.Rmd" class="external-link"><code>vignettes/articles/sessionstate-display.Rmd</code></a></small>
+      <div class="d-none name"><code>sessionstate-display.Rmd</code></div>
     </div>
 
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/sessioncheck" class="external-link">sessioncheck</a></span><span class="op">)</span></span></code></pre></div>
+<p>The <a href="sessionstate-reporting.html">session state reporting</a>
+and <a href="sessionstate-comparison.html">session state comparisons</a>
+articles both capture and print a lot of detail. That’s the point when
+you’re inspecting a session interactively, but it can get in the way
+once <code><a href="../reference/sessionstate.html">sessionstate()</a></code>/<code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code>
+calls are embedded in something you run repeatedly – a rendered report,
+a CI log, a script you rerun every day. You may want to consistently
+hide a section you don’t care about (or don’t want to expose, per the <a href="sessionstate-reporting.html#the-cost-more-identifying-information">privacy
+discussion</a>), shorten a long table, or both, without repeating the
+same arguments everywhere. This article covers how.</p>
 <div class="section level2">
-<h2 id="when-you-wish-you-had-a-record">When you wish you had a record<a class="anchor" aria-label="anchor" href="#when-you-wish-you-had-a-record"></a>
+<h2 id="selecting-fields-for-a-single-call">Selecting fields for a single call<a class="anchor" aria-label="anchor" href="#selecting-fields-for-a-single-call"></a>
 </h2>
-<p>Suppose you run an analysis script today and it produces a number you
-trust. Three months from now, you (or a colleague) run the same script
-again and get a slightly different number. Nothing about the code
-changed – so what did? Maybe a package was updated in the meantime.
-Maybe the script relies on randomness and the seed wasn’t what you
-thought it was. Maybe there was already something sitting in the R
-session, left over from earlier work, that quietly affected the
-result.</p>
-<p>Questions like these are hard to answer after the fact, because by
-the time you notice a discrepancy, the session that produced the
-original number is long gone. The fix is to capture a record of that
-session <em>while it still exists</em> – ideally as part of the script
-itself, so the record travels with the output. That’s the job of
-<code><a href="../reference/sessionstate.html">sessionstate()</a></code>.</p>
+<p><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>/<code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> on a
+<code><a href="../reference/sessionstate.html">sessionstate()</a></code> result accept one argument per section
+(<code>platform</code>, <code>locale</code>, <code>matrix</code>,
+<code>document</code>, <code>machine</code>, <code>git</code>,
+<code>timing</code>, <code>rng</code>, <code>packages</code>,
+<code>globalenv</code>, <code>attachments</code>), plus
+<code>globalenv_n</code> for how many <code>globalenv</code> rows to
+show. Passing <code>character(0)</code> hides a section entirely;
+passing a character vector of column names narrows a tabular section to
+just those columns.</p>
+<p>For example, this hides <code>machine</code> (dropping
+hostname/username/working directory), keeps only two columns of the
+package table, and shows just the three largest <code>globalenv</code>
+objects:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="../reference/sessionstate.html">sessionstate</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  machine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
+<span>  packages <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"package"</span>, <span class="st">"loaded_version"</span><span class="op">)</span>,</span>
+<span>  globalenv_n <span class="op">=</span> <span class="fl">3</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; ─ Platform ─────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • version             R version 4.6.1 (2026-06-24)</span></span>
+<span><span class="co">#&gt; • os                  Ubuntu 24.04.5 LTS</span></span>
+<span><span class="co">#&gt; • system              x86_64, linux-gnu</span></span>
+<span><span class="co">#&gt; • ui                  non-interactive</span></span>
+<span><span class="co">#&gt; • tz                  UTC</span></span>
+<span><span class="co">#&gt; • date                2026-09-13</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Locale ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • language            en-US</span></span>
+<span><span class="co">#&gt; • collate             C.UTF-8</span></span>
+<span><span class="co">#&gt; • ctype               C.UTF-8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Matrix products ──────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • BLAS                /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3</span></span>
+<span><span class="co">#&gt; • LAPACK              /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Document products ────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • pandoc              3.8.3</span></span>
+<span><span class="co">#&gt; • quarto              (not found)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Machine ──────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • commit sha          f505d36e3763787d5fde3cae81dd04a4d6af3df0</span></span>
+<span><span class="co">#&gt; • dirty               FALSE</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • captured at         2026-09-13 02:44:42 UTC</span></span>
+<span><span class="co">#&gt; • session uptime      0.683 sec</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • kind                Mersenne-Twister</span></span>
+<span><span class="co">#&gt; • normal kind         Inversion</span></span>
+<span><span class="co">#&gt; • sample kind         Rejection</span></span>
+<span><span class="co">#&gt; • seed hash           b71d56b44eb5ee9ceb53ef4cf66a2ed4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Library paths [n = 3] ────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; • /home/runner/work/_temp/Library</span></span>
+<span><span class="co">#&gt; • /opt/R/4.6.1/lib/R/site-library</span></span>
+<span><span class="co">#&gt; • /opt/R/4.6.1/lib/R/library</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Packages [n = 34] (attached + loaded via namespace) ──────────────────────────</span></span>
+<span><span class="co">#&gt;       package loaded_version</span></span>
+<span><span class="co">#&gt;          base          4.6.1</span></span>
+<span><span class="co">#&gt;         bslib         0.12.0</span></span>
+<span><span class="co">#&gt;        cachem          1.1.0</span></span>
+<span><span class="co">#&gt;           cli          3.6.6</span></span>
+<span><span class="co">#&gt;      compiler          4.6.1</span></span>
+<span><span class="co">#&gt;      datasets          4.6.1</span></span>
+<span><span class="co">#&gt;          desc          1.4.3</span></span>
+<span><span class="co">#&gt;        digest         0.6.39</span></span>
+<span><span class="co">#&gt;      evaluate          1.0.5</span></span>
+<span><span class="co">#&gt;       fastmap          1.2.0</span></span>
+<span><span class="co">#&gt;            fs          2.1.0</span></span>
+<span><span class="co">#&gt;      graphics          4.6.1</span></span>
+<span><span class="co">#&gt;     grDevices          4.6.1</span></span>
+<span><span class="co">#&gt;     htmltools          0.5.9</span></span>
+<span><span class="co">#&gt;     jquerylib          0.1.4</span></span>
+<span><span class="co">#&gt;      jsonlite          2.0.0</span></span>
+<span><span class="co">#&gt;         knitr           1.52</span></span>
+<span><span class="co">#&gt;     lifecycle          1.0.5</span></span>
+<span><span class="co">#&gt;       methods          4.6.1</span></span>
+<span><span class="co">#&gt;          otel          0.2.0</span></span>
+<span><span class="co">#&gt;       pkgdown          2.2.1</span></span>
+<span><span class="co">#&gt;            R6          2.6.1</span></span>
+<span><span class="co">#&gt;          ragg          1.5.2</span></span>
+<span><span class="co">#&gt;         rlang          1.3.0</span></span>
+<span><span class="co">#&gt;     rmarkdown           2.32</span></span>
+<span><span class="co">#&gt;          sass         0.4.10</span></span>
+<span><span class="co">#&gt;  sessioncheck     0.1.1.9000</span></span>
+<span><span class="co">#&gt;         stats          4.6.1</span></span>
+<span><span class="co">#&gt;   systemfonts          1.3.2</span></span>
+<span><span class="co">#&gt;   textshaping          1.0.5</span></span>
+<span><span class="co">#&gt;         tools          4.6.1</span></span>
+<span><span class="co">#&gt;         utils          4.6.1</span></span>
+<span><span class="co">#&gt;          xfun           0.60</span></span>
+<span><span class="co">#&gt;          yaml         2.3.12</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Global environment [n = 1] ───────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt;          name   class   size</span></span>
+<span><span class="co">#&gt;  .Random.seed integer 2.5 Kb</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Attached environments [n = 11] ───────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt;                  name    type</span></span>
+<span><span class="co">#&gt;            .GlobalEnv   other</span></span>
+<span><span class="co">#&gt;  package:sessioncheck package</span></span>
+<span><span class="co">#&gt;         package:stats package</span></span>
+<span><span class="co">#&gt;      package:graphics package</span></span>
+<span><span class="co">#&gt;     package:grDevices package</span></span>
+<span><span class="co">#&gt;         package:utils package</span></span>
+<span><span class="co">#&gt;      package:datasets package</span></span>
+<span><span class="co">#&gt;       package:methods package</span></span>
+<span><span class="co">#&gt;             Autoloads   other</span></span>
+<span><span class="co">#&gt;           tools:callr   other</span></span>
+<span><span class="co">#&gt;          package:base package</span></span></code></pre></div>
+<p><code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code> results take a smaller,
+analogous set: <code>changed_only</code> (default <code>TRUE</code>,
+collapsing unchanged sections to “(no changes)”),
+<code>packages</code>/<code>globalenv</code>/<code>attachments</code>
+for column selection, and <code>max_rows</code> for how many rows to
+show in each
+<code>added</code>/<code>removed</code>/<code>modified</code> block.</p>
+<p>None of this touches the underlying object – <code>x$machine</code>,
+<code>x$packages</code>, <code>x$globalenv</code>, and so on always hold
+everything, regardless of what was selected for display. Field selection
+is purely a <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>/<code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code>-time concern.</p>
 </div>
 <div class="section level2">
-<h2 id="introducing-sessionstate">Introducing <code>sessionstate()</code><a class="anchor" aria-label="anchor" href="#introducing-sessionstate"></a>
+<h2 id="setting-defaults-once">Setting defaults once<a class="anchor" aria-label="anchor" href="#setting-defaults-once"></a>
 </h2>
-<p><code><a href="../reference/sessionstate.html">sessionstate()</a></code> takes a snapshot of the current R
-session: what R version and packages are in use, what’s in the global
-environment, what randomness has occurred, and more. Where
-<code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> is called at the <em>start</em> of a script
-to check that the session is clean, <code><a href="../reference/sessionstate.html">sessionstate()</a></code> is meant
-to be called at the <em>end</em> – or embedded in a rendered report –
-purely to record what actually happened, without judging it.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<p>Passing the same arguments at every call site gets repetitive,
+especially if a whole team or a whole project wants the same defaults.
+Like <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> (see <a href="customizing-sessioncheck.html">customizing sessioncheck()
+behavior</a>),
+<code><a href="../reference/sessionstate.html">sessionstate()</a></code>/<code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code> display
+options can be set globally via
+<code>options(sessioncheck = list(...))</code>, typically in a
+<code>.Rprofile</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span></span>
+<span>  sessioncheck <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    sessionstate_machine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
+<span>    sessionstate_globalenv_n <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>    sessionstatediff_max_rows <span class="op">=</span> <span class="fl">5</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>With that option set, calls that don’t pass an explicit argument pick
+up these defaults automatically:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/sessionstate.html">sessionstate</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ─ Platform ─────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; • version             R version 4.6.1 (2026-06-24)</span></span>
@@ -141,17 +276,14 @@ purely to record what actually happened, without judging it.</p>
 <span><span class="co">#&gt; • quarto              (not found)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Machine ──────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • hostname            runnervmlun5p</span></span>
-<span><span class="co">#&gt; • user                runner</span></span>
-<span><span class="co">#&gt; • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; • commit sha          f505d36e3763787d5fde3cae81dd04a4d6af3df0</span></span>
 <span><span class="co">#&gt; • dirty               FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • captured at         2026-09-13 02:44:44 UTC</span></span>
-<span><span class="co">#&gt; • session uptime      0.705 sec</span></span>
+<span><span class="co">#&gt; • captured at         2026-09-13 02:44:42 UTC</span></span>
+<span><span class="co">#&gt; • session uptime      0.819 sec</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; • kind                Mersenne-Twister</span></span>
@@ -218,280 +350,47 @@ purely to record what actually happened, without judging it.</p>
 <span><span class="co">#&gt;             Autoloads   other</span></span>
 <span><span class="co">#&gt;           tools:callr   other</span></span>
 <span><span class="co">#&gt;          package:base package</span></span></code></pre></div>
-<p>If parts of this look familiar, that’s intentional:
-<code><a href="../reference/sessionstate.html">sessionstate()</a></code> is similar in spirit to <a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link"><code>utils::sessionInfo()</code></a>
-and to the <a href="https://sessioninfo.r-lib.org/" class="external-link"><strong>sessioninfo</strong></a>
-package’s <code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code>. All three report the
-R version, platform, locale, and attached/loaded packages.
-<code><a href="../reference/sessionstate.html">sessionstate()</a></code> goes further, which is the whole point of
-using it – the sections below walk through what that extra detail buys
-you, using the discrepancy from the scenario above as a guide.</p>
+<p>The precedence is the same as everywhere else in the package: an
+explicit argument to <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>/<code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> always
+wins; otherwise the relevant field in
+<code>options(sessioncheck = list(...))</code> is used; otherwise a
+built-in default applies. The option field names mirror the print
+arguments with a prefix identifying which class they apply to –
+<code>sessionstate_platform</code>, <code>sessionstate_machine</code>,
+<code>sessionstate_globalenv_n</code>, and so on for
+<code><a href="../reference/sessionstate.html">sessionstate()</a></code>, and
+<code>sessionstatediff_changed_only</code>,
+<code>sessionstatediff_packages</code>,
+<code>sessionstatediff_max_rows</code>, and so on for
+<code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code>. See <code><a href="../reference/display_methods.html">?display_methods</a></code>
+for the complete list of arguments and their corresponding option
+names.</p>
 </div>
 <div class="section level2">
-<h2 id="what-the-snapshot-can-tell-you">What the snapshot can tell you<a class="anchor" aria-label="anchor" href="#what-the-snapshot-can-tell-you"></a>
+<h2 id="what-this-doesnt-affect">What this doesn’t affect<a class="anchor" aria-label="anchor" href="#what-this-doesnt-affect"></a>
 </h2>
-<p><strong>Which version of the code actually ran.</strong> The
-<code>Git</code> section records the current commit SHA and whether the
-working tree was dirty (uncommitted changes) at capture time. If the
-script lives in a git repository, this is the most direct way to tie a
-result back to an exact version of the code – far more reliable than
-trusting that nobody edited anything since.</p>
-<p><strong>Whether a package changed underneath you.</strong> The
-<code>Packages</code> section lists every attached or loaded package,
-alongside its installed (on-disk) and loaded version. When you set out
-to reproduce a result, this is usually the first thing worth checking;
-<code><a href="../reference/sessionstate.html">sessionstate()</a></code> also flags subtler drift that a plain
-version listing would miss – a package whose on-disk and loaded versions
-or paths disagree (<code>version_mismatch</code>,
-<code>path_mismatch</code>), or a loaded namespace that has since been
-removed from disk entirely (<code>removed_from_disk</code>).</p>
-<p><strong>Whether randomness was involved.</strong> The
-<code>RNG state</code> section records the kind of random number
-generator in use, plus an MD5 fingerprint of <code>.Random.seed</code>
-(<code>seed_hash</code>). Comparing that fingerprint across two runs
-tells you whether the random state differed, without needing to store or
-inspect the (long, unreadable) seed itself.</p>
-<p><strong>What was already there before the script ran.</strong> The
-<code>Global environment</code> section lists every object in
-<code>.GlobalEnv</code> – name, class, size, and a value fingerprint –
-and <code>Attached environments</code> lists everything on the search
-path, including things a package listing alone would miss, like
-<code>tools:rstudio</code> or an environment added with
-<code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code>. If a stray object from an earlier interactive
-session quietly fed into a calculation, this is where you’d spot it.</p>
-<p><strong>When it happened, and with what tools.</strong>
-<code>Timing</code> records the capture time and how long the session
-had already been running; <code>Document products</code> records the
-pandoc and quarto versions in use, since these can affect how a rendered
-report looks even when the R-level session is otherwise identical.</p>
-<p>None of this is captured by <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">utils::sessionInfo()</a></code> or
-<code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code> – which is exactly why, for the
-“what changed?” question above, a plain session summary tends to run out
-of answers just when you need one.</p>
-</div>
-<div class="section level2">
-<h2 id="the-cost-more-identifying-information">The cost: more identifying information<a class="anchor" aria-label="anchor" href="#the-cost-more-identifying-information"></a>
-</h2>
-<p>This extra detail comes from looking at things the other two tools
-mostly leave alone: the filesystem, the machine, and the objects sitting
-in memory. That has a real privacy cost, worth thinking about
-<em>before</em> <code><a href="../reference/sessionstate.html">sessionstate()</a></code> output ends up in a GitHub
-issue, a CI log, or a shared report.</p>
-<table class="table">
-<colgroup>
-<col width="25%">
-<col width="25%">
-<col width="25%">
-<col width="25%">
-</colgroup>
-<thead><tr class="header">
-<th>Information</th>
-<th><code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">utils::sessionInfo()</a></code></th>
-<th><code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code></th>
-<th><code><a href="../reference/sessionstate.html">sessionstate()</a></code></th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>Hostname</td>
-<td>No</td>
-<td>No</td>
-<td>Yes (<code>machine$nodename</code>)</td>
-</tr>
-<tr class="even">
-<td>Local username</td>
-<td>No</td>
-<td>No</td>
-<td>Yes (<code>machine$user</code>)</td>
-</tr>
-<tr class="odd">
-<td>Working directory</td>
-<td>No</td>
-<td>No</td>
-<td>Yes (<code>machine$cwd</code>)</td>
-</tr>
-<tr class="even">
-<td>Library paths (often embed a home directory)</td>
-<td>No</td>
-<td>Yes, in the <code>[1] /home/...</code> listing</td>
-<td>Yes (<code>libpaths</code>, and
-<code>packages$ondisk_path</code>/<code>loaded_path</code>)</td>
-</tr>
-<tr class="odd">
-<td>Object names from your script</td>
-<td>No</td>
-<td>No</td>
-<td>Yes (<code>globalenv$name</code>)</td>
-</tr>
-</tbody>
-</table>
-<p>You can see this in the example above: <code>machine</code> records
-the hostname and username reported by <code><a href="https://rdrr.io/r/base/Sys.info.html" class="external-link">Sys.info()</a></code>, plus the
-working directory at capture time, and <code>globalenv</code> lists the
-name of every object in <code>.GlobalEnv</code> (never its value – but a
-name like <code>patient_ids</code> or <code>q3_salary_data</code> can be
-revealing on its own).</p>
-<p>This isn’t an oversight; it’s the same information that makes
-<code><a href="../reference/sessionstate.html">sessionstate()</a></code> useful as a reproducibility record in the
-first place. <code>machine$cwd</code> matters because relative paths
-elsewhere in the script only resolve correctly relative to it;
-<code>ondisk_path</code>/<code>loaded_path</code> matter because they
-show precisely which library a package came from. Usefulness and
-shareability are simply in tension here, so it’s worth deciding up front
-how much of that tradeoff you’re comfortable with.</p>
-</div>
-<div class="section level2">
-<h2 id="redacting-fields-when-sharing">Redacting fields when sharing<a class="anchor" aria-label="anchor" href="#redacting-fields-when-sharing"></a>
-</h2>
-<p>If you want to share <code><a href="../reference/sessionstate.html">sessionstate()</a></code> output but not all
-of it, the <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>/<code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> methods accept
-field-selection arguments, so you don’t have to hand-edit the output.
-For example, this hides <code>machine</code> entirely and keeps only the
-<code>class</code> column of <code>globalenv</code> (dropping the
-<code>name</code> column, which might describe the contents of your
-script):</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/sessionstate.html">sessionstate</a></span><span class="op">(</span><span class="op">)</span>, machine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>, globalenv <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ─ Platform ─────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • version             R version 4.6.1 (2026-06-24)</span></span>
-<span><span class="co">#&gt; • os                  Ubuntu 24.04.5 LTS</span></span>
-<span><span class="co">#&gt; • system              x86_64, linux-gnu</span></span>
-<span><span class="co">#&gt; • ui                  non-interactive</span></span>
-<span><span class="co">#&gt; • tz                  UTC</span></span>
-<span><span class="co">#&gt; • date                2026-09-13</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ─ Locale ───────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • language            en-US</span></span>
-<span><span class="co">#&gt; • collate             C.UTF-8</span></span>
-<span><span class="co">#&gt; • ctype               C.UTF-8</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ─ Matrix products ──────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • BLAS                /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3</span></span>
-<span><span class="co">#&gt; • LAPACK              /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ─ Document products ────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • pandoc              3.8.3</span></span>
-<span><span class="co">#&gt; • quarto              (not found)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ─ Machine ──────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • commit sha          f505d36e3763787d5fde3cae81dd04a4d6af3df0</span></span>
-<span><span class="co">#&gt; • dirty               FALSE</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • captured at         2026-09-13 02:44:44 UTC</span></span>
-<span><span class="co">#&gt; • session uptime      0.797 sec</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • kind                Mersenne-Twister</span></span>
-<span><span class="co">#&gt; • normal kind         Inversion</span></span>
-<span><span class="co">#&gt; • sample kind         Rejection</span></span>
-<span><span class="co">#&gt; • seed hash           b71d56b44eb5ee9ceb53ef4cf66a2ed4</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ─ Library paths [n = 3] ────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • /home/runner/work/_temp/Library</span></span>
-<span><span class="co">#&gt; • /opt/R/4.6.1/lib/R/site-library</span></span>
-<span><span class="co">#&gt; • /opt/R/4.6.1/lib/R/library</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ─ Packages [n = 34] (attached + loaded via namespace) ──────────────────────────</span></span>
-<span><span class="co">#&gt;       package attached loaded_version         source</span></span>
-<span><span class="co">#&gt;          base        *          4.6.1           base</span></span>
-<span><span class="co">#&gt;         bslib                  0.12.0 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;        cachem                   1.1.0 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;           cli                   3.6.6 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;      compiler                   4.6.1           base</span></span>
-<span><span class="co">#&gt;      datasets        *          4.6.1           base</span></span>
-<span><span class="co">#&gt;          desc                   1.4.3 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;        digest                  0.6.39 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;      evaluate                   1.0.5 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;       fastmap                   1.2.0 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;            fs                   2.1.0 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;      graphics        *          4.6.1           base</span></span>
-<span><span class="co">#&gt;     grDevices        *          4.6.1           base</span></span>
-<span><span class="co">#&gt;     htmltools                   0.5.9 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;     jquerylib                   0.1.4 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;      jsonlite                   2.0.0 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;         knitr                    1.52 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;     lifecycle                   1.0.5 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;       methods        *          4.6.1           base</span></span>
-<span><span class="co">#&gt;          otel                   0.2.0 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;       pkgdown                   2.2.1 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;            R6                   2.6.1 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;          ragg                   1.5.2 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;         rlang                   1.3.0 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;     rmarkdown                    2.32 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;          sass                  0.4.10 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;  sessioncheck        *     0.1.1.9000      local (.)</span></span>
-<span><span class="co">#&gt;         stats        *          4.6.1           base</span></span>
-<span><span class="co">#&gt;   systemfonts                   1.3.2 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;   textshaping                   1.0.5 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;         tools                   4.6.1           base</span></span>
-<span><span class="co">#&gt;         utils        *          4.6.1           base</span></span>
-<span><span class="co">#&gt;          xfun                    0.60 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt;          yaml                  2.3.12 RSPM (R 4.6.0)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ─ Global environment [n = 1] ───────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt;    class</span></span>
-<span><span class="co">#&gt;  integer</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ─ Attached environments [n = 11] ───────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt;                  name    type</span></span>
-<span><span class="co">#&gt;            .GlobalEnv   other</span></span>
-<span><span class="co">#&gt;  package:sessioncheck package</span></span>
-<span><span class="co">#&gt;         package:stats package</span></span>
-<span><span class="co">#&gt;      package:graphics package</span></span>
-<span><span class="co">#&gt;     package:grDevices package</span></span>
-<span><span class="co">#&gt;         package:utils package</span></span>
-<span><span class="co">#&gt;      package:datasets package</span></span>
-<span><span class="co">#&gt;       package:methods package</span></span>
-<span><span class="co">#&gt;             Autoloads   other</span></span>
-<span><span class="co">#&gt;           tools:callr   other</span></span>
-<span><span class="co">#&gt;          package:base package</span></span></code></pre></div>
-<p>This only changes what’s displayed – the underlying object is
-untouched, so <code>x$machine</code> and <code>x$globalenv</code> still
-hold everything for your own use. See <code><a href="../reference/display_methods.html">?display_methods</a></code> for
-the full list of selectable fields, and the <a href="sessionstate-display.html">customizing sessionstate() output</a>
-article for setting these as defaults via
-<code>options(sessioncheck = list(...))</code> so you don’t have to
-repeat them at every call site.</p>
-</div>
-<div class="section level2">
-<h2 id="choosing-between-the-three">Choosing between the three<a class="anchor" aria-label="anchor" href="#choosing-between-the-three"></a>
-</h2>
-<p>None of <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">utils::sessionInfo()</a></code>,
-<code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code>, and
-<code><a href="../reference/sessionstate.html">sessionstate()</a></code> is a strictly better choice – they trade
-detail against exposure:</p>
+<p>Field selection is purely cosmetic: it changes what
+<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>/<code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> shows, never what
+<code><a href="../reference/sessionstate.html">sessionstate()</a></code>/<code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code> capture
+or return. In particular:</p>
 <ul>
 <li>
-<strong><code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">utils::sessionInfo()</a></code></strong> – no dependency,
-minimal exposure. A good default for a quick report or a bug filed by
-someone you don’t know well.</li>
+<code>x$platform</code>, <code>x$machine</code>,
+<code>x$packages</code>, <code>x$globalenv</code>, and every other
+element of a
+<code><a href="../reference/sessionstate.html">sessionstate()</a></code>/<code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code> result
+are always complete, no matter what display options are in effect.</li>
 <li>
-<strong><code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code></strong> – a more
-readable package table (remotes, install source, mismatch flags), at the
-cost of a library-path listing that usually reveals a home
-directory.</li>
-<li>
-<strong><code><a href="../reference/sessionstate.html">sessionstate()</a></code></strong> – the most complete
-record, including git/RNG/timing information the other two don’t capture
-at all, but with the most exposure: hostname, username, working
-directory, and global environment object names.</li>
+<code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> on either class always returns every
+row of the table it selects (see <code><a href="../reference/coercion_methods.html">?coercion_methods</a></code>) – there
+is no <code>max_rows</code>-style truncation for programmatic use, only
+for the printed/formatted view.</li>
 </ul>
-<p>If you decide <code><a href="../reference/sessionstate.html">sessionstate()</a></code>’s extra detail is worth it,
-it’s worth deciding <em>before</em> you start using it in scripts or
-reports whether its output will ever leave your machine (committed logs,
-shared reports, public CI artifacts) – and if so, redacting the fields
-you’re not comfortable including.</p>
-</div>
-<div class="section level2">
-<h2 id="suggested-next-step">Suggested next step<a class="anchor" aria-label="anchor" href="#suggested-next-step"></a>
-</h2>
-<p>A single <code><a href="../reference/sessionstate.html">sessionstate()</a></code> call is a snapshot of one moment
-– on its own, it can’t tell you what changed between two points in time.
-The <a href="sessionstate-comparison.html">session state comparisons</a>
-article covers <code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code>, which takes two
-snapshots and reports exactly how they differ.</p>
+<p>If you need to filter or redact data itself, rather than just its
+display, do that after capture – for example,
+<code>x$globalenv &lt;- x$globalenv[, c("name", "class")]</code> before
+saving or sharing <code>x</code> – rather than relying on print options
+to do it for you.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
