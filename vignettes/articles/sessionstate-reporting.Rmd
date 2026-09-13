@@ -83,4 +83,4 @@ If you decide `sessionstate()`'s extra detail is worth it, it's worth deciding *
 ## Further reading
 
 - The [session state comparisons](sessionstate-comparison.html) article covers `compare_sessionstates()`, which takes two snapshots and reports exactly how they differ.
-- The [session state display](sessionstate-display.html) article provides a more detailed discussion of how you can customise the information that gets displayed when a session state is printed.
+- The [session state display](sessionstate-display.html) article provides a more detailed discussion of how you can customize the information that gets displayed when a session state is printed.
