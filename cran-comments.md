@@ -16,12 +16,17 @@ existing `check_*()` functions, and a bug fix -- see NEWS.md for details.
   * Ubuntu (latest), R oldrel-1
 * R-hub v2, selected platforms chosen for diversity of OS/toolchain/dependency
   configuration not already covered above (sessioncheck contains no compiled
-  code, so sanitizer/valgrind/compiler-focused R-hub platforms were skipped):
-  * `macos` -- R release on Intel macOS (CI only covers Apple silicon via
-    `macos-latest`)
+  code, so sanitizer/valgrind/compiler-focused R-hub platforms were skipped;
+  the macOS R-hub platform was also skipped, as it has been unreliable
+  recently -- macOS coverage instead comes from CI's Apple-silicon runner,
+  and CRAN performs its own macOS build/check as part of the submission
+  process):
   * `ubuntu-clang` -- R devel on Debian with clang (CI only covers Ubuntu
     with gcc)
   * `nosuggests` -- R devel on Fedora with Suggests packages unavailable
+* win-builder
+  * R-devel
+  * R-release
 
 ## R CMD check results
 
