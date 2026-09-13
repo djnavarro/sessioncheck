@@ -68,7 +68,7 @@ check_working_directory(action = "message")
 # a working directory that does not match the required path: reports both
 # the actual and required paths
 check_working_directory(action = "message", required_wd = tempdir())
-#> ✖ Working directory (/home/runner/work/sessioncheck/sessioncheck/docs/reference) does not match required path (/tmp/RtmpPv1E4F)
+#> ✖ Working directory (/home/runner/work/sessioncheck/sessioncheck/docs/reference) does not match required path (/tmp/RtmpaNzsr9)
 
 # a working directory matching the required path: `action` only controls
 # what happens when a problem *is* found, so use
