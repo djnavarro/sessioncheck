@@ -9,15 +9,8 @@ but unsafe method of calling `rm(list = ls())` at the top of the script.
 
 ## Installation
 
-You can install the current CRAN release of sessioncheck with:
-
-``` r
-
-install.packages("sessioncheck")
-```
-
-Alternatively, you can install the development version of sessioncheck
-from [GitHub](https://github.com/) with:
+You can install the development version of sessioncheck from
+[GitHub](https://github.com/) with:
 
 ``` r
 

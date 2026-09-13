@@ -178,9 +178,9 @@ compare_sessionstates(baseline, current)
 #> • (no changes)
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at (old)     2026-09-13 09:25:44 UTC
-#> • captured at (new)     2026-09-13 09:25:44 UTC
-#> • wall clock elapsed    0.06 secs
+#> • captured at (old)     2026-09-13 09:27:39 UTC
+#> • captured at (new)     2026-09-13 09:27:39 UTC
+#> • wall clock elapsed    0.07 secs
 #> • session uptime delta  0.07 secs
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
