@@ -1,38 +1,40 @@
 # Reporting the session state
 
+Suppose you run an analysis script today and it produces a number you
+trust. Three months from now, you (or a colleague) run the same script
+again and get a slightly different number. Nothing about the code has
+changed, that much you know for sure. But, what *did* change? That’s a
+little harder to answer. Maybe a package was updated in the meantime.
+Maybe the script relies on randomness and the seed wasn’t what you
+thought it was. Maybe there was already something sitting in the R
+session, left over from earlier work, that quietly affected the result.
+
+Questions like these are hard to answer if you don’t have an audit
+trail, because by the time you notice a discrepancy, the session that
+produced the original number is long gone. The fix is to capture a
+record of that session *while it still exists*, ideally as part of the
+script itself, so this audit is preserved alongside the output. That’s
+the job of
+[`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md).
+
 ``` r
 
 library(sessioncheck)
 ```
 
-## When you wish you had a record
-
-Suppose you run an analysis script today and it produces a number you
-trust. Three months from now, you (or a colleague) run the same script
-again and get a slightly different number. Nothing about the code
-changed – so what did? Maybe a package was updated in the meantime.
-Maybe the script relies on randomness and the seed wasn’t what you
-thought it was. Maybe there was already something sitting in the R
-session, left over from earlier work, that quietly affected the result.
-
-Questions like these are hard to answer after the fact, because by the
-time you notice a discrepancy, the session that produced the original
-number is long gone. The fix is to capture a record of that session
-*while it still exists* – ideally as part of the script itself, so the
-record travels with the output. That’s the job of
-[`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md).
-
 ## Introducing `sessionstate()`
 
+The role of
 [`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
-takes a snapshot of the current R session: what R version and packages
-are in use, what’s in the global environment, what randomness has
-occurred, and more. Where
+is to take a snapshot of the current R session: what R version and
+packages are in use, what’s in the global environment, what random
+events have occurred, and more. Where
 [`sessioncheck()`](https://sessioncheck.djnavarro.net/reference/sessioncheck.md)
 is called at the *start* of a script to check that the session is clean,
 [`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
 is meant to be called at the *end* – or embedded in a rendered report –
-purely to record what actually happened, without judging it.
+purely to record what actually happened, without judging it. Here’s what
+it produces:
 
 ``` r
 
@@ -64,12 +66,12 @@ sessionstate()
 #> • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          f505d36e3763787d5fde3cae81dd04a4d6af3df0
+#> • commit sha          d1ab25c1d945f7c01970c23b8dee4f108776ab46
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-13 02:44:44 UTC
-#> • session uptime      0.705 sec
+#> • captured at         2026-09-13 09:25:59 UTC
+#> • session uptime      0.738 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -143,67 +145,76 @@ If parts of this look familiar, that’s intentional:
 is similar in spirit to
 [`utils::sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html) and
 to the [**sessioninfo**](https://sessioninfo.r-lib.org/) package’s
-[`sessioninfo::session_info()`](https://sessioninfo.r-lib.org/reference/session_info.html).
-All three report the R version, platform, locale, and attached/loaded
-packages.
+[`sessioninfo::session_info()`](https://sessioninfo.r-lib.org/reference/session_info.html)
+function. All three report the R version, platform, locale, and
+attached/loaded packages. The difference lies in the details:
 [`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
-goes further, which is the whole point of using it – the sections below
-walk through what that extra detail buys you, using the discrepancy from
-the scenario above as a guide.
+goes a little further than either of the other two functions, and
+captures information that is not captured by the others. In the sections
+below we’ll walk through these additional details, showing you both what
+you *gain* by using the more detailed audit, but also highlighting some
+of the *costs* of doing so.
 
-## What the snapshot can tell you
+## The gain: extra information captured by `sessionstate()`
 
-**Which version of the code actually ran.** The `Git` section records
-the current commit SHA and whether the working tree was dirty
-(uncommitted changes) at capture time. If the script lives in a git
-repository, this is the most direct way to tie a result back to an exact
-version of the code – far more reliable than trusting that nobody edited
-anything since.
-
-**Whether a package changed underneath you.** The `Packages` section
-lists every attached or loaded package, alongside its installed
-(on-disk) and loaded version. When you set out to reproduce a result,
-this is usually the first thing worth checking;
+As mentioned above,
 [`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
-also flags subtler drift that a plain version listing would miss – a
-package whose on-disk and loaded versions or paths disagree
-(`version_mismatch`, `path_mismatch`), or a loaded namespace that has
-since been removed from disk entirely (`removed_from_disk`).
+captures the same information that other session information functions
+do, but it also records a few extra things:
 
-**Whether randomness was involved.** The `RNG state` section records the
-kind of random number generator in use, plus an MD5 fingerprint of
-`.Random.seed` (`seed_hash`). Comparing that fingerprint across two runs
-tells you whether the random state differed, without needing to store or
-inspect the (long, unreadable) seed itself.
+- **Which version of the code actually ran.** The `Git` section records
+  the current commit SHA and whether the working tree was dirty
+  (uncommitted changes) at capture time. If the script lives in a git
+  repository, this is the most direct way to tie a result back to an
+  exact version of the code – far more reliable than trusting that
+  nobody edited anything since.
 
-**What was already there before the script ran.** The
-`Global environment` section lists every object in `.GlobalEnv` – name,
-class, size, and a value fingerprint – and `Attached environments` lists
-everything on the search path, including things a package listing alone
-would miss, like `tools:rstudio` or an environment added with
-[`attach()`](https://rdrr.io/r/base/attach.html). If a stray object from
-an earlier interactive session quietly fed into a calculation, this is
-where you’d spot it.
+- **Whether a package changed underneath you.** The `Packages` section
+  lists every attached or loaded package, alongside its installed
+  (on-disk) and loaded version. When you set out to reproduce a result,
+  this is usually the first thing worth checking;
+  [`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
+  also flags subtler drift that a plain version listing would miss – a
+  package whose on-disk and loaded versions or paths disagree
+  (`version_mismatch`, `path_mismatch`), or a loaded namespace that has
+  since been removed from disk entirely (`removed_from_disk`).
 
-**When it happened, and with what tools.** `Timing` records the capture
-time and how long the session had already been running;
-`Document products` records the pandoc and quarto versions in use, since
-these can affect how a rendered report looks even when the R-level
-session is otherwise identical.
+- **Whether randomness was involved.** The `RNG state` section records
+  the kind of random number generator in use, plus an MD5 fingerprint of
+  `.Random.seed` (`seed_hash`). Comparing that fingerprint across two
+  runs tells you whether the random state differed, without needing to
+  store or inspect the (long, unreadable) seed itself.
+
+- **What was already there before the script ran.** The
+  `Global environment` section lists every object in `.GlobalEnv` –
+  name, class, size, and a value fingerprint – and
+  `Attached environments` lists everything on the search path, including
+  things a package listing alone would miss, like `tools:rstudio` or an
+  environment added with
+  [`attach()`](https://rdrr.io/r/base/attach.html). If a stray object
+  from an earlier interactive session quietly fed into a calculation,
+  this is where you’d spot it.
+
+- **When it happened, and with what tools.** `Timing` records the
+  capture time and how long the session had already been running;
+  `Document products` records the pandoc and quarto versions in use,
+  since these can affect how a rendered report looks even when the
+  R-level session is otherwise identical.
 
 None of this is captured by
 [`utils::sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html) or
 [`sessioninfo::session_info()`](https://sessioninfo.r-lib.org/reference/session_info.html)
 – which is exactly why, for the “what changed?” question above, a plain
-session summary tends to run out of answers just when you need one.
+session summary can sometimes fail to provide you the answers you need.
 
 ## The cost: more identifying information
 
 This extra detail comes from looking at things the other two tools
 mostly leave alone: the filesystem, the machine, and the objects sitting
-in memory. That has a real privacy cost, worth thinking about *before*
+in memory. That has a real privacy cost, and you should think about
+these costs *before* you decide to allow
 [`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
-output ends up in a GitHub issue, a CI log, or a shared report.
+output to appear in a document that will be shared with other people.
 
 | Information | [`utils::sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html) | [`sessioninfo::session_info()`](https://sessioninfo.r-lib.org/reference/session_info.html) | [`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md) |
 |----|----|----|----|
@@ -231,14 +242,21 @@ how much of that tradeoff you’re comfortable with.
 
 ## Redacting fields when sharing
 
-If you want to share
+Although there are real advantages to tracking the additional
+information recorded by
+[`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md),
+the privacy costs should not be disregarded. Sometimes those costs will
+be too high, and you would be better advised to use a different
+reporting tool. At other times, though, you may decide that the better
+approach is to use
 [`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
-output but not all of it, the
-[`print()`](https://rdrr.io/r/base/print.html)/[`format()`](https://rdrr.io/r/base/format.html)
-methods accept field-selection arguments, so you don’t have to hand-edit
-the output. For example, this hides `machine` entirely and keeps only
-the `class` column of `globalenv` (dropping the `name` column, which
-might describe the contents of your script):
+but redact a few pieces of information from the output. You can do this
+via the [`print()`](https://rdrr.io/r/base/print.html) method for
+session state objects, which accepts arguments that allow you to choose
+what information gets printed and what information does not. For
+example, the code below hides `machine` entirely and keeps only the
+`class` column of `globalenv` (dropping the `name` column, which might
+describe the contents of your script):
 
 ``` r
 
@@ -267,12 +285,12 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          f505d36e3763787d5fde3cae81dd04a4d6af3df0
+#> • commit sha          d1ab25c1d945f7c01970c23b8dee4f108776ab46
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-13 02:44:44 UTC
-#> • session uptime      0.797 sec
+#> • captured at         2026-09-13 09:25:59 UTC
+#> • session uptime      0.847 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -341,16 +359,13 @@ print(sessionstate(), machine = character(0), globalenv = "class")
 #>          package:base package
 ```
 
-This only changes what’s displayed – the underlying object is untouched,
-so `x$machine` and `x$globalenv` still hold everything for your own use.
-See
+It’s important to remember that this only changes what information is
+displayed: the underlying object is untouched. See
 [`?display_methods`](https://sessioncheck.djnavarro.net/reference/display_methods.md)
 for the full list of selectable fields, and the [customizing
 sessionstate()
 output](https://sessioncheck.djnavarro.net/articles/sessionstate-display.md)
-article for setting these as defaults via
-`options(sessioncheck = list(...))` so you don’t have to repeat them at
-every call site.
+article for a more detailed discussion of this topic.
 
 ## Choosing between the three
 
@@ -380,13 +395,14 @@ it in scripts or reports whether its output will ever leave your machine
 (committed logs, shared reports, public CI artifacts) – and if so,
 redacting the fields you’re not comfortable including.
 
-## Suggested next step
+## Further reading
 
-A single
-[`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
-call is a snapshot of one moment – on its own, it can’t tell you what
-changed between two points in time. The [session state
-comparisons](https://sessioncheck.djnavarro.net/articles/sessionstate-comparison.md)
-article covers
-[`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md),
-which takes two snapshots and reports exactly how they differ.
+- The [session state
+  comparisons](https://sessioncheck.djnavarro.net/articles/sessionstate-comparison.md)
+  article covers
+  [`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md),
+  which takes two snapshots and reports exactly how they differ.
+- The [session state
+  display](https://sessioncheck.djnavarro.net/articles/sessionstate-display.md)
+  article provides a more detailed discussion of how you can customise
+  the information that gets displayed when a session state is printed.

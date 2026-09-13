@@ -87,36 +87,34 @@
 
     
     
+<p>Suppose you run an analysis script today and it produces a number you
+trust. Three months from now, you (or a colleague) run the same script
+again and get a slightly different number. Nothing about the code has
+changed, that much you know for sure. But, what <em>did</em> change?
+That’s a little harder to answer. Maybe a package was updated in the
+meantime. Maybe the script relies on randomness and the seed wasn’t what
+you thought it was. Maybe there was already something sitting in the R
+session, left over from earlier work, that quietly affected the
+result.</p>
+<p>Questions like these are hard to answer if you don’t have an audit
+trail, because by the time you notice a discrepancy, the session that
+produced the original number is long gone. The fix is to capture a
+record of that session <em>while it still exists</em>, ideally as part
+of the script itself, so this audit is preserved alongside the output.
+That’s the job of <code><a href="../reference/sessionstate.html">sessionstate()</a></code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/sessioncheck" class="external-link">sessioncheck</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="when-you-wish-you-had-a-record">When you wish you had a record<a class="anchor" aria-label="anchor" href="#when-you-wish-you-had-a-record"></a>
-</h2>
-<p>Suppose you run an analysis script today and it produces a number you
-trust. Three months from now, you (or a colleague) run the same script
-again and get a slightly different number. Nothing about the code
-changed – so what did? Maybe a package was updated in the meantime.
-Maybe the script relies on randomness and the seed wasn’t what you
-thought it was. Maybe there was already something sitting in the R
-session, left over from earlier work, that quietly affected the
-result.</p>
-<p>Questions like these are hard to answer after the fact, because by
-the time you notice a discrepancy, the session that produced the
-original number is long gone. The fix is to capture a record of that
-session <em>while it still exists</em> – ideally as part of the script
-itself, so the record travels with the output. That’s the job of
-<code><a href="../reference/sessionstate.html">sessionstate()</a></code>.</p>
-</div>
-<div class="section level2">
 <h2 id="introducing-sessionstate">Introducing <code>sessionstate()</code><a class="anchor" aria-label="anchor" href="#introducing-sessionstate"></a>
 </h2>
-<p><code><a href="../reference/sessionstate.html">sessionstate()</a></code> takes a snapshot of the current R
-session: what R version and packages are in use, what’s in the global
-environment, what randomness has occurred, and more. Where
+<p>The role of <code><a href="../reference/sessionstate.html">sessionstate()</a></code> is to take a snapshot of the
+current R session: what R version and packages are in use, what’s in the
+global environment, what random events have occurred, and more. Where
 <code><a href="../reference/sessioncheck.html">sessioncheck()</a></code> is called at the <em>start</em> of a script
 to check that the session is clean, <code><a href="../reference/sessionstate.html">sessionstate()</a></code> is meant
 to be called at the <em>end</em> – or embedded in a rendered report –
-purely to record what actually happened, without judging it.</p>
+purely to record what actually happened, without judging it. Here’s what
+it produces:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/sessionstate.html">sessionstate</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ─ Platform ─────────────────────────────────────────────────────────────────────</span></span>
@@ -146,12 +144,12 @@ purely to record what actually happened, without judging it.</p>
 <span><span class="co">#&gt; • working directory   /home/runner/work/sessioncheck/sessioncheck/vignettes/articles</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • commit sha          f505d36e3763787d5fde3cae81dd04a4d6af3df0</span></span>
+<span><span class="co">#&gt; • commit sha          d1ab25c1d945f7c01970c23b8dee4f108776ab46</span></span>
 <span><span class="co">#&gt; • dirty               FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • captured at         2026-09-13 02:44:44 UTC</span></span>
-<span><span class="co">#&gt; • session uptime      0.705 sec</span></span>
+<span><span class="co">#&gt; • captured at         2026-09-13 09:25:59 UTC</span></span>
+<span><span class="co">#&gt; • session uptime      0.738 sec</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; • kind                Mersenne-Twister</span></span>
@@ -219,24 +217,32 @@ purely to record what actually happened, without judging it.</p>
 <span><span class="co">#&gt;           tools:callr   other</span></span>
 <span><span class="co">#&gt;          package:base package</span></span></code></pre></div>
 <p>If parts of this look familiar, that’s intentional:
-<code><a href="../reference/sessionstate.html">sessionstate()</a></code> is similar in spirit to <a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link"><code>utils::sessionInfo()</code></a>
-and to the <a href="https://sessioninfo.r-lib.org/" class="external-link"><strong>sessioninfo</strong></a>
-package’s <code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code>. All three report the
-R version, platform, locale, and attached/loaded packages.
-<code><a href="../reference/sessionstate.html">sessionstate()</a></code> goes further, which is the whole point of
-using it – the sections below walk through what that extra detail buys
-you, using the discrepancy from the scenario above as a guide.</p>
+<code><a href="../reference/sessionstate.html">sessionstate()</a></code> is similar in spirit to
+<code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">utils::sessionInfo()</a></code> and to the <a href="https://sessioninfo.r-lib.org/" class="external-link"><strong>sessioninfo</strong></a>
+package’s <code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code> function. All three
+report the R version, platform, locale, and attached/loaded packages.
+The difference lies in the details: <code><a href="../reference/sessionstate.html">sessionstate()</a></code> goes a
+little further than either of the other two functions, and captures
+information that is not captured by the others. In the sections below
+we’ll walk through these additional details, showing you both what you
+<em>gain</em> by using the more detailed audit, but also highlighting
+some of the <em>costs</em> of doing so.</p>
 </div>
 <div class="section level2">
-<h2 id="what-the-snapshot-can-tell-you">What the snapshot can tell you<a class="anchor" aria-label="anchor" href="#what-the-snapshot-can-tell-you"></a>
+<h2 id="the-gain-extra-information-captured-by-sessionstate">The gain: extra information captured by
+<code>sessionstate()</code><a class="anchor" aria-label="anchor" href="#the-gain-extra-information-captured-by-sessionstate"></a>
 </h2>
-<p><strong>Which version of the code actually ran.</strong> The
+<p>As mentioned above, <code><a href="../reference/sessionstate.html">sessionstate()</a></code> captures the same
+information that other session information functions do, but it also
+records a few extra things:</p>
+<ul>
+<li><p><strong>Which version of the code actually ran.</strong> The
 <code>Git</code> section records the current commit SHA and whether the
 working tree was dirty (uncommitted changes) at capture time. If the
 script lives in a git repository, this is the most direct way to tie a
 result back to an exact version of the code – far more reliable than
-trusting that nobody edited anything since.</p>
-<p><strong>Whether a package changed underneath you.</strong> The
+trusting that nobody edited anything since.</p></li>
+<li><p><strong>Whether a package changed underneath you.</strong> The
 <code>Packages</code> section lists every attached or loaded package,
 alongside its installed (on-disk) and loaded version. When you set out
 to reproduce a result, this is usually the first thing worth checking;
@@ -244,39 +250,43 @@ to reproduce a result, this is usually the first thing worth checking;
 version listing would miss – a package whose on-disk and loaded versions
 or paths disagree (<code>version_mismatch</code>,
 <code>path_mismatch</code>), or a loaded namespace that has since been
-removed from disk entirely (<code>removed_from_disk</code>).</p>
-<p><strong>Whether randomness was involved.</strong> The
+removed from disk entirely (<code>removed_from_disk</code>).</p></li>
+<li><p><strong>Whether randomness was involved.</strong> The
 <code>RNG state</code> section records the kind of random number
 generator in use, plus an MD5 fingerprint of <code>.Random.seed</code>
 (<code>seed_hash</code>). Comparing that fingerprint across two runs
 tells you whether the random state differed, without needing to store or
-inspect the (long, unreadable) seed itself.</p>
-<p><strong>What was already there before the script ran.</strong> The
-<code>Global environment</code> section lists every object in
+inspect the (long, unreadable) seed itself.</p></li>
+<li><p><strong>What was already there before the script ran.</strong>
+The <code>Global environment</code> section lists every object in
 <code>.GlobalEnv</code> – name, class, size, and a value fingerprint –
 and <code>Attached environments</code> lists everything on the search
 path, including things a package listing alone would miss, like
 <code>tools:rstudio</code> or an environment added with
 <code><a href="https://rdrr.io/r/base/attach.html" class="external-link">attach()</a></code>. If a stray object from an earlier interactive
-session quietly fed into a calculation, this is where you’d spot it.</p>
-<p><strong>When it happened, and with what tools.</strong>
+session quietly fed into a calculation, this is where you’d spot
+it.</p></li>
+<li><p><strong>When it happened, and with what tools.</strong>
 <code>Timing</code> records the capture time and how long the session
 had already been running; <code>Document products</code> records the
 pandoc and quarto versions in use, since these can affect how a rendered
-report looks even when the R-level session is otherwise identical.</p>
+report looks even when the R-level session is otherwise
+identical.</p></li>
+</ul>
 <p>None of this is captured by <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">utils::sessionInfo()</a></code> or
 <code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code> – which is exactly why, for the
-“what changed?” question above, a plain session summary tends to run out
-of answers just when you need one.</p>
+“what changed?” question above, a plain session summary can sometimes
+fail to provide you the answers you need.</p>
 </div>
 <div class="section level2">
 <h2 id="the-cost-more-identifying-information">The cost: more identifying information<a class="anchor" aria-label="anchor" href="#the-cost-more-identifying-information"></a>
 </h2>
 <p>This extra detail comes from looking at things the other two tools
 mostly leave alone: the filesystem, the machine, and the objects sitting
-in memory. That has a real privacy cost, worth thinking about
-<em>before</em> <code><a href="../reference/sessionstate.html">sessionstate()</a></code> output ends up in a GitHub
-issue, a CI log, or a shared report.</p>
+in memory. That has a real privacy cost, and you should think about
+these costs <em>before</em> you decide to allow
+<code><a href="../reference/sessionstate.html">sessionstate()</a></code> output to appear in a document that will be
+shared with other people.</p>
 <table class="table">
 <colgroup>
 <col width="25%">
@@ -342,12 +352,18 @@ how much of that tradeoff you’re comfortable with.</p>
 <div class="section level2">
 <h2 id="redacting-fields-when-sharing">Redacting fields when sharing<a class="anchor" aria-label="anchor" href="#redacting-fields-when-sharing"></a>
 </h2>
-<p>If you want to share <code><a href="../reference/sessionstate.html">sessionstate()</a></code> output but not all
-of it, the <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>/<code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> methods accept
-field-selection arguments, so you don’t have to hand-edit the output.
-For example, this hides <code>machine</code> entirely and keeps only the
-<code>class</code> column of <code>globalenv</code> (dropping the
-<code>name</code> column, which might describe the contents of your
+<p>Although there are real advantages to tracking the additional
+information recorded by <code><a href="../reference/sessionstate.html">sessionstate()</a></code>, the privacy costs
+should not be disregarded. Sometimes those costs will be too high, and
+you would be better advised to use a different reporting tool. At other
+times, though, you may decide that the better approach is to use
+<code><a href="../reference/sessionstate.html">sessionstate()</a></code> but redact a few pieces of information from
+the output. You can do this via the <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> method for
+session state objects, which accepts arguments that allow you to choose
+what information gets printed and what information does not. For
+example, the code below hides <code>machine</code> entirely and keeps
+only the <code>class</code> column of <code>globalenv</code> (dropping
+the <code>name</code> column, which might describe the contents of your
 script):</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/sessionstate.html">sessionstate</a></span><span class="op">(</span><span class="op">)</span>, machine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>, globalenv <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
@@ -375,12 +391,12 @@ script):</p>
 <span><span class="co">#&gt; ─ Machine ──────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Git ──────────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • commit sha          f505d36e3763787d5fde3cae81dd04a4d6af3df0</span></span>
+<span><span class="co">#&gt; • commit sha          d1ab25c1d945f7c01970c23b8dee4f108776ab46</span></span>
 <span><span class="co">#&gt; • dirty               FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • captured at         2026-09-13 02:44:44 UTC</span></span>
-<span><span class="co">#&gt; • session uptime      0.797 sec</span></span>
+<span><span class="co">#&gt; • captured at         2026-09-13 09:25:59 UTC</span></span>
+<span><span class="co">#&gt; • session uptime      0.847 sec</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; • kind                Mersenne-Twister</span></span>
@@ -447,13 +463,11 @@ script):</p>
 <span><span class="co">#&gt;             Autoloads   other</span></span>
 <span><span class="co">#&gt;           tools:callr   other</span></span>
 <span><span class="co">#&gt;          package:base package</span></span></code></pre></div>
-<p>This only changes what’s displayed – the underlying object is
-untouched, so <code>x$machine</code> and <code>x$globalenv</code> still
-hold everything for your own use. See <code><a href="../reference/display_methods.html">?display_methods</a></code> for
-the full list of selectable fields, and the <a href="sessionstate-display.html">customizing sessionstate() output</a>
-article for setting these as defaults via
-<code>options(sessioncheck = list(...))</code> so you don’t have to
-repeat them at every call site.</p>
+<p>It’s important to remember that this only changes what information is
+displayed: the underlying object is untouched. See
+<code><a href="../reference/display_methods.html">?display_methods</a></code> for the full list of selectable fields,
+and the <a href="sessionstate-display.html">customizing sessionstate()
+output</a> article for a more detailed discussion of this topic.</p>
 </div>
 <div class="section level2">
 <h2 id="choosing-between-the-three">Choosing between the three<a class="anchor" aria-label="anchor" href="#choosing-between-the-three"></a>
@@ -485,13 +499,16 @@ shared reports, public CI artifacts) – and if so, redacting the fields
 you’re not comfortable including.</p>
 </div>
 <div class="section level2">
-<h2 id="suggested-next-step">Suggested next step<a class="anchor" aria-label="anchor" href="#suggested-next-step"></a>
+<h2 id="further-reading">Further reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>
 </h2>
-<p>A single <code><a href="../reference/sessionstate.html">sessionstate()</a></code> call is a snapshot of one moment
-– on its own, it can’t tell you what changed between two points in time.
-The <a href="sessionstate-comparison.html">session state comparisons</a>
-article covers <code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code>, which takes two
-snapshots and reports exactly how they differ.</p>
+<ul>
+<li>The <a href="sessionstate-comparison.html">session state
+comparisons</a> article covers <code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code>,
+which takes two snapshots and reports exactly how they differ.</li>
+<li>The <a href="sessionstate-display.html">session state display</a>
+article provides a more detailed discussion of how you can customise the
+information that gets displayed when a session state is printed.</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

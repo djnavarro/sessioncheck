@@ -1,10 +1,5 @@
 # Comparing session states
 
-``` r
-
-library(sessioncheck)
-```
-
 The [session state
 reporting](https://sessioncheck.djnavarro.net/articles/sessionstate-reporting.md)
 article introduces
@@ -13,6 +8,11 @@ which takes a snapshot of the current R session – packages, global
 environment contents, RNG state, and more. A single snapshot is useful
 as a standalone record, but on its own it can’t answer a very natural
 follow-up question: *what changed?*
+
+``` r
+
+library(sessioncheck)
+```
 
 ## A concrete “what changed” question
 
@@ -63,10 +63,10 @@ diff
 #> • (no changes)
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at (old)     2026-09-13 02:44:40 UTC
-#> • captured at (new)     2026-09-13 02:44:41 UTC
-#> • wall clock elapsed    0.04 secs
-#> • session uptime delta  0.04 secs
+#> • captured at (old)     2026-09-13 09:25:55 UTC
+#> • captured at (new)     2026-09-13 09:25:55 UTC
+#> • wall clock elapsed    0.05 secs
+#> • session uptime delta  0.05 secs
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • (no changes)
@@ -86,15 +86,15 @@ diff
 #> • (no changes)
 ```
 
-That comment is worth pausing on, because it’s a real gotcha rather than
-defensive over-caution:
+The comment in the previous code chunk is worth discussing further,
+because it highlights a real gotcha:
 [`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)
 compares whatever is in `.GlobalEnv` at each snapshot, so any variable
-you assign there between the two calls – including `baseline` itself, if
-you didn’t wrap things in a function – will show up as “added”. Wrapping
-the two snapshots in a function keeps `baseline` and `current` local to
-that function, so the only real change visible in the diff is the one
-this example is trying to demonstrate: `some_result` being created.
+you assign there between the two calls – including the baseline snapshot
+itself – will show up as “added”. Wrapping the two snapshots in a
+function keeps `baseline` and `current` local to that function, so the
+only real change visible in the diff is the one this example is trying
+to demonstrate: `some_result` being created.
 
 ## Reading the output
 
@@ -133,35 +133,51 @@ as.data.frame(diff, which = "globalenv")
 
 ## How much can you trust a “modified” value?
 
-`globalenv`’s rows carry a `verified` column, and it’s worth knowing
-what it does and doesn’t promise.
+An important thing to pay attention to, when comparing two snapshots, is
+that there are limits to how far you can trust a “modified” value when
+it appears in the diff. Under the hood,
 [`sessionstate()`](https://sessioncheck.djnavarro.net/reference/sessionstate.md)
-fingerprints each global environment object’s serialized value, so
+creates a hash from each object stored in the global environment, so
 [`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)
-can usually detect that a value changed even when its class and size
-stayed the same – for instance, an object mutated in place. When both
-snapshots have a usable fingerprint for an object, a mismatch is
-authoritative, and the row is marked `verified = TRUE`.
+can usually detect that a value has changed between two snapshots. When
+both snapshots have a usable fingerprint for an object, a mismatch is
+considered authoritative, and the comparison is marked `verified = TRUE`
+within the diff object itself.
 
-Some objects can’t be fingerprinted at all – one holding a live database
-connection, for example. When that happens, the comparison falls back to
-`class`/`size` only, and the row is marked `verified = FALSE`: if
-neither of those changed either, a real value change could still have
-happened without being detected. `verified = FALSE` is a signal to
-double-check manually, not a sign that anything is broken.
+However, this capability is limited in what it can accomplish. Some
+objects can’t be fingerprinted at all – one holding a live database
+connection, for example. When that happens, the only thing that
+[`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)
+can rely on is the more generic `class` and `size` only. In those cases,
+the corresponding entry in the diff object is marked `verified = FALSE`:
+real changes could have occurred between snapshots, in a manner that the
+package is unable to check. In short, when you see `verified = FALSE` it
+should be treated as a signal to double-check manually. It doesn’t mean
+that something has gone wrong: it is an acknowledgement that
+[`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)
+was not able to make the comparison that we might wish it were able to.
 
-The reverse gotcha also exists: for R6 objects, closures, and other
-environment-backed values, `verified = TRUE` can still report a spurious
-“modified” row, since fingerprinting is sensitive to binding order, not
-just content – see
+Along the same lines, you should also be aware that the reverse pattern
+can happen for R6 objects, closures, and other environment-backed
+values. Because environments have different semantics to other kinds of
+R objects, it is possible that `verified = TRUE` can still report a
+spurious “modified” row, since fingerprinting is sensitive to binding
+order, not just content.
+
+In short, caution is always advisable when interpreting the part of the
+output that describes how objects differ across two snapshots. It is a
+*heuristic* – it is not and cannot be a definitive assertion about how
+two R session states differ. See
 [`?compare_sessionstates`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)
 for the specifics of both failure modes.
 
-## One thing worth watching for
+## Pay attention to timing information
 
+One final thing is worth mentioning:
 [`compare_sessionstates()`](https://sessioncheck.djnavarro.net/reference/compare_sessionstates.md)
 warns if `new` looks like it was captured *before* `old`, since that
-usually means the two snapshots were passed in the wrong order:
+usually means the two snapshots were passed in the wrong order. Here’s
+what that looks like:
 
 ``` r
 

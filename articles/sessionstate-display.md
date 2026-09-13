@@ -1,10 +1,5 @@
 # Customizing sessionstate() output
 
-``` r
-
-library(sessioncheck)
-```
-
 The [session state
 reporting](https://sessioncheck.djnavarro.net/articles/sessionstate-reporting.md)
 and [session state
@@ -20,6 +15,11 @@ hide a section you don’t care about (or don’t want to expose, per the
 discussion](https://sessioncheck.djnavarro.net/articles/sessionstate-reporting.html#the-cost-more-identifying-information)),
 shorten a long table, or both, without repeating the same arguments
 everywhere. This article covers how.
+
+``` r
+
+library(sessioncheck)
+```
 
 ## Selecting fields for a single call
 
@@ -69,12 +69,12 @@ print(
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          f505d36e3763787d5fde3cae81dd04a4d6af3df0
+#> • commit sha          d1ab25c1d945f7c01970c23b8dee4f108776ab46
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-13 02:44:42 UTC
-#> • session uptime      0.683 sec
+#> • captured at         2026-09-13 09:25:57 UTC
+#> • session uptime      0.712 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister
@@ -209,12 +209,12 @@ sessionstate()
 #> ─ Machine ──────────────────────────────────────────────────────────────────────
 #> 
 #> ─ Git ──────────────────────────────────────────────────────────────────────────
-#> • commit sha          f505d36e3763787d5fde3cae81dd04a4d6af3df0
+#> • commit sha          d1ab25c1d945f7c01970c23b8dee4f108776ab46
 #> • dirty               FALSE
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at         2026-09-13 02:44:42 UTC
-#> • session uptime      0.819 sec
+#> • captured at         2026-09-13 09:25:57 UTC
+#> • session uptime      0.866 sec
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
 #> • kind                Mersenne-Twister

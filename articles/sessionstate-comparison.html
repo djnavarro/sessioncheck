@@ -87,14 +87,14 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/sessioncheck" class="external-link">sessioncheck</a></span><span class="op">)</span></span></code></pre></div>
 <p>The <a href="sessionstate-reporting.html">session state reporting</a>
 article introduces <code><a href="../reference/sessionstate.html">sessionstate()</a></code>, which takes a snapshot
 of the current R session – packages, global environment contents, RNG
 state, and more. A single snapshot is useful as a standalone record, but
 on its own it can’t answer a very natural follow-up question: <em>what
 changed?</em></p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/sessioncheck" class="external-link">sessioncheck</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="a-concrete-what-changed-question">A concrete “what changed” question<a class="anchor" aria-label="anchor" href="#a-concrete-what-changed-question"></a>
 </h2>
@@ -143,10 +143,10 @@ does the comparing.</p>
 <span><span class="co">#&gt; • (no changes)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Timing ───────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; • captured at (old)     2026-09-13 02:44:40 UTC</span></span>
-<span><span class="co">#&gt; • captured at (new)     2026-09-13 02:44:41 UTC</span></span>
-<span><span class="co">#&gt; • wall clock elapsed    0.04 secs</span></span>
-<span><span class="co">#&gt; • session uptime delta  0.04 secs</span></span>
+<span><span class="co">#&gt; • captured at (old)     2026-09-13 09:25:55 UTC</span></span>
+<span><span class="co">#&gt; • captured at (new)     2026-09-13 09:25:55 UTC</span></span>
+<span><span class="co">#&gt; • wall clock elapsed    0.05 secs</span></span>
+<span><span class="co">#&gt; • session uptime delta  0.05 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ RNG state ────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; • (no changes)</span></span>
@@ -164,11 +164,11 @@ does the comparing.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Attached environments ────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; • (no changes)</span></span></code></pre></div>
-<p>That comment is worth pausing on, because it’s a real gotcha rather
-than defensive over-caution: <code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code>
-compares whatever is in <code>.GlobalEnv</code> at each snapshot, so any
-variable you assign there between the two calls – including
-<code>baseline</code> itself, if you didn’t wrap things in a function –
+<p>The comment in the previous code chunk is worth discussing further,
+because it highlights a real gotcha:
+<code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code> compares whatever is in
+<code>.GlobalEnv</code> at each snapshot, so any variable you assign
+there between the two calls – including the baseline snapshot itself –
 will show up as “added”. Wrapping the two snapshots in a function keeps
 <code>baseline</code> and <code>current</code> local to that function,
 so the only real change visible in the diff is the one this example is
@@ -211,33 +211,50 @@ tables, though: one row per key <em>and</em> tracked field, tagged
 <div class="section level2">
 <h2 id="how-much-can-you-trust-a-modified-value">How much can you trust a “modified” value?<a class="anchor" aria-label="anchor" href="#how-much-can-you-trust-a-modified-value"></a>
 </h2>
-<p><code>globalenv</code>’s rows carry a <code>verified</code> column,
-and it’s worth knowing what it does and doesn’t promise.
-<code><a href="../reference/sessionstate.html">sessionstate()</a></code> fingerprints each global environment
-object’s serialized value, so <code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code> can
-usually detect that a value changed even when its class and size stayed
-the same – for instance, an object mutated in place. When both snapshots
-have a usable fingerprint for an object, a mismatch is authoritative,
-and the row is marked <code>verified = TRUE</code>.</p>
-<p>Some objects can’t be fingerprinted at all – one holding a live
-database connection, for example. When that happens, the comparison
-falls back to <code>class</code>/<code>size</code> only, and the row is
-marked <code>verified = FALSE</code>: if neither of those changed
-either, a real value change could still have happened without being
-detected. <code>verified = FALSE</code> is a signal to double-check
-manually, not a sign that anything is broken.</p>
-<p>The reverse gotcha also exists: for R6 objects, closures, and other
-environment-backed values, <code>verified = TRUE</code> can still report
-a spurious “modified” row, since fingerprinting is sensitive to binding
-order, not just content – see <code><a href="../reference/compare_sessionstates.html">?compare_sessionstates</a></code> for
-the specifics of both failure modes.</p>
+<p>An important thing to pay attention to, when comparing two snapshots,
+is that there are limits to how far you can trust a “modified” value
+when it appears in the diff. Under the hood, <code><a href="../reference/sessionstate.html">sessionstate()</a></code>
+creates a hash from each object stored in the global environment, so
+<code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code> can usually detect that a value has
+changed between two snapshots. When both snapshots have a usable
+fingerprint for an object, a mismatch is considered authoritative, and
+the comparison is marked <code>verified = TRUE</code> within the diff
+object itself.</p>
+<p>However, this capability is limited in what it can accomplish. Some
+objects can’t be fingerprinted at all – one holding a live database
+connection, for example. When that happens, the only thing that
+<code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code> can rely on is the more generic
+<code>class</code> and <code>size</code> only. In those cases, the
+corresponding entry in the diff object is marked
+<code>verified = FALSE</code>: real changes could have occurred between
+snapshots, in a manner that the package is unable to check. In short,
+when you see <code>verified = FALSE</code> it should be treated as a
+signal to double-check manually. It doesn’t mean that something has gone
+wrong: it is an acknowledgement that
+<code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code> was not able to make the comparison
+that we might wish it were able to.</p>
+<p>Along the same lines, you should also be aware that the reverse
+pattern can happen for R6 objects, closures, and other
+environment-backed values. Because environments have different semantics
+to other kinds of R objects, it is possible that
+<code>verified = TRUE</code> can still report a spurious “modified” row,
+since fingerprinting is sensitive to binding order, not just
+content.</p>
+<p>In short, caution is always advisable when interpreting the part of
+the output that describes how objects differ across two snapshots. It is
+a <em>heuristic</em> – it is not and cannot be a definitive assertion
+about how two R session states differ. See
+<code><a href="../reference/compare_sessionstates.html">?compare_sessionstates</a></code> for the specifics of both failure
+modes.</p>
 </div>
 <div class="section level2">
-<h2 id="one-thing-worth-watching-for">One thing worth watching for<a class="anchor" aria-label="anchor" href="#one-thing-worth-watching-for"></a>
+<h2 id="pay-attention-to-timing-information">Pay attention to timing information<a class="anchor" aria-label="anchor" href="#pay-attention-to-timing-information"></a>
 </h2>
-<p><code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code> warns if <code>new</code> looks
+<p>One final thing is worth mentioning:
+<code><a href="../reference/compare_sessionstates.html">compare_sessionstates()</a></code> warns if <code>new</code> looks
 like it was captured <em>before</em> <code>old</code>, since that
-usually means the two snapshots were passed in the wrong order:</p>
+usually means the two snapshots were passed in the wrong order. Here’s
+what that looks like:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">show_backwards_order</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">early</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sessionstate.html">sessionstate</a></span><span class="op">(</span><span class="op">)</span></span>
