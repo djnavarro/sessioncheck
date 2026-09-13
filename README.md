@@ -14,12 +14,14 @@ coverage](https://codecov.io/gh/djnavarro/sessioncheck/graph/badge.svg)](https:/
 status](https://www.r-pkg.org/badges/version/sessioncheck)](https://CRAN.R-project.org/package=sessioncheck)
 <!-- badges: end -->
 
-The goal of **sessioncheck** is to provide simple tools that can be
-called at the top of a script, and produce warnings or errors if it
+The primary goal of **sessioncheck** is to provide simple tools that can
+be called at the top of a script, and produce warnings or errors if it
 detects signs that the script is not being executed in a clean R
 session. The intended user for **sessioncheck** is a beginner or
 intermediate level R user who needs a drop-in replacement for the simple
 but unsafe method of calling `rm(list = ls())` at the top of the script.
+As a secondary goal, it also provides some reporting tools that can be
+useful for describing the state of an R session.
 
 ## Installation
 
