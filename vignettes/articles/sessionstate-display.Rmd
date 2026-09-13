@@ -1,0 +1,70 @@
+---
+title: "Customizing sessionstate() output"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(sessioncheck)
+```
+
+The [session state reporting](sessionstate-reporting.html) and [session state comparisons](sessionstate-comparison.html) articles both capture and print a lot of detail. That's the point when you're inspecting a session interactively, but it can get in the way once `sessionstate()`/`compare_sessionstates()` calls are embedded in something you run repeatedly -- a rendered report, a CI log, a script you rerun every day. You may want to consistently hide a section you don't care about (or don't want to expose, per the [privacy discussion](sessionstate-reporting.html#the-cost-more-identifying-information)), shorten a long table, or both, without repeating the same arguments everywhere. This article covers how.
+
+## Selecting fields for a single call
+
+`print()`/`format()` on a `sessionstate()` result accept one argument per section (`platform`, `locale`, `matrix`, `document`, `machine`, `git`, `timing`, `rng`, `packages`, `globalenv`, `attachments`), plus `globalenv_n` for how many `globalenv` rows to show. Passing `character(0)` hides a section entirely; passing a character vector of column names narrows a tabular section to just those columns.
+
+For example, this hides `machine` (dropping hostname/username/working directory), keeps only two columns of the package table, and shows just the three largest `globalenv` objects:
+
+```{r}
+print(
+  sessionstate(),
+  machine = character(0),
+  packages = c("package", "loaded_version"),
+  globalenv_n = 3
+)
+```
+
+`compare_sessionstates()` results take a smaller, analogous set: `changed_only` (default `TRUE`, collapsing unchanged sections to "(no changes)"), `packages`/`globalenv`/`attachments` for column selection, and `max_rows` for how many rows to show in each `added`/`removed`/`modified` block.
+
+None of this touches the underlying object -- `x$machine`, `x$packages`, `x$globalenv`, and so on always hold everything, regardless of what was selected for display. Field selection is purely a `print()`/`format()`-time concern.
+
+## Setting defaults once
+
+Passing the same arguments at every call site gets repetitive, especially if a whole team or a whole project wants the same defaults. Like `sessioncheck()` (see [customizing sessioncheck() behavior](customizing-sessioncheck.html)), `sessionstate()`/`compare_sessionstates()` display options can be set globally via `options(sessioncheck = list(...))`, typically in a `.Rprofile`:
+
+```{r}
+options(
+  sessioncheck = list(
+    sessionstate_machine = character(0),
+    sessionstate_globalenv_n = 3,
+    sessionstatediff_max_rows = 5
+  )
+)
+```
+
+With that option set, calls that don't pass an explicit argument pick up these defaults automatically:
+
+```{r}
+sessionstate()
+```
+
+```{r, include = FALSE}
+options(sessioncheck = NULL)
+```
+
+The precedence is the same as everywhere else in the package: an explicit argument to `print()`/`format()` always wins; otherwise the relevant field in `options(sessioncheck = list(...))` is used; otherwise a built-in default applies. The option field names mirror the print arguments with a prefix identifying which class they apply to -- `sessionstate_platform`, `sessionstate_machine`, `sessionstate_globalenv_n`, and so on for `sessionstate()`, and `sessionstatediff_changed_only`, `sessionstatediff_packages`, `sessionstatediff_max_rows`, and so on for `compare_sessionstates()`. See `?display_methods` for the complete list of arguments and their corresponding option names.
+
+## What this doesn't affect
+
+Field selection is purely cosmetic: it changes what `print()`/`format()` shows, never what `sessionstate()`/`compare_sessionstates()` capture or return. In particular:
+
+- `x$platform`, `x$machine`, `x$packages`, `x$globalenv`, and every other element of a `sessionstate()`/`compare_sessionstates()` result are always complete, no matter what display options are in effect.
+- `as.data.frame()` on either class always returns every row of the table it selects (see `?coercion_methods`) -- there is no `max_rows`-style truncation for programmatic use, only for the printed/formatted view.
+
+If you need to filter or redact data itself, rather than just its display, do that after capture -- for example, `x$globalenv <- x$globalenv[, c("name", "class")]` before saving or sharing `x` -- rather than relying on print options to do it for you.
