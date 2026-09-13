@@ -178,8 +178,8 @@ compare_sessionstates(baseline, current)
 #> • (no changes)
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at (old)     2026-09-13 10:18:29 UTC
-#> • captured at (new)     2026-09-13 10:18:29 UTC
+#> • captured at (old)     2026-09-13 10:46:33 UTC
+#> • captured at (new)     2026-09-13 10:46:33 UTC
 #> • wall clock elapsed    0.07 secs
 #> • session uptime delta  0.07 secs
 #> 
