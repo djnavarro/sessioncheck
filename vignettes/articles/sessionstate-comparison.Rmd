@@ -61,6 +61,8 @@ as.data.frame(diff, which = "globalenv")
 
 Some objects can't be fingerprinted at all -- one holding a live database connection, for example. When that happens, the comparison falls back to `class`/`size` only, and the row is marked `verified = FALSE`: if neither of those changed either, a real value change could still have happened without being detected. `verified = FALSE` is a signal to double-check manually, not a sign that anything is broken.
 
+The reverse gotcha also exists: for R6 objects, closures, and other environment-backed values, `verified = TRUE` can still report a spurious "modified" row, since fingerprinting is sensitive to binding order, not just content -- see `?compare_sessionstates` for the specifics of both failure modes.
+
 ## One thing worth watching for
 
 `compare_sessionstates()` warns if `new` looks like it was captured *before* `old`, since that usually means the two snapshots were passed in the wrong order:
