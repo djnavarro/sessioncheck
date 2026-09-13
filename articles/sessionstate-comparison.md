@@ -63,9 +63,9 @@ diff
 #> • (no changes)
 #> 
 #> ─ Timing ───────────────────────────────────────────────────────────────────────
-#> • captured at (old)     2026-09-13 09:27:51 UTC
-#> • captured at (new)     2026-09-13 09:27:51 UTC
-#> • wall clock elapsed    0.05 secs
+#> • captured at (old)     2026-09-13 09:29:51 UTC
+#> • captured at (new)     2026-09-13 09:29:51 UTC
+#> • wall clock elapsed    0.04 secs
 #> • session uptime delta  0.05 secs
 #> 
 #> ─ RNG state ────────────────────────────────────────────────────────────────────
